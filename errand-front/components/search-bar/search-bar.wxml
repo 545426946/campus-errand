@@ -1,0 +1,65 @@
+<view class="search-bar-container {{customClass}}">
+  <!-- 搜索框 -->
+  <view class="search-input-wrapper">
+    <input 
+      class="search-input" 
+      placeholder="{{placeholder}}"
+      value="{{value}}"
+      bindinput="onInput"
+      bindconfirm="onSearch"
+      bindfocus="onFocus"
+      bindblur="onBlur"
+      maxlength="{{maxLength}}"
+      disabled="{{disabled}}"
+    />
+    
+    <!-- 清除按钮 -->
+    <view 
+      class="clear-btn" 
+      wx:if="{{value && showClear && !disabled}}" 
+      bindtap="onClear"
+    >
+      <text class="clear-icon">×</text>
+    </view>
+    
+    <!-- 搜索按钮 -->
+    <view 
+      class="search-btn {{showSearchButton ? '' : 'hidden'}}" 
+      bindtap="onSearch"
+    >
+      <text class="search-icon">🔍</text>
+    </view>
+  </view>
+  
+  <!-- 搜索建议 -->
+  <view class="search-suggestions" wx:if="{{showSuggestions && suggestions.length > 0}}">
+    <view 
+      class="suggestion-item" 
+      wx:for="{{suggestions}}" 
+      wx:key="index"
+      bindtap="onSuggestionTap"
+      data-value="{{item}}"
+    >
+      <text class="suggestion-text">{{item}}</text>
+    </view>
+  </view>
+  
+  <!-- 搜索历史 -->
+  <view class="search-history" wx:if="{{showHistory && searchHistory.length > 0 && !value}}">
+    <view class="history-header">
+      <text class="history-title">搜索历史</text>
+      <text class="history-clear" bindtap="onClearHistory">清空</text>
+    </view>
+    <view class="history-list">
+      <text 
+        class="history-item" 
+        wx:for="{{searchHistory}}" 
+        wx:key="index"
+        bindtap="onHistoryTap"
+        data-value="{{item}}"
+      >
+        {{item}}
+      </text>
+    </view>
+  </view>
+</view>

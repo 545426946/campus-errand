@@ -1,0 +1,108 @@
+<view class="order-card" bindtap="onOrderTap">
+  <!-- 订单头部 -->
+  <view class="order-header">
+    <view class="order-type-info">
+      <text class="order-type">{{orderData.type}}</text>
+      <text class="order-id">订单号: {{orderData.orderNo}}</text>
+    </view>
+    <text class="order-status {{orderData.statusClass}}">{{orderData.statusText}}</text>
+  </view>
+  
+  <!-- 订单内容 -->
+  <view class="order-content">
+    <text class="order-desc">{{orderData.description}}</text>
+    
+    <view class="order-details" wx:if="{{showDetails}}">
+      <view class="detail-item" wx:if="{{orderData.pickupLocation}}">
+        <text class="detail-label">取件地点:</text>
+        <text class="detail-value">{{orderData.pickupLocation}}</text>
+      </view>
+      <view class="detail-item" wx:if="{{orderData.deliveryLocation}}">
+        <text class="detail-label">送达地点:</text>
+        <text class="detail-value">{{orderData.deliveryLocation}}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">发布时间:</text>
+        <text class="detail-value">{{orderData.createTime}}</text>
+      </view>
+      <view class="detail-item" wx:if="{{orderData.expectedTime}}">
+        <text class="detail-label">期望时间:</text>
+        <text class="detail-value">{{orderData.expectedTime}}</text>
+      </view>
+      <view class="detail-item" wx:if="{{orderData.contactInfo}}">
+        <text class="detail-label">联系方式:</text>
+        <text class="detail-value" bindtap="onContactTap">{{orderData.contactInfo}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 订单底部 -->
+  <view class="order-footer">
+    <view class="price-info">
+      <text class="price">¥{{orderData.price}}</text>
+      <text class="tip" wx:if="{{orderData.tip && parseFloat(orderData.tip) > 0}}">含小费¥{{orderData.tip}}</text>
+    </view>
+    
+    <view class="order-actions" wx:if="{{showActions}}">
+      <slot name="actions">
+        <block wx:if="{{orderData.status === 'pending'}}">
+          <button 
+            wx:if="{{orderData.isMyOrder}}" 
+            class="action-btn cancel-btn" 
+            bindtap="onCancelOrder"
+            data-id="{{orderData.id}}"
+          >
+            取消订单
+          </button>
+          <button 
+            wx:else 
+            class="action-btn accept-btn" 
+            bindtap="onAcceptOrder"
+            data-id="{{orderData.id}}"
+          >
+            接单
+          </button>
+        </block>
+        <block wx:elif="{{orderData.status === 'accepted'}}">
+          <button 
+            wx:if="{{orderData.isMyOrder}}" 
+            class="action-btn complete-btn" 
+            bindtap="onCompleteOrder"
+            data-id="{{orderData.id}}"
+          >
+            确认完成
+          </button>
+          <button 
+            wx:else 
+            class="action-btn finish-btn" 
+            bindtap="onFinishOrder"
+            data-id="{{orderData.id}}"
+          >
+            完成订单
+          </button>
+        </block>
+        <block wx:else>
+          <button 
+            class="action-btn detail-btn" 
+            bindtap="onViewDetail"
+            data-id="{{orderData.id}}"
+          >
+            查看详情
+          </button>
+        </block>
+      </slot>
+    </view>
+  </view>
+  
+  <!-- 标签 -->
+  <view class="order-tags" wx:if="{{orderData.tags && orderData.tags.length > 0}}">
+    <text 
+      class="tag" 
+      wx:for="{{orderData.tags}}" 
+      wx:key="index"
+      style="{{item.style}}"
+    >
+      {{item.text}}
+    </text>
+  </view>
+</view>

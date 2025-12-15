@@ -1,0 +1,73 @@
+<view class="page-container">
+  <!-- 顶部搜索区域 -->
+  <view class="search-section">
+    <view class="search-bar">
+      <input 
+        class="search-input" 
+        placeholder="搜索服务类型..." 
+        bindinput="onSearchInput"
+        value="{{searchKeyword}}"
+      />
+      <button class="search-btn" bindtap="onSearch">搜索</button>
+    </view>
+  </view>
+
+  <!-- 服务类型分类 -->
+  <view class="service-section">
+    <view class="section-title">服务分类</view>
+    <view class="service-grid">
+      <view 
+        class="service-item" 
+        wx:for="{{serviceTypes}}" 
+        wx:key="id"
+        bindtap="onServiceTap"
+        data-id="{{item.id}}"
+        data-name="{{item.name}}"
+      >
+        <image class="service-icon" src="{{item.icon}}" mode="aspectFit"></image>
+        <text class="service-name">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 热门订单 -->
+  <view class="orders-section">
+    <view class="section-header">
+      <text class="section-title">热门订单</text>
+      <text class="more-text" bindtap="onViewMore">查看更多</text>
+    </view>
+    
+    <view class="order-list">
+      <view 
+        class="order-card" 
+        wx:for="{{orderList}}" 
+        wx:key="id"
+        bindtap="onOrderTap"
+        data-id="{{item.id}}"
+      >
+        <view class="order-header">
+          <text class="order-type">{{item.type}}</text>
+          <text class="order-status {{item.statusClass}}">{{item.statusText}}</text>
+        </view>
+        
+        <view class="order-content">
+          <text class="order-desc">{{item.description}}</text>
+          <view class="order-info">
+            <text class="order-location">📍 {{item.location}}</text>
+            <text class="order-time">🕐 {{item.createTime}}</text>
+          </view>
+        </view>
+        
+        <view class="order-footer">
+          <text class="order-price">¥{{item.price}}</text>
+          <button class="accept-btn" bindtap="onAcceptOrder" data-id="{{item.id}}">接单</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 悬浮发布按钮 -->
+  <view class="fab" bindtap="onPublishOrder">
+    <text class="fab-text">+</text>
+  </view>
+</view>

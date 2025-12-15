@@ -1,0 +1,186 @@
+.tab-section {
+  background-color: #fff;
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.tab-bar {
+  display: flex;
+  background-color: #f8f8f8;
+  border-radius: 25rpx;
+  padding: 6rpx;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx;
+  font-size: 28rpx;
+  color: #666;
+  border-radius: 20rpx;
+  transition: all 0.3s ease;
+}
+
+.tab-item.active {
+  background-color: #007aff;
+  color: #fff;
+  font-weight: bold;
+}
+
+.order-list {
+  padding: 20rpx;
+  min-height: 60vh;
+}
+
+.order-card {
+  background-color: #fff;
+  border-radius: 15rpx;
+  padding: 25rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.08);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
+}
+
+.order-type-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.order-type {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.order-id {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.order-content {
+  margin-bottom: 25rpx;
+}
+
+.order-desc {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+  margin-bottom: 20rpx;
+}
+
+.order-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  background-color: #f8f8f8;
+  padding: 20rpx;
+  border-radius: 10rpx;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+}
+
+.detail-label {
+  font-size: 26rpx;
+  color: #666;
+  width: 140rpx;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  font-size: 26rpx;
+  color: #333;
+  flex: 1;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price-info {
+  display: flex;
+  align-items: baseline;
+  gap: 15rpx;
+}
+
+.price {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ff6b35;
+}
+
+.tip {
+  font-size: 24rpx;
+  color: #ff9500;
+  background-color: #fff3e0;
+  padding: 4rpx 8rpx;
+  border-radius: 4rpx;
+}
+
+.order-actions {
+  display: flex;
+  gap: 15rpx;
+}
+
+.action-btn {
+  border: none;
+  border-radius: 20rpx;
+  padding: 12rpx 25rpx;
+  font-size: 26rpx;
+}
+
+.accept-btn {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.cancel-btn {
+  background-color: #f44336;
+  color: #fff;
+}
+
+.complete-btn {
+  background-color: #007aff;
+  color: #fff;
+}
+
+.finish-btn {
+  background-color: #ff9800;
+  color: #fff;
+}
+
+.detail-btn {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 20rpx;
+}
+
+.empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}

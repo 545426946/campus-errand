@@ -1,0 +1,178 @@
+.user-header {
+  background: linear-gradient(135deg, #007aff 0%, #00d4ff 100%);
+  padding: 60rpx 30rpx 40rpx;
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+
+.user-avatar-section {
+  position: relative;
+  margin-right: 30rpx;
+}
+
+.user-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255, 255, 255, 0.8);
+}
+
+.login-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-text {
+  font-size: 24rpx;
+  color: #fff;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 15rpx;
+  display: block;
+}
+
+.user-stats {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.stat-item {
+  font-size: 26rpx;
+  opacity: 0.9;
+}
+
+.stat-divider {
+  font-size: 24rpx;
+  opacity: 0.7;
+}
+
+.setting-btn {
+  padding: 15rpx;
+  font-size: 40rpx;
+}
+
+.menu-section {
+  padding: 20rpx;
+}
+
+.menu-group {
+  background-color: #fff;
+  border-radius: 15rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.08);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30rpx 25rpx;
+  border-bottom: 1rpx solid #f8f8f8;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.menu-icon {
+  font-size: 40rpx;
+  margin-right: 20rpx;
+  width: 40rpx;
+  text-align: center;
+}
+
+.menu-title {
+  font-size: 32rpx;
+  color: #333;
+}
+
+.menu-right {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.menu-count {
+  background-color: #ff6b35;
+  color: #fff;
+  font-size: 24rpx;
+  padding: 6rpx 12rpx;
+  border-radius: 20rpx;
+  min-width: 20rpx;
+  text-align: center;
+}
+
+.menu-value {
+  font-size: 32rpx;
+  color: #ff6b35;
+  font-weight: bold;
+}
+
+.cert-status {
+  font-size: 26rpx;
+  padding: 6rpx 12rpx;
+  border-radius: 6rpx;
+}
+
+.cert-status.verified {
+  background-color: #e8f5e8;
+  color: #4caf50;
+}
+
+.cert-status.unverified {
+  background-color: #fff3e0;
+  color: #ff9500;
+}
+
+.menu-arrow {
+  font-size: 32rpx;
+  color: #999;
+}
+
+.action-section {
+  padding: 40rpx 20rpx;
+}
+
+.logout-btn {
+  background-color: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 25rpx;
+  padding: 25rpx;
+  font-size: 32rpx;
+  width: 100%;
+}
+
+.version-info {
+  text-align: center;
+  padding: 30rpx 20rpx 50rpx;
+}
+
+.version-text {
+  font-size: 24rpx;
+  color: #999;
+}

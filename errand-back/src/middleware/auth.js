@@ -14,12 +14,13 @@ exports.protect = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id);
     
-    if (!req.user) {
+    if (!user) {
       return res.status(401).json({ message: '用户不存在' });
     }
 
+    req.user = user;
     next();
   } catch (error) {
     res.status(401).json({ message: 'Token无效或已过期' });

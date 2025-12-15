@@ -1,63 +1,58 @@
-const mongoose = require('mongoose');
+const { pool } = require('../config/database');
 const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: [true, '请提供用户名'],
-    unique: true,
-    trim: true
-  },
-  email: {
-    type: String,
-    required: [true, '请提供邮箱'],
-    unique: true,
-    lowercase: true,
-    match: [/^\S+@\S+\.\S+$/, '请提供有效的邮箱地址']
-  },
-  password: {
-    type: String,
-    required: [true, '请提供密码'],
-    minlength: 6,
-    select: false
-  },
-  role: {
-    type: String,
-    enum: ['student', 'teacher', 'admin'],
-    default: 'student'
-  },
-  profile: {
-    avatar: String,
-    phone: String,
-    studentId: String,
-    major: String,
-    grade: String
-  },
-  learningProgress: [{
-    courseId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Course'
-    },
-    progress: {
-      type: Number,
-      default: 0
-    },
-    lastAccessed: Date
-  }],
-  createdAt: {
-    type: Date,
-    default: Date.now
+class User {
+  static async create(userData) {
+    const { username, email, password, role = 'student' } = userData;
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    const [result] = await pool.execute(
+      'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)',
+      [username, email, hashedPassword, role]
+    );
+    
+    return { id: result.insertId, username, email, role };
   }
-});
 
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
-});
+  static async findById(id) {
+    const [rows] = await pool.execute(
+      'SELECT id, username, email, role, avatar, phone, student_id, major, grade, created_at FROM users WHERE id = ?',
+      [id]
+    );
+    return rows[0];
+  }
 
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
+  static async findByEmail(email) {
+    const [rows] = await pool.execute(
+      'SELECT * FROM users WHERE email = ?',
+      [email]
+    );
+    return rows[0];
+  }
 
-module.exports = mongoose.model('User', userSchema);
+  static async comparePassword(candidatePassword, hashedPassword) {
+    return await bcrypt.compare(candidatePassword, hashedPassword);
+  }
+
+  static async updateProfile(id, profileData) {
+    const { avatar, phone, student_id, major, grade } = profileData;
+    await pool.execute(
+      'UPDATE users SET avatar = ?, phone = ?, student_id = ?, major = ?, grade = ? WHERE id = ?',
+      [avatar, phone, student_id, major, grade, id]
+    );
+    return await this.findById(id);
+  }
+
+  static async getLearningProgress(userId) {
+    const [rows] = await pool.execute(
+      `SELECT ce.course_id, c.title, ce.progress, ce.last_accessed 
+       FROM course_enrollments ce 
+       JOIN courses c ON ce.course_id = c.id 
+       WHERE ce.student_id = ?`,
+      [userId]
+    );
+    return rows;
+  }
+}
+
+module.exports = User;

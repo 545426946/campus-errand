@@ -5,7 +5,7 @@
 
 ## 技术栈
 - Node.js + Express
-- MongoDB + Mongoose
+- MySQL + mysql2
 - JWT身份认证
 - AI集成（可扩展OpenAI等服务）
 
@@ -17,13 +17,24 @@ cd errand-back
 npm install
 ```
 
-### 2. 配置环境变量
+### 2. 配置数据库
+导入数据库结构：
+```bash
+mysql -u root -p < database/schema.sql
+```
+
+导入测试数据（可选）：
+```bash
+mysql -u root -p < database/seed.sql
+```
+
+### 3. 配置环境变量
 复制 `.env.example` 为 `.env` 并配置：
 ```bash
 cp .env.example .env
 ```
 
-### 3. 启动服务
+### 4. 启动服务
 ```bash
 # 开发模式
 npm run dev

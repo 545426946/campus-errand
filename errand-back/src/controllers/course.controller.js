@@ -3,15 +3,9 @@ const Course = require('../models/Course');
 exports.getAllCourses = async (req, res) => {
   try {
     const { category, difficulty, search } = req.query;
-    const filter = {};
+    const filters = { category, difficulty, search };
 
-    if (category) filter.category = category;
-    if (difficulty) filter.difficulty = difficulty;
-    if (search) filter.title = { $regex: search, $options: 'i' };
-
-    const courses = await Course.find(filter)
-      .populate('instructor', 'username email')
-      .sort('-createdAt');
+    const courses = await Course.findAll(filters);
 
     res.json({
       success: true,
@@ -25,13 +19,15 @@ exports.getAllCourses = async (req, res) => {
 
 exports.getCourse = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id)
-      .populate('instructor', 'username email profile')
-      .populate('enrolledStudents', 'username email');
+    const course = await Course.findById(req.params.id);
 
     if (!course) {
       return res.status(404).json({ success: false, error: '课程不存在' });
     }
+
+    // 获取已报名学生
+    const enrolledStudents = await Course.getEnrolledStudents(req.params.id);
+    course.enrolledStudents = enrolledStudents;
 
     res.json({ success: true, course });
   } catch (error) {
@@ -41,7 +37,7 @@ exports.getCourse = async (req, res) => {
 
 exports.createCourse = async (req, res) => {
   try {
-    req.body.instructor = req.user.id;
+    req.body.instructor_id = req.user.id;
     const course = await Course.create(req.body);
 
     res.status(201).json({
@@ -55,11 +51,7 @@ exports.createCourse = async (req, res) => {
 
 exports.updateCourse = async (req, res) => {
   try {
-    const course = await Course.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body, updatedAt: Date.now() },
-      { new: true, runValidators: true }
-    );
+    const course = await Course.update(req.params.id, req.body);
 
     if (!course) {
       return res.status(404).json({ success: false, error: '课程不存在' });
@@ -73,21 +65,13 @@ exports.updateCourse = async (req, res) => {
 
 exports.enrollCourse = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    await Course.enroll(req.params.id, req.user.id);
 
-    if (!course) {
-      return res.status(404).json({ success: false, error: '课程不存在' });
-    }
-
-    if (course.enrolledStudents.includes(req.user.id)) {
+    res.json({ success: true, message: '报名成功' });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ success: false, error: '已经报名该课程' });
     }
-
-    course.enrolledStudents.push(req.user.id);
-    await course.save();
-
-    res.json({ success: true, message: '报名成功', course });
-  } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }
 };

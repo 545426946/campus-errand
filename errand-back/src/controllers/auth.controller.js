@@ -18,13 +18,13 @@ exports.register = async (req, res) => {
       role
     });
 
-    const token = generateToken(user._id);
+    const token = generateToken(user.id);
 
     res.status(201).json({
       success: true,
       token,
       user: {
-        id: user._id,
+        id: user.id,
         username: user.username,
         email: user.email,
         role: user.role
@@ -49,22 +49,22 @@ exports.login = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findByEmail(email);
 
-    if (!user || !(await user.comparePassword(password))) {
+    if (!user || !(await User.comparePassword(password, user.password))) {
       return res.status(401).json({
         success: false,
         error: '邮箱或密码错误'
       });
     }
 
-    const token = generateToken(user._id);
+    const token = generateToken(user.id);
 
     res.json({
       success: true,
       token,
       user: {
-        id: user._id,
+        id: user.id,
         username: user.username,
         email: user.email,
         role: user.role

@@ -1,5 +1,6 @@
 const express = require('express');
 const { protect } = require('../middleware/auth');
+const User = require('../models/User');
 
 const router = express.Router();
 
@@ -11,13 +12,17 @@ router.get('/profile', (req, res) => {
 
 router.put('/profile', async (req, res) => {
   try {
-    const updates = req.body;
-    const user = await require('../models/User').findByIdAndUpdate(
-      req.user.id,
-      { profile: updates },
-      { new: true }
-    );
+    const user = await User.updateProfile(req.user.id, req.body);
     res.json({ success: true, user });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+router.get('/learning-progress', async (req, res) => {
+  try {
+    const progress = await User.getLearningProgress(req.user.id);
+    res.json({ success: true, progress });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
   }

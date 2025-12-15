@@ -1,0 +1,167 @@
+.search-section {
+  background: linear-gradient(135deg, #007aff 0%, #00d4ff 100%);
+  padding: 30rpx 20rpx 40rpx;
+  border-radius: 0 0 30rpx 30rpx;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 25rpx;
+  padding: 10rpx 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.search-input {
+  flex: 1;
+  padding: 15rpx;
+  font-size: 28rpx;
+}
+
+.search-btn {
+  background-color: #007aff;
+  color: #fff;
+  border: none;
+  border-radius: 20rpx;
+  padding: 15rpx 30rpx;
+  font-size: 28rpx;
+  margin-left: 20rpx;
+}
+
+.service-section, .orders-section {
+  padding: 30rpx 20rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.more-text {
+  font-size: 28rpx;
+  color: #007aff;
+}
+
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30rpx;
+}
+
+.service-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+}
+
+.service-icon {
+  width: 60rpx;
+  height: 60rpx;
+  margin-bottom: 15rpx;
+}
+
+.service-name {
+  font-size: 24rpx;
+  color: #666;
+  text-align: center;
+}
+
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.order-card {
+  background-color: #fff;
+  border-radius: 15rpx;
+  padding: 25rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.08);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.order-type {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.order-content {
+  margin-bottom: 20rpx;
+}
+
+.order-desc {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
+  margin-bottom: 15rpx;
+}
+
+.order-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.order-location, .order-time {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-price {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ff6b35;
+}
+
+.accept-btn {
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 20rpx;
+  padding: 12rpx 25rpx;
+  font-size: 28rpx;
+}
+
+.fab {
+  position: fixed;
+  right: 30rpx;
+  bottom: 100rpx;
+  width: 120rpx;
+  height: 120rpx;
+  background: linear-gradient(135deg, #007aff 0%, #00d4ff 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 20rpx rgba(0, 122, 255, 0.4);
+  z-index: 1000;
+}
+
+.fab-text {
+  color: #fff;
+  font-size: 48rpx;
+  font-weight: bold;
+}

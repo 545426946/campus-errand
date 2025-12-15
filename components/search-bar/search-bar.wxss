@@ -1,0 +1,149 @@
+.search-bar-container {
+  width: 100%;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: #f8f8f8;
+  border-radius: 25rpx;
+  padding: 10rpx 20rpx;
+  transition: all 0.3s ease;
+}
+
+.search-input-wrapper:focus-within {
+  background-color: #fff;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  padding: 15rpx;
+  color: #333;
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+.clear-btn {
+  padding: 10rpx;
+  margin-right: 10rpx;
+  border-radius: 50%;
+  background-color: #ccc;
+  width: 32rpx;
+  height: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-icon {
+  color: #fff;
+  font-size: 24rpx;
+  line-height: 1;
+}
+
+.search-btn {
+  padding: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-btn.hidden {
+  display: none;
+}
+
+.search-icon {
+  font-size: 32rpx;
+  color: #666;
+}
+
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  border-radius: 15rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-top: 10rpx;
+  max-height: 300rpx;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  padding: 25rpx 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:active {
+  background-color: #f8f8f8;
+}
+
+.suggestion-text {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.search-history {
+  margin-top: 20rpx;
+  background-color: #fff;
+  border-radius: 15rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.history-title {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: bold;
+}
+
+.history-clear {
+  font-size: 26rpx;
+  color: #007aff;
+}
+
+.history-clear:active {
+  color: #0056b3;
+}
+
+.history-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15rpx;
+}
+
+.history-item {
+  background-color: #f0f0f0;
+  color: #666;
+  padding: 12rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 26rpx;
+  max-width: 200rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-item:active {
+  background-color: #e0e0e0;
+  color: #333;
+}

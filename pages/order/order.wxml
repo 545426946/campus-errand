@@ -1,0 +1,89 @@
+<view class="page-container">
+  <!-- 订单类型切换 -->
+  <view class="tab-section">
+    <view class="tab-bar">
+      <view 
+        class="tab-item {{currentTab === index ? 'active' : ''}}" 
+        wx:for="{{tabs}}" 
+        wx:key="index"
+        bindtap="switchTab"
+        data-index="{{index}}"
+      >
+        {{item}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list">
+    <view 
+      class="order-card" 
+      wx:for="{{filteredOrders}}" 
+      wx:key="id"
+      bindtap="onOrderTap"
+      data-id="{{item.id}}"
+    >
+      <view class="order-header">
+        <view class="order-type-info">
+          <text class="order-type">{{item.type}}</text>
+          <text class="order-id">订单号: {{item.orderNo}}</text>
+        </view>
+        <text class="order-status {{item.statusClass}}">{{item.statusText}}</text>
+      </view>
+      
+      <view class="order-content">
+        <text class="order-desc">{{item.description}}</text>
+        
+        <view class="order-details">
+          <view class="detail-item">
+            <text class="detail-label">取件地点:</text>
+            <text class="detail-value">{{item.pickupLocation}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">送达地点:</text>
+            <text class="detail-value">{{item.deliveryLocation}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">发布时间:</text>
+            <text class="detail-value">{{item.createTime}}</text>
+          </view>
+          <view class="detail-item" wx:if="{{item.expectedTime}}">
+            <text class="detail-label">期望时间:</text>
+            <text class="detail-value">{{item.expectedTime}}</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="order-footer">
+        <view class="price-info">
+          <text class="price">¥{{item.price}}</text>
+          <text class="tip" wx:if="{{item.tip}}">含小费¥{{item.tip}}</text>
+        </view>
+        
+        <view class="order-actions">
+          <block wx:if="{{item.status === 'pending' && item.isMyOrder}}">
+            <button class="action-btn cancel-btn" bindtap="onCancelOrder" data-id="{{item.id}}">取消订单</button>
+          </block>
+          <block wx:elif="{{item.status === 'pending' && !item.isMyOrder}}">
+            <button class="action-btn accept-btn" bindtap="onAcceptOrder" data-id="{{item.id}}">接单</button>
+          </block>
+          <block wx:elif="{{item.status === 'accepted' && item.isMyOrder}}">
+            <button class="action-btn complete-btn" bindtap="onCompleteOrder" data-id="{{item.id}}">确认完成</button>
+          </block>
+          <block wx:elif="{{item.status === 'accepted' && !item.isMyOrder}}">
+            <button class="action-btn finish-btn" bindtap="onFinishOrder" data-id="{{item.id}}">完成订单</button>
+          </block>
+          <block wx:else>
+            <button class="action-btn detail-btn" bindtap="onViewDetail" data-id="{{item.id}}">查看详情</button>
+          </block>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{filteredOrders.length === 0}}">
+    <image class="empty-icon" src="/images/empty.png" mode="aspectFit"></image>
+    <text class="empty-text">暂无{{tabs[currentTab]}}订单</text>
+  </view>
+</view>

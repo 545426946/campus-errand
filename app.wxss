@@ -1,0 +1,209 @@
+/* 全局样式 */
+page {
+  background-color: #f8f8f8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, 'Segoe UI', Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* 通用容器 */
+.container {
+  padding: 20rpx;
+}
+
+.page-container {
+  min-height: 100vh;
+  background-color: #f8f8f8;
+}
+
+/* 卡片样式 */
+.card {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background-color: #007aff;
+  color: #fff;
+  border: none;
+  border-radius: 8rpx;
+  padding: 20rpx 40rpx;
+  font-size: 32rpx;
+}
+
+.btn-secondary {
+  background-color: #f0f0f0;
+  color: #333;
+  border: none;
+  border-radius: 8rpx;
+  padding: 20rpx 40rpx;
+  font-size: 32rpx;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: #007aff;
+  border: 2rpx solid #007aff;
+  border-radius: 8rpx;
+  padding: 18rpx 38rpx;
+  font-size: 32rpx;
+}
+
+/* 列表样式 */
+.list-item {
+  background-color: #fff;
+  padding: 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  display: flex;
+  align-items: center;
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.list-item-content {
+  flex: 1;
+}
+
+.list-item-title {
+  font-size: 32rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.list-item-desc {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 状态标签 */
+.status-pending {
+  color: #ff9500;
+  background-color: #fff3e0;
+  padding: 8rpx 16rpx;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+}
+
+.status-completed {
+  color: #4caf50;
+  background-color: #e8f5e8;
+  padding: 8rpx 16rpx;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+}
+
+.status-cancelled {
+  color: #f44336;
+  background-color: #ffebee;
+  padding: 8rpx 16rpx;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+}
+
+/* 价格样式 */
+.price {
+  color: #ff6b35;
+  font-weight: bold;
+  font-size: 36rpx;
+}
+
+.price-small {
+  color: #ff6b35;
+  font-weight: bold;
+  font-size: 28rpx;
+}
+
+/* 间距工具类 */
+.mt-10 { margin-top: 10rpx; }
+.mt-20 { margin-top: 20rpx; }
+.mt-30 { margin-top: 30rpx; }
+
+.mb-10 { margin-bottom: 10rpx; }
+.mb-20 { margin-bottom: 20rpx; }
+.mb-30 { margin-bottom: 30rpx; }
+
+.ml-10 { margin-left: 10rpx; }
+.ml-20 { margin-left: 20rpx; }
+.ml-30 { margin-left: 30rpx; }
+
+.mr-10 { margin-right: 10rpx; }
+.mr-20 { margin-right: 20rpx; }
+.mr-30 { margin-right: 30rpx; }
+
+.p-10 { padding: 10rpx; }
+.p-20 { padding: 20rpx; }
+.p-30 { padding: 30rpx; }
+
+/* 布局工具类 */
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* 文字样式 */
+.text-primary {
+  color: #007aff;
+}
+
+.text-secondary {
+  color: #666;
+}
+
+.text-muted {
+  color: #999;
+}
+
+.text-success {
+  color: #4caf50;
+}
+
+.text-warning {
+  color: #ff9500;
+}
+
+.text-danger {
+  color: #f44336;
+}
+
+.text-bold {
+  font-weight: bold;
+}
+
+.text-large {
+  font-size: 36rpx;
+}
+
+.text-small {
+  font-size: 24rpx;
+}

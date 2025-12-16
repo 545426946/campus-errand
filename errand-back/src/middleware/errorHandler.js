@@ -1,5 +1,5 @@
 const errorHandler = (err, req, res, next) => {
-  console.error(err.stack);
+  console.error('错误详情:', err);
 
   const error = {
     message: err.message || '服务器错误',
@@ -23,7 +23,8 @@ const errorHandler = (err, req, res, next) => {
 
   res.status(error.statusCode).json({
     success: false,
-    error: error.message
+    code: error.statusCode,
+    message: error.message
   });
 };
 

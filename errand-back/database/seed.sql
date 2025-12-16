@@ -1,11 +1,11 @@
 -- 测试数据
 USE errand_platform;
 
--- 插入管理员用户（密码: admin123，需要在应用中加密）
+-- 插入管理员用户（密码: admin123）
 INSERT INTO users (username, email, password, role) VALUES
-('admin', 'admin@example.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIiIkYvYOm', 'admin'),
-('teacher1', 'teacher1@example.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIiIkYvYOm', 'teacher'),
-('student1', 'student1@example.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIiIkYvYOm', 'student');
+('admin', 'admin@example.com', '$2a$12$F60MTP9fmvdzacblsQHAmegEPLMq.TxvU3f53Mke8/cigvoQPXXmW', 'admin'),
+('teacher1', 'teacher1@example.com', '$2a$12$F60MTP9fmvdzacblsQHAmegEPLMq.TxvU3f53Mke8/cigvoQPXXmW', 'teacher'),
+('student1', 'student1@example.com', '$2a$12$F60MTP9fmvdzacblsQHAmegEPLMq.TxvU3f53Mke8/cigvoQPXXmW', 'student');
 
 -- 插入示例课程
 INSERT INTO courses (title, description, instructor_id, category, difficulty) VALUES

@@ -1,4 +1,4 @@
-const { pool } = require('../config/database');
+const db = require('../config/database');
 
 class Task {
   static async create(taskData) {
@@ -7,7 +7,7 @@ class Task {
       status = 'pending', priority = 'medium', due_date, assigned_to = []
     } = taskData;
     
-    const connection = await pool.getConnection();
+    const connection = await db.getConnection();
     
     try {
       await connection.beginTransaction();
@@ -68,12 +68,12 @@ class Task {
 
     query += ' ORDER BY t.created_at DESC';
 
-    const [rows] = await pool.execute(query, params);
+    const [rows] = await db.execute(query, params);
     return rows;
   }
 
   static async findById(id) {
-    const [rows] = await pool.execute(
+    const [rows] = await db.execute(
       `SELECT t.*, u.username as creator_name, u.email as creator_email, c.title as course_title
        FROM tasks t
        JOIN users u ON t.creator_id = u.id
@@ -87,7 +87,7 @@ class Task {
     const task = rows[0];
     
     // 获取分配的用户
-    const [assigned] = await pool.execute(
+    const [assigned] = await db.execute(
       `SELECT u.id, u.username, u.email FROM task_assignments ta
        JOIN users u ON ta.user_id = u.id
        WHERE ta.task_id = ?`,
@@ -96,7 +96,7 @@ class Task {
     task.assigned_to = assigned;
 
     // 获取提交记录
-    const [submissions] = await pool.execute(
+    const [submissions] = await db.execute(
       `SELECT ts.*, u.username FROM task_submissions ts
        JOIN users u ON ts.user_id = u.id
        WHERE ts.task_id = ?`,
@@ -110,7 +110,7 @@ class Task {
   static async submit(taskId, userId, submissionData) {
     const { content, files = [] } = submissionData;
     
-    const connection = await pool.getConnection();
+    const connection = await db.getConnection();
     
     try {
       await connection.beginTransaction();

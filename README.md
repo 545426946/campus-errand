@@ -1,111 +1,209 @@
-# 校园跑腿微信小程序
+# 校园跑腿平台
 
-## 📁 项目结构
+一个基于微信小程序的校园跑腿服务平台，包含订单发布、接单、支付等完整功能。
+
+## 项目结构
 
 ```
 campus-errand/
-├── 📱 errand-front/           # 微信小程序前端
-│   ├── app.js                 # 小程序入口文件
-│   ├── app.json               # 全局配置文件
-│   ├── app.wxss               # 全局样式文件
-│   ├── sitemap.json           # 站点地图配置
-│   ├── api/                   # API服务层
-│   │   ├── request.js         # HTTP请求封装
-│   │   ├── order.js           # 订单相关API
-│   │   ├── user.js            # 用户相关API
-│   │   └── common.js         # 通用API
-│   ├── components/            # 自定义组件
-│   │   ├── order-card/       # 订单卡片组件
-│   │   └── search-bar/       # 搜索栏组件
-│   ├── pages/                 # 页面文件
-│   │   ├── index/             # 首页
-│   │   ├── order/             # 订单页
-│   │   ├── user/              # 用户中心
-│   │   └── detail/            # 订单详情
-│   └── utils/                 # 工具类库
-│       ├── util.js            # 通用工具函数
-│       ├── config.js          # 配置管理
-│       └── validator.js       # 表单验证工具
-├── 🖥️ errand-back/            # 后端项目（待开发）
-│   └── 01.md                 # 后端规划文档
-└── 📄 README.md               # 项目说明文档
+├── errand-back/          # 后端服务 (Node.js + Express + MySQL)
+├── errand-front/         # 前端小程序 (微信小程序)
+└── README.md
 ```
 
-## 🚀 功能特性
+## 📚 文档导航
 
-### 核心功能
-- ✅ **首页**：服务分类、热门订单、搜索功能
-- ✅ **订单管理**：订单列表、状态管理、操作功能
-- ✅ **用户中心**：个人信息、功能菜单、数据统计
-- ✅ **组件化**：可复用的订单卡片、搜索栏组件
+**[📚 文档导航.md](./📚%20文档导航.md)** - 查看所有文档的完整导航
 
-### 技术特性
-- ✅ **模块化架构**：分层设计，易于维护
-- ✅ **API服务层**：统一的HTTP请求处理
-- ✅ **表单验证**：完善的验证工具库
-- ✅ **配置管理**：环境配置、状态映射
+### 快速链接
+- **[快速开始指南.md](./快速开始指南.md)** ⭐ - 5分钟快速启动
+- **[配置完成总结.md](./配置完成总结.md)** - 项目概览和核心功能
+- **[前后端数据交互配置说明.md](./前后端数据交互配置说明.md)** - 详细配置步骤
+- **[前后端数据交互测试指南.md](./前后端数据交互测试指南.md)** - 完整测试流程
+- **[验证检查清单.md](./验证检查清单.md)** - 功能验证清单
 
-## 🛠️ 开发指南
+## 快速开始
 
-### 前置要求
-- 微信开发者工具
-- Node.js 环境（用于API开发）
+### 后端启动
 
-### 本地开发
-1. 克隆项目
+1. 进入后端目录
 ```bash
-git clone https://github.com/545426946/campus-errand.git
+cd errand-back
 ```
 
-2. 在微信开发者工具中导入 `errand-front` 目录
+2. 安装依赖
+```bash
+npm install
+```
 
-3. 配置API接口地址
-编辑 `errand-front/utils/config.js` 文件，修改 `baseUrl` 为实际API地址
+3. 配置环境变量
+复制 `.env.example` 为 `.env` 并配置数据库信息
 
-4. 开始开发
+4. 初始化数据库
+```bash
+setup-database.bat
+```
 
-## 📱 微信小程序架构说明
+5. 启动服务器
+```bash
+npm run dev
+# 或使用
+start-dev.bat
+```
 
-### 页面结构
-- **index**：首页展示服务分类和热门订单
-- **order**：订单列表页面，支持状态筛选
-- **user**：用户中心，包含个人信息和功能菜单
-- **detail**：订单详情页面（待完善）
+服务器将运行在 http://localhost:3000
 
-### 组件说明
-- **order-card**：订单卡片组件，支持不同状态展示
-- **search-bar**：搜索栏组件，支持搜索历史和建议
+### 前端启动
 
-### API设计
-- **request.js**：封装了HTTP请求，包含拦截器和错误处理
-- **order.js**：订单相关接口（列表、详情、创建、状态更新等）
-- **user.js**：用户相关接口（登录、信息、认证等）
-- **common.js**：通用接口（上传、配置、帮助等）
+1. 使用微信开发者工具打开 `errand-front` 目录
 
-## 📝 待完成功能
+2. 配置后端API地址
+在 `errand-front/utils/config.js` 中配置：
+```javascript
+baseUrl: 'http://localhost:3000/api'
+```
 
-- [ ] 订单详情页面
-- [ ] 登录注册功能
-- [ ] 订单发布功能
-- [ ] 实名认证功能
-- [ ] 钱包功能
-- [ ] 评价系统
-- [ ] 消息通知
-- [ ] 后端API开发
+3. 编译并运行
 
-## 🤝 贡献指南
+## 主要功能
 
-1. Fork 项目
-2. 创建功能分支
-3. 提交代码
-4. 发起 Pull Request
+- ✅ 用户认证（微信登录/邮箱登录）
+- ✅ 订单管理（发布/接单/取消/完成）
+- ✅ 订单筛选和搜索（支持分页）
+- ✅ 用户个人中心（订单统计、钱包）
+- ✅ 订单状态跟踪
+- ✅ **消息通知系统**（订单状态变更自动通知）
+- ✅ 前后端完整数据交互
+- ✅ 动态数据加载（从MySQL数据库）
 
-## 📄 许可证
+## 技术栈
 
-MIT License
+### 后端
+- Node.js + Express
+- MySQL 数据库
+- JWT 认证
+- bcryptjs 密码加密
 
----
+### 前端
+- 微信小程序
+- 微信小程序API
 
-**项目状态**：🚧 开发中  
-**当前版本**：v1.0.0-alpha  
-**最后更新**：2025-12-15
+## 前后端数据交互
+
+### 🎯 已完成配置
+
+本项目已完成前后端完整数据交互配置：
+
+- ✅ 前端通过API从MySQL数据库动态获取数据
+- ✅ 所有页面数据均为动态加载（非静态数据）
+- ✅ 完整的认证和权限控制
+- ✅ 统一的错误处理和提示
+- ✅ 支持分页、筛选、搜索
+
+### 📚 配置文档
+
+- **[前后端数据交互配置说明.md](./前后端数据交互配置说明.md)** - 完整配置说明
+- **[前后端数据交互测试指南.md](./前后端数据交互测试指南.md)** - 详细测试步骤
+
+### 🚀 一键配置
+
+运行配置脚本自动完成所有配置：
+```bash
+配置前后端数据交互.bat
+```
+
+## API文档
+
+### 认证接口
+- `POST /api/auth/login` - 用户登录（支持微信code和邮箱密码）
+- `POST /api/auth/register` - 用户注册
+- `GET /api/auth/me` - 获取当前用户信息
+
+### 订单接口
+- `GET /api/orders` - 获取订单列表（支持分页、筛选）
+- `GET /api/orders/:id` - 获取订单详情
+- `POST /api/orders` - 创建订单
+- `PUT /api/orders/:id` - 更新订单
+- `DELETE /api/orders/:id` - 删除订单
+- `POST /api/orders/:id/accept` - 接单
+- `POST /api/orders/:id/complete` - 完成订单
+- `POST /api/orders/:id/cancel` - 取消订单
+- `GET /api/orders/my-publish` - 我发布的订单
+- `GET /api/orders/my-accepted` - 我接受的订单
+- `GET /api/orders/stats` - 订单统计
+
+### 用户接口
+- `GET /api/users/profile` - 获取用户信息
+- `PUT /api/user/info` - 更新用户信息
+- `GET /api/user/wallet` - 获取钱包信息
+
+### 通知接口
+- `GET /api/notifications` - 获取通知列表
+- `GET /api/notifications/unread-count` - 获取未读数量
+- `PUT /api/notifications/:id/read` - 标记已读
+- `PUT /api/notifications/read-all` - 全部已读
+- `DELETE /api/notifications/:id` - 删除通知
+
+## 测试账号
+
+所有测试账号密码都是: `admin123`
+
+| 用户名 | 邮箱 | 角色 |
+|--------|------|------|
+| student1 | student1@example.com | 学生 |
+| student2 | student2@example.com | 学生 |
+| teacher1 | teacher1@example.com | 教师 |
+| admin | admin@example.com | 管理员 |
+
+## 测试数据
+
+数据库已包含15条测试订单：
+- 6条待接单订单
+- 3条进行中订单
+- 4条已完成订单
+- 2条已取消订单
+
+## 微信小程序配置
+
+1. 使用微信开发者工具打开 `errand-front` 目录
+2. 在 **详情 > 本地设置** 中勾选：
+   - ✅ 不校验合法域名
+   - ✅ 不校验安全域名
+3. 编译运行即可
+
+详细测试指南请查看 [测试指南.md](./测试指南.md)
+
+## 快速启动
+
+双击运行 `快速启动.bat` 即可启动后端服务器
+
+或手动启动：
+```bash
+cd errand-back
+npm run dev
+```
+
+## 开发说明
+
+- 后端默认端口: 3000
+- 数据库: MySQL 5.7+
+- Node.js版本: 14+
+- 前端自动登录: student1@example.com
+
+## 项目特点
+
+- ✅ 完整的前后端分离架构
+- ✅ 前端数据完全动态加载（从MySQL数据库）
+- ✅ JWT身份认证（支持微信登录）
+- ✅ **消息通知系统**（订单状态变更自动通知）
+- ✅ **实时数据同步**（前端操作触发后端数据变更）
+- ✅ RESTful API设计
+- ✅ 统一的响应格式
+- ✅ 完善的错误处理
+- ✅ 分页、筛选、搜索功能
+- ✅ 测试数据完备
+- ✅ 一键配置脚本
+
+## 许可证
+
+MIT

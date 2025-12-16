@@ -1,0 +1,72 @@
+<view class="publish-container">
+  <form bindsubmit="onSubmit">
+    <!-- 订单标题 -->
+    <view class="form-item">
+      <view class="label required">订单标题</view>
+      <input class="input" name="title" value="{{formData.title}}" placeholder="请输入订单标题" maxlength="50" />
+    </view>
+
+    <!-- 服务类型 -->
+    <view class="form-item">
+      <view class="label required">服务类型</view>
+      <picker name="type" mode="selector" range="{{serviceTypes}}" range-key="name" value="{{typeIndex}}" bindchange="onTypeChange">
+        <view class="picker">
+          {{serviceTypes[typeIndex].name}}
+        </view>
+      </picker>
+    </view>
+
+    <!-- 订单描述 -->
+    <view class="form-item">
+      <view class="label required">订单描述</view>
+      <textarea class="textarea" name="description" value="{{formData.description}}" placeholder="请详细描述订单内容" maxlength="500" />
+    </view>
+
+    <!-- 取货地点 -->
+    <view class="form-item">
+      <view class="label required">取货地点</view>
+      <input class="input" name="pickupLocation" value="{{formData.pickupLocation}}" placeholder="请输入取货地点" />
+    </view>
+
+    <!-- 送达地点 -->
+    <view class="form-item">
+      <view class="label required">送达地点</view>
+      <input class="input" name="deliveryLocation" value="{{formData.deliveryLocation}}" placeholder="请输入送达地点" />
+    </view>
+
+    <!-- 联系电话 -->
+    <view class="form-item">
+      <view class="label required">联系电话</view>
+      <input class="input" name="contactPhone" type="number" value="{{formData.contactPhone}}" placeholder="请输入联系电话" maxlength="11" />
+    </view>
+
+    <!-- 订单金额 -->
+    <view class="form-item">
+      <view class="label required">订单金额</view>
+      <input class="input" name="price" type="digit" value="{{formData.price}}" placeholder="请输入订单金额" />
+      <text class="unit">元</text>
+    </view>
+
+    <!-- 上传图片 -->
+    <view class="form-item">
+      <view class="label">订单图片</view>
+      <view class="image-list">
+        <block wx:for="{{formData.images}}" wx:key="index">
+          <view class="image-item">
+            <image class="image" src="{{item}}" mode="aspectFill" bindtap="onPreviewImage" data-url="{{item}}" />
+            <view class="delete-btn" bindtap="onDeleteImage" data-index="{{index}}">×</view>
+          </view>
+        </block>
+        <view class="upload-btn" bindtap="onChooseImage" wx:if="{{formData.images.length < 9}}">
+          <text class="icon">+</text>
+          <text class="text">添加图片</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <view class="submit-section">
+      <button class="submit-btn" formType="submit">发布订单</button>
+    </view>
+  </form>
+</view>

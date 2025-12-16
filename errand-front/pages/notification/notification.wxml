@@ -1,0 +1,52 @@
+<view class="notification-container">
+  <!-- 顶部操作栏 -->
+  <view class="header">
+    <view class="title">消息通知</view>
+    <view class="actions">
+      <text class="action-btn" bindtap="onMarkAllRead" wx:if="{{unreadCount > 0}}">全部已读</text>
+    </view>
+  </view>
+
+  <!-- 通知列表 -->
+  <view class="notification-list" wx:if="{{notificationList.length > 0}}">
+    <view 
+      class="notification-item {{item.is_read ? 'read' : 'unread'}}" 
+      wx:for="{{notificationList}}" 
+      wx:key="id"
+      bindtap="onNotificationTap"
+      data-id="{{item.id}}"
+      data-order-id="{{item.order_id}}">
+      
+      <view class="notification-content">
+        <view class="notification-header">
+          <text class="notification-title">{{item.title}}</text>
+          <view class="unread-dot" wx:if="{{!item.is_read}}"></view>
+        </view>
+        
+        <view class="notification-body">{{item.content}}</view>
+        
+        <view class="notification-footer">
+          <text class="notification-time">{{item.createTime}}</text>
+          <text class="notification-type">{{item.typeText}}</text>
+        </view>
+      </view>
+
+      <view class="notification-actions">
+        <view class="delete-btn" catchtap="onDeleteNotification" data-id="{{item.id}}">
+          <text class="icon">🗑️</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{notificationList.length === 0 && !loading}}">
+    <text class="empty-icon">📭</text>
+    <text class="empty-text">暂无通知</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>

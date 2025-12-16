@@ -1,31 +1,29 @@
 const express = require('express');
 const { protect } = require('../middleware/auth');
-const User = require('../models/User');
+const {
+  getUserProfile,
+  updateUserInfo,
+  updateUserProfile,
+  getLearningProgress,
+  getWalletInfo
+} = require('../controllers/user.controller');
 
 const router = express.Router();
 
+// 所有用户路由都需要认证
 router.use(protect);
 
-router.get('/profile', (req, res) => {
-  res.json({ success: true, user: req.user });
-});
+// 用户信息
+router.get('/profile', getUserProfile);
+router.put('/profile', updateUserProfile);
 
-router.put('/profile', async (req, res) => {
-  try {
-    const user = await User.updateProfile(req.user.id, req.body);
-    res.json({ success: true, user });
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
+// 更新用户信息（兼容前端 /api/user/info）
+router.put('/info', updateUserInfo);
 
-router.get('/learning-progress', async (req, res) => {
-  try {
-    const progress = await User.getLearningProgress(req.user.id);
-    res.json({ success: true, progress });
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
-  }
-});
+// 钱包信息
+router.get('/wallet', getWalletInfo);
+
+// 学习进度
+router.get('/learning-progress', getLearningProgress);
 
 module.exports = router;

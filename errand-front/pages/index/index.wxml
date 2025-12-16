@@ -24,7 +24,8 @@
         data-id="{{item.id}}"
         data-name="{{item.name}}"
       >
-        <image class="service-icon" src="{{item.icon}}" mode="aspectFit"></image>
+        <view wx:if="{{item.emoji}}" class="service-icon-emoji">{{item.icon}}</view>
+        <image wx:else class="service-icon" src="{{item.icon}}" mode="aspectFit"></image>
         <text class="service-name">{{item.name}}</text>
       </view>
     </view>

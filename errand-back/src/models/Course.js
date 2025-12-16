@@ -1,10 +1,10 @@
-const { pool } = require('../config/database');
+const db = require('../config/database');
 
 class Course {
   static async create(courseData) {
     const { title, description, instructor_id, category, difficulty = 'beginner' } = courseData;
     
-    const [result] = await pool.execute(
+    const [result] = await db.execute(
       'INSERT INTO courses (title, description, instructor_id, category, difficulty) VALUES (?, ?, ?, ?, ?)',
       [title, description, instructor_id, category, difficulty]
     );
@@ -37,12 +37,12 @@ class Course {
 
     query += ' ORDER BY c.created_at DESC';
 
-    const [rows] = await pool.execute(query, params);
+    const [rows] = await db.execute(query, params);
     return rows;
   }
 
   static async findById(id) {
-    const [rows] = await pool.execute(
+    const [rows] = await db.execute(
       `SELECT c.*, u.username as instructor_name, u.email as instructor_email
        FROM courses c
        JOIN users u ON c.instructor_id = u.id
@@ -55,14 +55,14 @@ class Course {
     const course = rows[0];
     
     // 获取课程内容
-    const [contents] = await pool.execute(
+    const [contents] = await db.execute(
       'SELECT * FROM course_contents WHERE course_id = ? ORDER BY content_order',
       [id]
     );
     course.contents = contents;
 
     // 获取标签
-    const [tags] = await pool.execute(
+    const [tags] = await db.execute(
       'SELECT tag_name FROM course_tags WHERE course_id = ?',
       [id]
     );
@@ -73,7 +73,7 @@ class Course {
 
   static async update(id, courseData) {
     const { title, description, category, difficulty } = courseData;
-    await pool.execute(
+    await db.execute(
       'UPDATE courses SET title = ?, description = ?, category = ?, difficulty = ? WHERE id = ?',
       [title, description, category, difficulty, id]
     );
@@ -81,14 +81,14 @@ class Course {
   }
 
   static async enroll(courseId, studentId) {
-    await pool.execute(
+    await db.execute(
       'INSERT INTO course_enrollments (course_id, student_id) VALUES (?, ?)',
       [courseId, studentId]
     );
   }
 
   static async getEnrolledStudents(courseId) {
-    const [rows] = await pool.execute(
+    const [rows] = await db.execute(
       `SELECT u.id, u.username, u.email, ce.progress, ce.enrolled_at
        FROM course_enrollments ce
        JOIN users u ON ce.student_id = u.id

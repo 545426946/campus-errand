@@ -22,4 +22,6 @@ const connectDB = async () => {
   }
 };
 
-module.exports = { pool, connectDB };
+// 导出pool的execute方法
+module.exports = pool;
+module.exports.connectDB = connectDB;

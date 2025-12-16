@@ -1,0 +1,460 @@
+const Order = require('../models/Order');
+const Notification = require('../models/Notification');
+
+// 获取订单列表
+exports.getOrders = async (req, res, next) => {
+  try {
+    const { page, pageSize, status, type, keyword } = req.query;
+
+    const filters = {
+      page: parseInt(page) || 1,
+      pageSize: parseInt(pageSize) || 10,
+      status: status || '',
+      type: type || '',
+      keyword: keyword || ''
+    };
+
+    const orders = await Order.findAll(filters);
+
+    res.json({
+      success: true,
+      code: 0,
+      data: orders,
+      message: '获取订单列表成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 获取订单详情
+exports.getOrderDetail = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        code: 404,
+        message: '订单不存在'
+      });
+    }
+
+    res.json({
+      success: true,
+      code: 0,
+      data: order,
+      message: '获取订单详情成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 创建订单
+exports.createOrder = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const orderData = {
+      userId,
+      ...req.body
+    };
+
+    const orderId = await Order.create(orderData);
+
+    res.status(201).json({
+      success: true,
+      code: 0,
+      data: { orderId },
+      message: '订单创建成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 更新订单
+exports.updateOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        code: 404,
+        message: '订单不存在'
+      });
+    }
+
+    // 只有订单发布者可以更新
+    if (order.user_id !== userId) {
+      return res.status(403).json({
+        success: false,
+        code: 403,
+        message: '无权限更新此订单'
+      });
+    }
+
+    const updated = await Order.update(id, req.body);
+
+    if (!updated) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '订单更新失败'
+      });
+    }
+
+    res.json({
+      success: true,
+      code: 0,
+      message: '订单更新成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 接单
+exports.acceptOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const acceptorId = req.user.id;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        code: 404,
+        message: '订单不存在'
+      });
+    }
+
+    if (order.user_id === acceptorId) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '不能接受自己发布的订单'
+      });
+    }
+
+    if (order.status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '订单状态不允许接单'
+      });
+    }
+
+    const accepted = await Order.accept(id, acceptorId);
+
+    if (!accepted) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '接单失败'
+      });
+    }
+
+    // 创建通知给订单发布者
+    try {
+      await Notification.createOrderNotification(
+        id,
+        order.user_id,
+        'order_accepted',
+        '订单已被接单',
+        `您的订单"${order.title}"已被接单`
+      );
+    } catch (error) {
+      console.error('创建通知失败:', error);
+    }
+
+    res.json({
+      success: true,
+      code: 0,
+      message: '接单成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 取消订单
+exports.cancelOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const { reason } = req.body;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        code: 404,
+        message: '订单不存在'
+      });
+    }
+
+    // 只有订单发布者或接单者可以取消
+    if (order.user_id !== userId && order.acceptor_id !== userId) {
+      return res.status(403).json({
+        success: false,
+        code: 403,
+        message: '无权限取消此订单'
+      });
+    }
+
+    const cancelled = await Order.cancel(id, reason);
+
+    if (!cancelled) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '取消订单失败'
+      });
+    }
+
+    // 创建通知
+    try {
+      // 如果有接单者，通知接单者
+      if (order.acceptor_id && order.acceptor_id !== userId) {
+        await Notification.createOrderNotification(
+          id,
+          order.acceptor_id,
+          'order_cancelled',
+          '订单已取消',
+          `订单"${order.title}"已被取消，原因：${reason}`
+        );
+      }
+      // 如果是接单者取消，通知发布者
+      if (order.acceptor_id === userId) {
+        await Notification.createOrderNotification(
+          id,
+          order.user_id,
+          'order_cancelled',
+          '订单已取消',
+          `您的订单"${order.title}"已被取消，原因：${reason}`
+        );
+      }
+    } catch (error) {
+      console.error('创建通知失败:', error);
+    }
+
+    res.json({
+      success: true,
+      code: 0,
+      message: '订单已取消'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 完成订单
+exports.completeOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        code: 404,
+        message: '订单不存在'
+      });
+    }
+
+    // 只有接单者可以标记完成
+    if (order.acceptor_id !== userId) {
+      return res.status(403).json({
+        success: false,
+        code: 403,
+        message: '无权限完成此订单'
+      });
+    }
+
+    const completed = await Order.complete(id);
+
+    if (!completed) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '完成订单失败'
+      });
+    }
+
+    // 创建通知给订单发布者
+    try {
+      await Notification.createOrderNotification(
+        id,
+        order.user_id,
+        'order_completed',
+        '订单已完成',
+        `您的订单"${order.title}"已完成`
+      );
+    } catch (error) {
+      console.error('创建通知失败:', error);
+    }
+
+    res.json({
+      success: true,
+      code: 0,
+      message: '订单已完成'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 确认订单（发布者确认）
+exports.confirmOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        code: 404,
+        message: '订单不存在'
+      });
+    }
+
+    // 只有订单发布者可以确认
+    if (order.user_id !== userId) {
+      return res.status(403).json({
+        success: false,
+        code: 403,
+        message: '无权限确认此订单'
+      });
+    }
+
+    res.json({
+      success: true,
+      code: 0,
+      message: '订单已确认'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 删除订单
+exports.deleteOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        code: 404,
+        message: '订单不存在'
+      });
+    }
+
+    // 只有订单发布者可以删除
+    if (order.user_id !== userId) {
+      return res.status(403).json({
+        success: false,
+        code: 403,
+        message: '无权限删除此订单'
+      });
+    }
+
+    const deleted = await Order.delete(id);
+
+    if (!deleted) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '删除订单失败'
+      });
+    }
+
+    res.json({
+      success: true,
+      code: 0,
+      message: '订单已删除'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 获取我发布的订单
+exports.getMyPublishOrders = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { page, pageSize, status } = req.query;
+
+    const orders = await Order.findByPublisher(userId, {
+      page: parseInt(page) || 1,
+      pageSize: parseInt(pageSize) || 10,
+      status
+    });
+
+    res.json({
+      success: true,
+      code: 0,
+      data: orders,
+      message: '获取发布订单成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 获取我接受的订单
+exports.getMyAcceptedOrders = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { page, pageSize, status } = req.query;
+
+    const orders = await Order.findByAcceptor(userId, {
+      page: parseInt(page) || 1,
+      pageSize: parseInt(pageSize) || 10,
+      status
+    });
+
+    res.json({
+      success: true,
+      code: 0,
+      data: orders,
+      message: '获取接受订单成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 获取订单统计
+exports.getOrderStats = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const stats = await Order.getStats(userId);
+
+    res.json({
+      success: true,
+      code: 0,
+      data: stats,
+      message: '获取订单统计成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};

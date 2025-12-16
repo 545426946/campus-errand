@@ -2,16 +2,18 @@ App({
   globalData: {
     userInfo: null,
     isLogin: false,
-    baseUrl: 'https://your-api-domain.com/api',
+    baseUrl: 'http://localhost:3000/api',
     orderList: [],
-    currentOrder: null
+    currentOrder: null,
+    loginReady: false,
+    loginCallbacks: []
   },
 
   onLaunch: function () {
     console.log('校园跑腿小程序启动')
     
-    // 检查登录状态
-    this.checkLoginStatus()
+    // 检查登录状态并自动登录
+    this.autoLogin()
     
     // 获取系统信息
     this.getSystemInfo()
@@ -27,6 +29,70 @@ App({
 
   onError: function (msg) {
     console.error('小程序错误:', msg)
+  },
+
+  // 自动登录
+  autoLogin: function () {
+    const token = wx.getStorageSync('token')
+    if (token) {
+      this.globalData.isLogin = true
+      this.globalData.loginReady = true
+      console.log('已有token，跳过登录')
+      this.triggerLoginCallbacks()
+      return
+    }
+
+    // 使用测试账号自动登录
+    console.log('开始自动登录...')
+    wx.request({
+      url: 'http://localhost:3000/api/auth/login',
+      method: 'POST',
+      data: {
+        email: 'student1@example.com',
+        password: 'admin123'
+      },
+      success: (res) => {
+        if (res.data.success && res.data.token) {
+          wx.setStorageSync('token', res.data.token)
+          this.globalData.isLogin = true
+          this.globalData.loginReady = true
+          this.globalData.userInfo = res.data.user
+          console.log('自动登录成功')
+          wx.showToast({
+            title: '登录成功',
+            icon: 'success',
+            duration: 1500
+          })
+          this.triggerLoginCallbacks()
+        } else {
+          console.error('登录失败:', res.data)
+          this.globalData.loginReady = true
+          this.triggerLoginCallbacks()
+        }
+      },
+      fail: (err) => {
+        console.error('登录请求失败:', err)
+        this.globalData.loginReady = true
+        this.triggerLoginCallbacks()
+      }
+    })
+  },
+
+  // 等待登录完成
+  waitForLogin: function(callback) {
+    if (this.globalData.loginReady) {
+      callback()
+    } else {
+      this.globalData.loginCallbacks.push(callback)
+    }
+  },
+
+  // 触发登录完成回调
+  triggerLoginCallbacks: function() {
+    this.globalData.loginCallbacks.forEach(callback => {
+      callback()
+    })
+    this.globalData.loginCallbacks = []
   },
 
   // 检查登录状态

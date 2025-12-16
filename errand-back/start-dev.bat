@@ -1,6 +1,7 @@
 @echo off
+chcp 65001 >nul
 echo ====================================
-echo 启动开发服务器
+echo Starting Development Server
 echo ====================================
 echo.
 npm run dev

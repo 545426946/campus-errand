@@ -1,155 +1,261 @@
-const app = getApp()
+// 首页 - 订单列表（完整后端交互版本）
+const app = getApp();
+const orderAPI = require('../../api/order.js');
+const { formatTime } = require('../../utils/util.js');
+const config = require('../../utils/config.js');
 
 Page({
   data: {
+    // 搜索
     searchKeyword: '',
+    
+    // 服务类型（使用emoji作为临时图标）
     serviceTypes: [
-      { id: 1, name: '快递代取', icon: '/images/express.png' },
-      { id: 2, name: '外卖配送', icon: '/images/food.png' },
-      { id: 3, name: '代购服务', icon: '/images/shopping.png' },
-      { id: 4, name: '其他服务', icon: '/images/other.png' }
+      { id: 1, name: '快递代取', icon: '📦', emoji: true },
+      { id: 2, name: '外卖配送', icon: '🍔', emoji: true },
+      { id: 3, name: '代购服务', icon: '🛒', emoji: true },
+      { id: 4, name: '其他服务', icon: '✨', emoji: true }
     ],
-    orderList: [
-      {
-        id: 1,
-        type: '快递代取',
-        statusText: '待接单',
-        statusClass: 'status-pending',
-        description: '帮忙取一下顺丰快递，在菜鸟驿站',
-        location: '菜鸟驿站',
-        createTime: '10分钟前',
-        price: '5.00'
-      },
-      {
-        id: 2,
-        type: '外卖配送',
-        statusText: '待接单',
-        statusClass: 'status-pending',
-        description: '帮忙送一份外卖到宿舍楼下',
-        location: '食堂二楼',
-        createTime: '15分钟前',
-        price: '8.00'
-      },
-      {
-        id: 3,
-        type: '代购服务',
-        statusText: '已完成',
-        statusClass: 'status-completed',
-        description: '帮忙买一瓶矿泉水',
-        location: '超市',
-        createTime: '30分钟前',
-        price: '3.00'
-      }
-    ]
+    
+    // 订单列表（从后端获取）
+    orderList: [],
+    
+    // 分页
+    page: 1,
+    pageSize: 10,
+    hasMore: true,
+    loading: false,
+    
+    // 筛选
+    filterStatus: '', // pending, accepted, completed, cancelled
+    serviceType: '', // 1-快递代取，2-外卖配送，3-代购服务，4-其他
+    
+    // 配置
+    statusMap: config.orderStatusMap,
+    serviceTypeMap: config.serviceTypeMap
   },
 
   onLoad: function (options) {
-    console.log('首页加载')
-    this.loadOrderList()
+    console.log('首页加载');
+    
+    // 等待登录完成后再加载数据
+    const app = getApp();
+    app.waitForLogin(() => {
+      console.log('登录完成，开始加载数据');
+      this.checkLogin();
+      this.loadOrderList();
+    });
   },
 
   onShow: function () {
-    console.log('首页显示')
+    console.log('首页显示');
+    // 每次显示时刷新数据
+    this.loadOrderList(true);
   },
 
   onPullDownRefresh: function () {
-    console.log('下拉刷新')
-    this.loadOrderList()
-    wx.stopPullDownRefresh()
+    console.log('下拉刷新');
+    this.loadOrderList(true).then(() => {
+      wx.stopPullDownRefresh();
+    });
   },
 
   onReachBottom: function () {
-    console.log('上拉加载更多')
-    this.loadMoreOrders()
+    console.log('上拉加载更多');
+    this.loadMoreOrders();
   },
 
-  // 加载订单列表
-  loadOrderList: function () {
-    // 这里应该调用API获取订单列表
-    console.log('加载订单列表')
+  // 检查登录状态
+  checkLogin: function() {
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录使用完整功能',
+        confirmText: '去登录',
+        cancelText: '稍后',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({
+              url: '/pages/login/login'
+            });
+          }
+        }
+      });
+    }
+  },
+
+  // 加载订单列表（从后端获取）
+  loadOrderList: async function (refresh = false) {
+    // 防止重复加载
+    if (this.data.loading) return;
+    
+    // 刷新时重置页码
+    if (refresh) {
+      this.setData({
+        page: 1,
+        orderList: [],
+        hasMore: true
+      });
+    }
+    
+    this.setData({ loading: true });
+    
+    try {
+      const result = await orderAPI.getOrderList({
+        page: this.data.page,
+        pageSize: this.data.pageSize,
+        status: this.data.filterStatus,
+        type: this.data.serviceType,
+        keyword: this.data.searchKeyword
+      });
+      
+      // 处理订单数据
+      const orders = result.data.map(order => ({
+        ...order,
+        statusText: this.data.statusMap[order.status],
+        typeText: this.data.serviceTypeMap[order.type],
+        statusClass: `status-${order.status}`,
+        createTime: this.formatTimeAgo(order.created_at),
+        location: order.pickup_location
+      }));
+      
+      // 合并数据
+      const newList = refresh ? orders : [...this.data.orderList, ...orders];
+      
+      this.setData({
+        orderList: newList,
+        hasMore: orders.length >= this.data.pageSize,
+        loading: false
+      });
+      
+      console.log('订单列表加载成功，共', newList.length, '条');
+      
+    } catch (error) {
+      console.error('加载订单失败:', error);
+      this.setData({ loading: false });
+      
+      wx.showToast({
+        title: error.message || '加载失败',
+        icon: 'none'
+      });
+    }
   },
 
   // 加载更多订单
   loadMoreOrders: function () {
-    // 这里应该调用API获取更多订单
-    console.log('加载更多订单')
+    if (!this.data.hasMore || this.data.loading) {
+      return;
+    }
+    
+    this.setData({
+      page: this.data.page + 1
+    });
+    
+    this.loadOrderList();
   },
 
   // 搜索输入
   onSearchInput: function (e) {
     this.setData({
       searchKeyword: e.detail.value
-    })
+    });
   },
 
   // 搜索
   onSearch: function () {
-    console.log('搜索关键词:', this.data.searchKeyword)
-    // 这里应该调用搜索API
+    console.log('搜索关键词:', this.data.searchKeyword);
+    this.loadOrderList(true);
   },
 
   // 点击服务类型
   onServiceTap: function (e) {
-    const { id, name } = e.currentTarget.dataset
-    console.log('选择服务类型:', id, name)
-    // 可以跳转到对应的服务列表页面
-    wx.navigateTo({
-      url: `/pages/service/service?type=${id}&name=${name}`
-    })
+    const { id } = e.currentTarget.dataset;
+    console.log('选择服务类型:', id);
+    
+    this.setData({
+      serviceType: id === this.data.serviceType ? '' : id
+    });
+    
+    this.loadOrderList(true);
   },
 
   // 点击订单
   onOrderTap: function (e) {
-    const orderId = e.currentTarget.dataset.id
-    console.log('查看订单详情:', orderId)
+    const orderId = e.currentTarget.dataset.id;
+    console.log('查看订单详情:', orderId);
     wx.navigateTo({
-      url: `/pages/detail/detail?id=${orderId}`
-    })
+      url: `/pages/order/detail?id=${orderId}`
+    });
   },
 
   // 接单
-  onAcceptOrder: function (e) {
-    const orderId = e.currentTarget.dataset.id
-    console.log('接受订单:', orderId)
+  onAcceptOrder: async function (e) {
+    const orderId = e.currentTarget.dataset.id;
+    console.log('接受订单:', orderId);
     
-    wx.showModal({
-      title: '确认接单',
-      content: '确定要接受这个订单吗？',
-      success: (res) => {
-        if (res.confirm) {
-          this.acceptOrder(orderId)
-        }
-      }
-    })
-  },
-
-  // 执行接单
-  acceptOrder: function (orderId) {
-    wx.showLoading({
-      title: '接单中...'
-    })
-
-    // 这里应该调用接单API
-    setTimeout(() => {
-      wx.hideLoading()
+    // 检查登录
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none'
+      });
+      setTimeout(() => {
+        wx.navigateTo({
+          url: '/pages/login/login'
+        });
+      }, 1500);
+      return;
+    }
+    
+    try {
+      const res = await wx.showModal({
+        title: '确认接单',
+        content: '确定要接受这个订单吗？'
+      });
+      
+      if (!res.confirm) return;
+      
+      wx.showLoading({ title: '接单中...' });
+      
+      // 调用后端接单API
+      await orderAPI.acceptOrder(orderId);
+      
+      wx.hideLoading();
+      
       wx.showToast({
         title: '接单成功',
         icon: 'success'
-      })
-      this.loadOrderList()
-    }, 1000)
+      });
+      
+      // 刷新列表
+      setTimeout(() => {
+        this.loadOrderList(true);
+      }, 1500);
+      
+    } catch (error) {
+      wx.hideLoading();
+      console.error('接单失败:', error);
+      
+      wx.showToast({
+        title: error.message || '接单失败',
+        icon: 'none'
+      });
+    }
   },
 
   // 查看更多
   onViewMore: function () {
-    wx.navigateTo({
+    wx.switchTab({
       url: '/pages/order/order'
-    })
+    });
   },
 
   // 发布订单
   onPublishOrder: function () {
-    if (!app.globalData.isLogin) {
+    const token = wx.getStorageSync('token');
+    if (!token) {
       wx.showModal({
         title: '提示',
         content: '请先登录后再发布订单',
@@ -157,14 +263,32 @@ Page({
         success: () => {
           wx.navigateTo({
             url: '/pages/login/login'
-          })
+          });
         }
-      })
-      return
+      });
+      return;
     }
 
     wx.navigateTo({
       url: '/pages/publish/publish'
-    })
+    });
+  },
+
+  // 格式化时间为"xx分钟前"
+  formatTimeAgo: function(dateString) {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diff = now - date;
+    
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 1) return '刚刚';
+    if (minutes < 60) return `${minutes}分钟前`;
+    if (hours < 24) return `${hours}小时前`;
+    if (days < 7) return `${days}天前`;
+    
+    return formatTime(date);
   }
-})
+});

@@ -14,8 +14,11 @@ app.use(express.urlencoded({ extended: true }));
 // 路由
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/users', require('./routes/user.routes'));
+app.use('/api/user', require('./routes/user.routes')); // 兼容前端 /api/user 路径
 app.use('/api/courses', require('./routes/course.routes'));
 app.use('/api/tasks', require('./routes/task.routes'));
+app.use('/api/orders', require('./routes/order.routes')); // 订单路由
+app.use('/api/notifications', require('./routes/notification.routes')); // 通知路由
 app.use('/api/ai', require('./routes/ai.routes'));
 
 // 健康检查

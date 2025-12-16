@@ -70,6 +70,12 @@
   margin-bottom: 15rpx;
 }
 
+.service-icon-emoji {
+  font-size: 60rpx;
+  line-height: 60rpx;
+  margin-bottom: 15rpx;
+}
+
 .service-name {
   font-size: 24rpx;
   color: #666;

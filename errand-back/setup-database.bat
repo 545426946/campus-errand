@@ -1,22 +1,23 @@
 @echo off
+chcp 65001 >nul
 echo ====================================
-echo 导入数据库结构
+echo Import Database Schema
 echo ====================================
 echo.
-echo 请输入MySQL root密码（如果没有密码直接按回车）:
+echo Enter MySQL root password (press Enter if no password):
 mysql -u root -p < database\schema.sql
 echo.
 echo ====================================
-echo 数据库结构导入完成！
+echo Database schema imported successfully!
 echo ====================================
 echo.
-echo 是否导入测试数据？(Y/N)
+echo Import test data? (Y/N)
 set /p choice=
 if /i "%choice%"=="Y" (
-    echo 导入测试数据...
+    echo Importing test data...
     mysql -u root -p < database\seed.sql
-    echo 测试数据导入完成！
+    echo Test data imported successfully!
 )
 echo.
-echo 完成！按任意键退出...
+echo Done! Press any key to exit...
 pause > nul

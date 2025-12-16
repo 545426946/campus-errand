@@ -9,7 +9,7 @@ const userAPI = {
 
   // 获取用户信息
   getUserInfo() {
-    return request.get('/user/info')
+    return request.get('/users/profile')
   },
 
   // 更新用户信息
@@ -112,7 +112,7 @@ const userAPI = {
   // 获取用户统计数据
   getUserStats() {
     return request.get('/user/stats')
-  }
+  },
 
   // 获取收藏列表
   getFavoriteList(params = {}) {

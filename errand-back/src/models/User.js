@@ -1,4 +1,4 @@
-const { pool } = require('../config/database');
+const db = require('../config/database');
 const bcrypt = require('bcryptjs');
 
 class User {
@@ -6,7 +6,7 @@ class User {
     const { username, email, password, role = 'student' } = userData;
     const hashedPassword = await bcrypt.hash(password, 12);
     
-    const [result] = await pool.execute(
+    const [result] = await db.execute(
       'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)',
       [username, email, hashedPassword, role]
     );
@@ -15,7 +15,7 @@ class User {
   }
 
   static async findById(id) {
-    const [rows] = await pool.execute(
+    const [rows] = await db.execute(
       'SELECT id, username, email, role, avatar, phone, student_id, major, grade, created_at FROM users WHERE id = ?',
       [id]
     );
@@ -23,7 +23,7 @@ class User {
   }
 
   static async findByEmail(email) {
-    const [rows] = await pool.execute(
+    const [rows] = await db.execute(
       'SELECT * FROM users WHERE email = ?',
       [email]
     );
@@ -36,7 +36,7 @@ class User {
 
   static async updateProfile(id, profileData) {
     const { avatar, phone, student_id, major, grade } = profileData;
-    await pool.execute(
+    await db.execute(
       'UPDATE users SET avatar = ?, phone = ?, student_id = ?, major = ?, grade = ? WHERE id = ?',
       [avatar, phone, student_id, major, grade, id]
     );
@@ -44,7 +44,7 @@ class User {
   }
 
   static async getLearningProgress(userId) {
-    const [rows] = await pool.execute(
+    const [rows] = await db.execute(
       `SELECT ce.course_id, c.title, ce.progress, ce.last_accessed 
        FROM course_enrollments ce 
        JOIN courses c ON ce.course_id = c.id 
@@ -52,6 +52,61 @@ class User {
       [userId]
     );
     return rows;
+  }
+
+  static async findByWechatCode(code) {
+    // 简化版：通过openid查找用户
+    const [rows] = await db.execute(
+      'SELECT id, nickname, avatar, phone, openid FROM users WHERE openid LIKE ? LIMIT 1',
+      [`%${code}%`]
+    );
+    return rows[0];
+  }
+
+  static async createWechatUser(userData) {
+    const { openid, nickname, avatar } = userData;
+    
+    const [result] = await db.execute(
+      'INSERT INTO users (openid, nickname, avatar, role) VALUES (?, ?, ?, ?)',
+      [openid, nickname, avatar, 'student']
+    );
+    
+    return {
+      id: result.insertId,
+      openid,
+      nickname,
+      avatar,
+      phone: null
+    };
+  }
+
+  static async updateUserInfo(id, userData) {
+    const { nickname, avatar, phone } = userData;
+    const fields = [];
+    const values = [];
+
+    if (nickname) {
+      fields.push('nickname = ?');
+      values.push(nickname);
+    }
+    if (avatar) {
+      fields.push('avatar = ?');
+      values.push(avatar);
+    }
+    if (phone) {
+      fields.push('phone = ?');
+      values.push(phone);
+    }
+
+    if (fields.length === 0) return await this.findById(id);
+
+    values.push(id);
+    await db.execute(
+      `UPDATE users SET ${fields.join(', ')} WHERE id = ?`,
+      values
+    );
+
+    return await this.findById(id);
   }
 }
 

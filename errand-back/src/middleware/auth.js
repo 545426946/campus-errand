@@ -10,20 +10,33 @@ exports.protect = async (req, res, next) => {
     }
 
     if (!token) {
-      return res.status(401).json({ message: '未授权访问，请先登录' });
+      return res.status(401).json({ 
+        success: false,
+        code: 401,
+        message: '未授权访问，请先登录' 
+      });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
     
     if (!user) {
-      return res.status(401).json({ message: '用户不存在' });
+      return res.status(401).json({ 
+        success: false,
+        code: 401,
+        message: '用户不存在' 
+      });
     }
 
     req.user = user;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Token无效或已过期' });
+    console.error('认证错误:', error);
+    res.status(401).json({ 
+      success: false,
+      code: 401,
+      message: 'Token无效或已过期' 
+    });
   }
 };
 

@@ -1,79 +1,116 @@
-const app = getApp()
+// 用户中心页面（完整后端交互版本）
+const app = getApp();
+const userAPI = require('../../api/user.js');
+const orderAPI = require('../../api/order.js');
+const notificationAPI = require('../../api/notification.js');
 
 Page({
   data: {
     isLogin: false,
     userInfo: {},
+    
+    // 用户统计（从后端获取）
     userStats: {
       completedOrders: 0,
-      goodRate: 98
-    },
-    menuCounts: {
+      publishedOrders: 0,
+      acceptedOrders: 0,
       pendingOrders: 0,
-      publishOrders: 0
+      inProgressOrders: 0
     },
+    
+    // 钱包信息（从后端获取）
     userWallet: {
-      balance: '25.80'
+      balance: '0.00'
     },
+    
+    // 认证状态（从后端获取）
     userCertification: {
-      status: 'unverified', // verified, unverified, pending
+      status: 'unverified',
       statusText: '未认证'
-    }
+    },
+    
+    // 未读通知数量
+    unreadNotificationCount: 0
   },
 
   onLoad: function (options) {
-    console.log('用户中心加载')
+    console.log('用户中心加载');
   },
 
   onShow: function () {
-    console.log('用户中心显示')
-    this.updateUserInfo()
-    this.loadUserData()
+    console.log('用户中心显示');
+    this.updateUserInfo();
+    if (this.data.isLogin) {
+      this.loadUserData();
+      this.loadUnreadNotificationCount();
+    }
   },
 
   // 更新用户信息
   updateUserInfo: function () {
+    const token = wx.getStorageSync('token');
+    const userInfo = wx.getStorageSync('userInfo');
+    
     this.setData({
-      isLogin: app.globalData.isLogin,
-      userInfo: app.globalData.userInfo || {}
-    })
+      isLogin: !!token,
+      userInfo: userInfo || {}
+    });
   },
 
-  // 加载用户数据
-  loadUserData: function () {
+  // 加载用户数据（从后端获取）
+  loadUserData: async function () {
     if (!this.data.isLogin) {
-      return
+      return;
     }
 
-    // 这里应该调用API获取用户相关数据
-    this.setData({
-      userStats: {
-        completedOrders: 23,
-        goodRate: 98
-      },
-      menuCounts: {
-        pendingOrders: 2,
-        publishOrders: 1
-      },
-      userWallet: {
-        balance: '25.80'
-      },
-      userCertification: {
-        status: 'unverified',
-        statusText: '未认证'
-      }
-    })
+    try {
+      // 并行请求多个接口
+      const [statsResult, walletResult] = await Promise.all([
+        orderAPI.getOrderStats(),
+        userAPI.getWalletInfo().catch(() => ({ data: { balance: 0 } }))
+      ]);
+      
+      // 更新统计数据
+      this.setData({
+        userStats: {
+          completedOrders: statsResult.data.completed_count || 0,
+          publishedOrders: statsResult.data.published_count || 0,
+          acceptedOrders: statsResult.data.accepted_count || 0,
+          pendingOrders: statsResult.data.pending_count || 0,
+          inProgressOrders: statsResult.data.in_progress_count || 0
+        },
+        userWallet: {
+          balance: (walletResult.data.balance || 0).toFixed(2)
+        }
+      });
+      
+      console.log('用户数据加载成功');
+      
+    } catch (error) {
+      console.error('加载用户数据失败:', error);
+      
+      // 不显示错误提示，使用默认值
+      this.setData({
+        userStats: {
+          completedOrders: 0,
+          publishedOrders: 0,
+          acceptedOrders: 0,
+          pendingOrders: 0,
+          inProgressOrders: 0
+        }
+      });
+    }
   },
 
   // 点击头像
   onAvatarTap: function () {
     if (!this.data.isLogin) {
-      this.login()
+      this.login();
     } else {
-      // 可以跳转到个人资料编辑页面
+      // 跳转到个人资料编辑页面
       wx.navigateTo({
         url: '/pages/profile/profile'
-      })
+      });
     }
   },
 
@@ -82,83 +119,98 @@ Page({
     wx.showModal({
       title: '登录提示',
       content: '请使用微信授权登录',
+      confirmText: '去登录',
       showCancel: false,
       success: () => {
-        app.login((code) => {
-          // 登录成功后更新页面状态
-          this.updateUserInfo()
-          this.loadUserData()
-          wx.showToast({
-            title: '登录成功',
-            icon: 'success'
-          })
-        })
+        wx.navigateTo({
+          url: '/pages/login/login'
+        });
       }
-    })
+    });
   },
 
   // 点击设置
   onSettingTap: function () {
     wx.navigateTo({
       url: '/pages/setting/setting'
-    })
+    });
+  },
+
+  // 加载未读通知数量
+  loadUnreadNotificationCount: async function () {
+    try {
+      const result = await notificationAPI.getUnreadCount();
+      this.setData({
+        unreadNotificationCount: result.data.count
+      });
+    } catch (error) {
+      console.error('加载未读通知数量失败:', error);
+    }
   },
 
   // 点击菜单项
   onMenuTap: function (e) {
-    const type = e.currentTarget.dataset.type
+    const type = e.currentTarget.dataset.type;
     
-    if (!this.data.isLogin) {
-      this.login()
-      return
+    // 需要登录的功能
+    const needLoginTypes = ['myOrders', 'myPublish', 'myWallet', 'favorite', 'history', 'certification', 'notification'];
+    
+    if (needLoginTypes.includes(type) && !this.data.isLogin) {
+      this.login();
+      return;
     }
 
     switch (type) {
+      case 'notification':
+        wx.navigateTo({
+          url: '/pages/notification/notification'
+        });
+        break;
       case 'myOrders':
         wx.switchTab({
           url: '/pages/order/order'
-        })
-        break
+        });
+        break;
       case 'myPublish':
         wx.navigateTo({
           url: '/pages/my-publish/my-publish'
-        })
-        break
+        });
+        break;
       case 'myWallet':
         wx.navigateTo({
           url: '/pages/wallet/wallet'
-        })
-        break
+        });
+        break;
       case 'favorite':
         wx.navigateTo({
           url: '/pages/favorite/favorite'
-        })
-        break
+        });
+        break;
       case 'history':
         wx.navigateTo({
           url: '/pages/history/history'
-        })
-        break
+        });
+        break;
       case 'certification':
         wx.navigateTo({
           url: '/pages/certification/certification'
-        })
-        break
+        });
+        break;
       case 'help':
         wx.navigateTo({
           url: '/pages/help/help'
-        })
-        break
+        });
+        break;
       case 'feedback':
         wx.navigateTo({
           url: '/pages/feedback/feedback'
-        })
-        break
+        });
+        break;
       case 'about':
         wx.navigateTo({
           url: '/pages/about/about'
-        })
-        break
+        });
+        break;
     }
   },
 
@@ -169,14 +221,38 @@ Page({
       content: '确定要退出登录吗？',
       success: (res) => {
         if (res.confirm) {
-          app.logout()
-          this.updateUserInfo()
+          // 清除本地存储
+          wx.removeStorageSync('token');
+          wx.removeStorageSync('userInfo');
+          
+          // 更新全局状态
+          if (app.globalData) {
+            app.globalData.isLogin = false;
+            app.globalData.userInfo = null;
+          }
+          
+          // 更新页面状态
+          this.setData({
+            isLogin: false,
+            userInfo: {},
+            userStats: {
+              completedOrders: 0,
+              publishedOrders: 0,
+              acceptedOrders: 0,
+              pendingOrders: 0,
+              inProgressOrders: 0
+            },
+            userWallet: {
+              balance: '0.00'
+            }
+          });
+          
           wx.showToast({
             title: '已退出登录',
             icon: 'success'
-          })
+          });
         }
       }
-    })
+    });
   }
-})
+});

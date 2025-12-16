@@ -1,0 +1,26 @@
+<view class="login-container">
+  <view class="login-header">
+    <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+    <text class="app-name">校园跑腿</text>
+    <text class="slogan">让校园生活更便捷</text>
+  </view>
+
+  <view class="login-content">
+    <button class="login-btn" bindtap="onWechatLogin">
+      <text class="btn-icon">📱</text>
+      <text class="btn-text">微信快速登录</text>
+    </button>
+    
+    <button class="login-btn profile-btn" bindtap="onGetUserProfile">
+      <text class="btn-icon">👤</text>
+      <text class="btn-text">获取头像昵称</text>
+    </button>
+  </view>
+
+  <view class="login-footer">
+    <text class="tips">登录即表示同意</text>
+    <text class="link">《用户协议》</text>
+    <text class="tips">和</text>
+    <text class="link">《隐私政策》</text>
+  </view>
+</view>

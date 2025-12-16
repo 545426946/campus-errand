@@ -1,261 +1,324 @@
-const app = getApp()
+// 我的订单页面（完整后端交互版本）
+const app = getApp();
+const orderAPI = require('../../api/order.js');
+const { formatTime } = require('../../utils/util.js');
+const config = require('../../utils/config.js');
 
 Page({
   data: {
     currentTab: 0,
-    tabs: ['全部', '待接单', '进行中', '已完成'],
-    orderList: [
-      {
-        id: 1,
-        orderNo: 'ER20231215001',
-        type: '快递代取',
-        status: 'pending',
-        statusText: '待接单',
-        statusClass: 'status-pending',
-        description: '帮忙取一下顺丰快递，在菜鸟驿站，送到宿舍楼下',
-        pickupLocation: '菜鸟驿站',
-        deliveryLocation: '宿舍A栋楼下',
-        createTime: '10分钟前',
-        expectedTime: '今天 18:00前',
-        price: '8.00',
-        tip: '2.00',
-        isMyOrder: false
-      },
-      {
-        id: 2,
-        orderNo: 'ER20231215002',
-        type: '外卖配送',
-        status: 'accepted',
-        statusText: '进行中',
-        statusClass: 'status-warning',
-        description: '帮忙送一份外卖到宿舍楼下',
-        pickupLocation: '食堂二楼',
-        deliveryLocation: '宿舍B栋楼下',
-        createTime: '30分钟前',
-        expectedTime: '今天 17:30前',
-        price: '6.00',
-        tip: '1.00',
-        isMyOrder: true
-      },
-      {
-        id: 3,
-        orderNo: 'ER20231215003',
-        type: '代购服务',
-        status: 'completed',
-        statusText: '已完成',
-        statusClass: 'status-completed',
-        description: '帮忙买一瓶矿泉水和一包薯片',
-        pickupLocation: '校内超市',
-        deliveryLocation: '图书馆',
-        createTime: '1小时前',
-        price: '5.00',
-        tip: '0',
-        isMyOrder: false
-      }
-    ],
-    filteredOrders: []
+    tabs: ['我发布的', '我接受的', '待接单', '进行中', '已完成'],
+    
+    // 订单列表（从后端获取）
+    orderList: [],
+    
+    // 分页
+    page: 1,
+    pageSize: 20,
+    hasMore: true,
+    loading: false,
+    
+    // 配置
+    statusMap: config.orderStatusMap,
+    serviceTypeMap: config.serviceTypeMap
   },
 
   onLoad: function (options) {
-    console.log('订单页面加载')
-    this.filterOrders()
+    console.log('订单页面加载');
+    this.checkLogin();
+    this.loadOrderList();
   },
 
   onShow: function () {
-    console.log('订单页面显示')
-    this.loadOrderList()
+    console.log('订单页面显示');
+    this.loadOrderList(true);
   },
 
   onPullDownRefresh: function () {
-    console.log('下拉刷新')
-    this.loadOrderList()
-    wx.stopPullDownRefresh()
+    console.log('下拉刷新');
+    this.loadOrderList(true).then(() => {
+      wx.stopPullDownRefresh();
+    });
   },
 
-  // 加载订单列表
-  loadOrderList: function () {
-    // 这里应该调用API获取订单列表
-    console.log('加载订单列表')
-    this.filterOrders()
+  onReachBottom: function () {
+    this.loadMoreOrders();
   },
 
-  // 切换标签
-  switchTab: function (e) {
-    const index = e.currentTarget.dataset.index
-    this.setData({
-      currentTab: index
-    })
-    this.filterOrders()
-  },
-
-  // 过滤订单
-  filterOrders: function () {
-    const { currentTab, orderList } = this.data
-    let filteredOrders = []
-
-    switch (currentTab) {
-      case 0: // 全部
-        filteredOrders = orderList
-        break
-      case 1: // 待接单
-        filteredOrders = orderList.filter(order => order.status === 'pending')
-        break
-      case 2: // 进行中
-        filteredOrders = orderList.filter(order => order.status === 'accepted')
-        break
-      case 3: // 已完成
-        filteredOrders = orderList.filter(order => order.status === 'completed')
-        break
-    }
-
-    this.setData({
-      filteredOrders: filteredOrders
-    })
-  },
-
-  // 点击订单
-  onOrderTap: function (e) {
-    const orderId = e.currentTarget.dataset.id
-    console.log('查看订单详情:', orderId)
-    wx.navigateTo({
-      url: `/pages/detail/detail?id=${orderId}`
-    })
-  },
-
-  // 接单
-  onAcceptOrder: function (e) {
-    const orderId = e.currentTarget.dataset.id
-    console.log('接受订单:', orderId)
-    
-    if (!app.globalData.isLogin) {
+  // 检查登录状态
+  checkLogin: function() {
+    const token = wx.getStorageSync('token');
+    if (!token) {
       wx.showModal({
         title: '提示',
-        content: '请先登录后再接单',
+        content: '请先登录查看订单',
+        confirmText: '去登录',
         showCancel: false,
         success: () => {
           wx.navigateTo({
             url: '/pages/login/login'
-          })
+          });
         }
-      })
-      return
+      });
+      return false;
     }
-
-    wx.showModal({
-      title: '确认接单',
-      content: '确定要接受这个订单吗？',
-      success: (res) => {
-        if (res.confirm) {
-          this.acceptOrder(orderId)
-        }
-      }
-    })
+    return true;
   },
 
-  // 执行接单
-  acceptOrder: function (orderId) {
-    wx.showLoading({
-      title: '接单中...'
-    })
+  // 加载订单列表（从后端获取）
+  loadOrderList: async function (refresh = false) {
+    if (!this.checkLogin()) return;
+    
+    if (this.data.loading) return;
+    
+    if (refresh) {
+      this.setData({
+        page: 1,
+        orderList: [],
+        hasMore: true
+      });
+    }
+    
+    this.setData({ loading: true });
+    
+    try {
+      let result;
+      const { currentTab } = this.data;
+      
+      // 根据标签页调用不同的API
+      if (currentTab === 0) {
+        // 我发布的订单
+        result = await orderAPI.getMyPublishOrders({
+          page: this.data.page,
+          pageSize: this.data.pageSize
+        });
+      } else if (currentTab === 1) {
+        // 我接受的订单
+        result = await orderAPI.getMyAcceptedOrders({
+          page: this.data.page,
+          pageSize: this.data.pageSize
+        });
+      } else {
+        // 按状态筛选
+        const statusMap = {
+          2: 'pending',
+          3: 'accepted',
+          4: 'completed'
+        };
+        result = await orderAPI.getOrderList({
+          page: this.data.page,
+          pageSize: this.data.pageSize,
+          status: statusMap[currentTab]
+        });
+      }
+      
+      // 处理订单数据
+      const orders = result.data.map(order => {
+        const userInfo = wx.getStorageSync('userInfo');
+        return {
+          ...order,
+          statusText: this.data.statusMap[order.status],
+          typeText: this.data.serviceTypeMap[order.type],
+          statusClass: `status-${order.status}`,
+          createTime: this.formatTimeAgo(order.created_at),
+          isMyOrder: order.user_id === userInfo?.id,
+          isAccepted: order.acceptor_id === userInfo?.id
+        };
+      });
+      
+      const newList = refresh ? orders : [...this.data.orderList, ...orders];
+      
+      this.setData({
+        orderList: newList,
+        hasMore: orders.length >= this.data.pageSize,
+        loading: false
+      });
+      
+      console.log('订单列表加载成功，共', newList.length, '条');
+      
+    } catch (error) {
+      console.error('加载订单失败:', error);
+      this.setData({ loading: false });
+      
+      wx.showToast({
+        title: error.message || '加载失败',
+        icon: 'none'
+      });
+    }
+  },
 
-    // 这里应该调用接单API
-    setTimeout(() => {
-      wx.hideLoading()
+  // 加载更多
+  loadMoreOrders: function() {
+    if (!this.data.hasMore || this.data.loading) return;
+    
+    this.setData({
+      page: this.data.page + 1
+    });
+    
+    this.loadOrderList();
+  },
+
+  // 切换标签
+  switchTab: function (e) {
+    const index = e.currentTarget.dataset.index;
+    this.setData({
+      currentTab: index
+    });
+    this.loadOrderList(true);
+  },
+
+  // 点击订单
+  onOrderTap: function (e) {
+    const orderId = e.currentTarget.dataset.id;
+    console.log('查看订单详情:', orderId);
+    wx.navigateTo({
+      url: `/pages/order/detail?id=${orderId}`
+    });
+  },
+
+  // 接单
+  onAcceptOrder: async function (e) {
+    const orderId = e.currentTarget.dataset.id;
+    console.log('接受订单:', orderId);
+    
+    try {
+      const res = await wx.showModal({
+        title: '确认接单',
+        content: '确定要接受这个订单吗？'
+      });
+      
+      if (!res.confirm) return;
+      
+      wx.showLoading({ title: '接单中...' });
+      
+      await orderAPI.acceptOrder(orderId);
+      
+      wx.hideLoading();
+      
       wx.showToast({
         title: '接单成功',
         icon: 'success'
-      })
-      this.loadOrderList()
-    }, 1000)
+      });
+      
+      setTimeout(() => {
+        this.loadOrderList(true);
+      }, 1500);
+      
+    } catch (error) {
+      wx.hideLoading();
+      console.error('接单失败:', error);
+      
+      wx.showToast({
+        title: error.message || '接单失败',
+        icon: 'none'
+      });
+    }
   },
 
   // 取消订单
-  onCancelOrder: function (e) {
-    const orderId = e.currentTarget.dataset.id
-    console.log('取消订单:', orderId)
+  onCancelOrder: async function (e) {
+    const orderId = e.currentTarget.dataset.id;
+    console.log('取消订单:', orderId);
 
-    wx.showModal({
-      title: '确认取消',
-      content: '确定要取消这个订单吗？',
-      success: (res) => {
-        if (res.confirm) {
-          this.cancelOrder(orderId)
-        }
-      }
-    })
-  },
-
-  // 执行取消订单
-  cancelOrder: function (orderId) {
-    wx.showLoading({
-      title: '取消中...'
-    })
-
-    // 这里应该调用取消订单API
-    setTimeout(() => {
-      wx.hideLoading()
+    try {
+      const res = await wx.showModal({
+        title: '取消订单',
+        content: '确定要取消这个订单吗？',
+        editable: true,
+        placeholderText: '请输入取消原因（可选）'
+      });
+      
+      if (!res.confirm) return;
+      
+      wx.showLoading({ title: '取消中...' });
+      
+      const reason = res.content || '用户取消';
+      await orderAPI.cancelOrder(orderId, reason);
+      
+      wx.hideLoading();
+      
       wx.showToast({
         title: '已取消订单',
         icon: 'success'
-      })
-      this.loadOrderList()
-    }, 1000)
-  },
-
-  // 确认完成
-  onCompleteOrder: function (e) {
-    const orderId = e.currentTarget.dataset.id
-    console.log('确认完成订单:', orderId)
-
-    wx.showModal({
-      title: '确认完成',
-      content: '确定订单已完成吗？',
-      success: (res) => {
-        if (res.confirm) {
-          this.completeOrder(orderId)
-        }
-      }
-    })
+      });
+      
+      setTimeout(() => {
+        this.loadOrderList(true);
+      }, 1500);
+      
+    } catch (error) {
+      wx.hideLoading();
+      console.error('取消订单失败:', error);
+      
+      wx.showToast({
+        title: error.message || '取消失败',
+        icon: 'none'
+      });
+    }
   },
 
   // 完成订单
-  onFinishOrder: function (e) {
-    const orderId = e.currentTarget.dataset.id
-    console.log('完成订单:', orderId)
+  onCompleteOrder: async function (e) {
+    const orderId = e.currentTarget.dataset.id;
+    console.log('完成订单:', orderId);
 
-    wx.showModal({
-      title: '确认完成',
-      content: '确定订单已完成吗？',
-      success: (res) => {
-        if (res.confirm) {
-          this.completeOrder(orderId)
-        }
-      }
-    })
-  },
-
-  // 执行完成订单
-  completeOrder: function (orderId) {
-    wx.showLoading({
-      title: '处理中...'
-    })
-
-    // 这里应该调用完成订单API
-    setTimeout(() => {
-      wx.hideLoading()
+    try {
+      const res = await wx.showModal({
+        title: '确认完成',
+        content: '确定订单已完成吗？完成后将无法撤销。'
+      });
+      
+      if (!res.confirm) return;
+      
+      wx.showLoading({ title: '处理中...' });
+      
+      await orderAPI.completeOrder(orderId);
+      
+      wx.hideLoading();
+      
       wx.showToast({
         title: '订单已完成',
         icon: 'success'
-      })
-      this.loadOrderList()
-    }, 1000)
+      });
+      
+      setTimeout(() => {
+        this.loadOrderList(true);
+      }, 1500);
+      
+    } catch (error) {
+      wx.hideLoading();
+      console.error('完成订单失败:', error);
+      
+      wx.showToast({
+        title: error.message || '操作失败',
+        icon: 'none'
+      });
+    }
   },
 
   // 查看详情
   onViewDetail: function (e) {
-    const orderId = e.currentTarget.dataset.id
+    const orderId = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `/pages/detail/detail?id=${orderId}`
-    })
+      url: `/pages/order/detail?id=${orderId}`
+    });
+  },
+
+  // 格式化时间
+  formatTimeAgo: function(dateString) {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diff = now - date;
+    
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 1) return '刚刚';
+    if (minutes < 60) return `${minutes}分钟前`;
+    if (hours < 24) return `${hours}小时前`;
+    if (days < 7) return `${days}天前`;
+    
+    return formatTime(date);
   }
-})
+});

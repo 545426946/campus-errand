@@ -55,7 +55,8 @@ exports.login = async (req, res) => {
         user = await User.createWechatUser({
           openid: `wx_${code}_${Date.now()}`,
           nickname: '微信用户',
-          avatar: ''
+          avatar: '',
+          username: `wx_user_${Date.now()}`
         });
       }
 

@@ -42,32 +42,41 @@ App({
       return
     }
 
-    // 使用测试账号自动登录
+    // 使用邮箱密码自动登录
     console.log('开始自动登录...')
-    const userAPI = require('./api/user.js')
     
-    userAPI.login('test_code').then(result => {
-      if (result.success && result.data && result.data.token) {
-        wx.setStorageSync('token', result.data.token)
-        this.globalData.isLogin = true
-        this.globalData.loginReady = true
-        this.globalData.userInfo = result.data.user
-        console.log('自动登录成功')
-        wx.showToast({
-          title: '登录成功',
-          icon: 'success',
-          duration: 1500
-        })
-        this.triggerLoginCallbacks()
-      } else {
-        console.error('登录失败:', result)
+    wx.request({
+      url: 'http://localhost:3000/api/auth/login',
+      method: 'POST',
+      data: {
+        email: 'student1@example.com',
+        password: 'admin123'
+      },
+      success: (res) => {
+        console.log('登录响应:', res.data)
+        if (res.data && res.data.success && res.data.token) {
+          wx.setStorageSync('token', res.data.token)
+          this.globalData.isLogin = true
+          this.globalData.loginReady = true
+          this.globalData.userInfo = res.data.user
+          console.log('自动登录成功')
+          wx.showToast({
+            title: '登录成功',
+            icon: 'success',
+            duration: 1500
+          })
+          this.triggerLoginCallbacks()
+        } else {
+          console.error('登录失败:', res.data)
+          this.globalData.loginReady = true
+          this.triggerLoginCallbacks()
+        }
+      },
+      fail: (err) => {
+        console.error('登录请求失败:', err)
         this.globalData.loginReady = true
         this.triggerLoginCallbacks()
       }
-    }).catch(err => {
-      console.error('登录请求失败:', err)
-      this.globalData.loginReady = true
-      this.triggerLoginCallbacks()
     })
   },
 

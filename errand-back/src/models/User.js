@@ -64,11 +64,11 @@ class User {
   }
 
   static async createWechatUser(userData) {
-    const { openid, nickname, avatar } = userData;
+    const { openid, nickname, avatar, username } = userData;
     
     const [result] = await db.execute(
-      'INSERT INTO users (openid, nickname, avatar, role) VALUES (?, ?, ?, ?)',
-      [openid, nickname, avatar, 'student']
+      'INSERT INTO users (openid, nickname, avatar, role, username, password) VALUES (?, ?, ?, ?, ?, ?)',
+      [openid, nickname, avatar, 'student', username || `wx_user_${Date.now()}`, '']
     );
     
     return {
@@ -76,7 +76,8 @@ class User {
       openid,
       nickname,
       avatar,
-      phone: null
+      phone: null,
+      username: username || `wx_user_${Date.now()}`
     };
   }
 

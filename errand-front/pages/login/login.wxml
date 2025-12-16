@@ -6,6 +6,11 @@
   </view>
 
   <view class="login-content">
+    <button class="login-btn" bindtap="onTestLogin">
+      <text class="btn-icon">🔑</text>
+      <text class="btn-text">测试账号登录</text>
+    </button>
+    
     <button class="login-btn" bindtap="onWechatLogin">
       <text class="btn-icon">📱</text>
       <text class="btn-text">微信快速登录</text>

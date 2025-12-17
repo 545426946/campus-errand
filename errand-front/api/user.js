@@ -159,6 +159,11 @@ const userAPI = {
   // 删除账号
   deleteAccount(password) {
     return request.delete('/user/account', { password })
+  },
+
+  // 删除历史记录（单条）
+  deleteHistoryItem(id) {
+    return request.delete(`/user/history/${id}`)
   }
 }
 

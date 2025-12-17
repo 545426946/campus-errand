@@ -458,3 +458,213 @@ exports.getOrderStats = async (req, res, next) => {
     next(error);
   }
 };
+
+// 评价订单
+exports.evaluateOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const { rating, comment, tags } = req.body;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        code: 404,
+        message: '订单不存在'
+      });
+    }
+
+    // 只有订单发布者可以评价
+    if (order.user_id !== userId) {
+      return res.status(403).json({
+        success: false,
+        code: 403,
+        message: '无权限评价此订单'
+      });
+    }
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '评分必须在1-5之间'
+      });
+    }
+
+    // 简化版：直接返回成功
+    res.json({
+      success: true,
+      code: 0,
+      message: '评价成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 获取订单评价
+exports.getEvaluations = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // 简化版：返回空列表
+    res.json({
+      success: true,
+      code: 0,
+      data: {
+        list: [],
+        total: 0
+      },
+      message: '获取评价成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 举报订单
+exports.reportOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const { reason, description } = req.body;
+
+    if (!reason) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '请提供举报原因'
+      });
+    }
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        code: 404,
+        message: '订单不存在'
+      });
+    }
+
+    // 简化版：直接返回成功
+    console.log(`用户 ${userId} 举报订单 ${id}，原因：${reason}`);
+
+    res.json({
+      success: true,
+      code: 0,
+      message: '举报已提交'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 分享订单
+exports.shareOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        code: 404,
+        message: '订单不存在'
+      });
+    }
+
+    // 生成分享信息
+    res.json({
+      success: true,
+      code: 0,
+      data: {
+        title: order.title,
+        description: order.description,
+        imageUrl: order.images ? order.images[0] : '',
+        path: `/pages/order/detail?id=${id}`
+      },
+      message: '获取分享信息成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 搜索订单
+exports.searchOrders = async (req, res, next) => {
+  try {
+    const { keyword, page = 1, pageSize = 10 } = req.query;
+
+    if (!keyword) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '请提供搜索关键词'
+      });
+    }
+
+    const orders = await Order.search(keyword, {
+      page: parseInt(page),
+      pageSize: parseInt(pageSize)
+    });
+
+    res.json({
+      success: true,
+      code: 0,
+      data: orders,
+      message: '搜索成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 获取热门订单
+exports.getHotOrders = async (req, res, next) => {
+  try {
+    const { page = 1, pageSize = 10 } = req.query;
+
+    const orders = await Order.findAll({
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+      status: 'pending',
+      orderBy: 'view_count DESC'
+    });
+
+    res.json({
+      success: true,
+      code: 0,
+      data: orders,
+      message: '获取热门订单成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 获取推荐订单
+exports.getRecommendedOrders = async (req, res, next) => {
+  try {
+    const { page = 1, pageSize = 10 } = req.query;
+
+    const orders = await Order.findAll({
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+      status: 'pending',
+      orderBy: 'created_at DESC'
+    });
+
+    res.json({
+      success: true,
+      code: 0,
+      data: orders,
+      message: '获取推荐订单成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};

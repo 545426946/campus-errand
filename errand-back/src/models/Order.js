@@ -260,6 +260,38 @@ class Order {
     const [rows] = await db.execute(query, [userId, userId, userId, userId, userId, userId]);
     return rows[0];
   }
+
+  // 搜索订单
+  static async search(keyword, filters = {}) {
+    let query = `
+      SELECT o.*, u.nickname as publisher_name, u.avatar as publisher_avatar
+      FROM orders o
+      LEFT JOIN users u ON o.user_id = u.id
+      WHERE (o.title LIKE ? OR o.description LIKE ?)
+      AND o.status = 'pending'
+    `;
+    const params = [`%${keyword}%`, `%${keyword}%`];
+
+    query += ' ORDER BY o.created_at DESC';
+
+    if (filters.pageSize && filters.page) {
+      const pageSize = parseInt(filters.pageSize);
+      const offset = (parseInt(filters.page) - 1) * pageSize;
+      query += ` LIMIT ${pageSize} OFFSET ${offset}`;
+    }
+
+    const [rows] = await db.execute(query, params);
+    
+    return {
+      list: rows.map(row => ({
+        ...row,
+        images: safeJSONParse(row.images)
+      })),
+      total: rows.length,
+      page: filters.page || 1,
+      pageSize: filters.pageSize || 10
+    };
+  }
 }
 
 module.exports = Order;

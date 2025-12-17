@@ -82,22 +82,18 @@ class User {
   }
 
   static async updateUserInfo(id, userData) {
-    const { nickname, avatar, phone } = userData;
     const fields = [];
     const values = [];
 
-    if (nickname) {
-      fields.push('nickname = ?');
-      values.push(nickname);
-    }
-    if (avatar) {
-      fields.push('avatar = ?');
-      values.push(avatar);
-    }
-    if (phone) {
-      fields.push('phone = ?');
-      values.push(phone);
-    }
+    // 支持更多字段
+    const allowedFields = ['nickname', 'avatar', 'phone', 'real_name', 'id_card', 'certification_status'];
+    
+    allowedFields.forEach(field => {
+      if (userData[field] !== undefined) {
+        fields.push(`${field} = ?`);
+        values.push(userData[field]);
+      }
+    });
 
     if (fields.length === 0) return await this.findById(id);
 

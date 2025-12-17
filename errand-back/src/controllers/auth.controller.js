@@ -137,3 +137,104 @@ exports.getMe = async (req, res) => {
     });
   }
 };
+
+// 发送验证码
+exports.sendCode = async (req, res) => {
+  try {
+    const { phone, email, type } = req.body;
+
+    if (!phone && !email) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '请提供手机号或邮箱'
+      });
+    }
+
+    // 生成6位验证码
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // 简化版：直接返回成功（实际应该发送短信或邮件）
+    // 在实际项目中，应该：
+    // 1. 将验证码存储到Redis，设置5分钟过期
+    // 2. 调用短信或邮件服务发送验证码
+    
+    console.log(`验证码: ${code} (${type}) 发送到 ${phone || email}`);
+
+    res.json({
+      success: true,
+      code: 0,
+      data: { 
+        code: process.env.NODE_ENV === 'development' ? code : undefined // 开发环境返回验证码
+      },
+      message: '验证码已发送'
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      code: 400,
+      message: error.message
+    });
+  }
+};
+
+// 验证验证码
+exports.verifyCode = async (req, res) => {
+  try {
+    const { phone, email, code } = req.body;
+
+    if (!code) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '请提供验证码'
+      });
+    }
+
+    // 简化版：验证码为123456时通过
+    // 实际项目中应该从Redis中获取并验证
+    const isValid = code === '123456';
+
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '验证码错误或已过期'
+      });
+    }
+
+    res.json({
+      success: true,
+      code: 0,
+      message: '验证成功'
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      code: 400,
+      message: error.message
+    });
+  }
+};
+
+// 退出登录
+exports.logout = async (req, res) => {
+  try {
+    // 简化版：直接返回成功
+    // 实际项目中应该：
+    // 1. 将token加入黑名单（Redis）
+    // 2. 清除相关缓存
+    
+    res.json({
+      success: true,
+      code: 0,
+      message: '退出登录成功'
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      code: 400,
+      message: error.message
+    });
+  }
+};

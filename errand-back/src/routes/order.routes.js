@@ -40,4 +40,16 @@ router.post('/:id/cancel', cancelOrder);
 router.post('/:id/complete', completeOrder);
 router.post('/:id/confirm', confirmOrder);
 
+// 订单评价、举报、分享
+const { evaluateOrder, getEvaluations, reportOrder, shareOrder, searchOrders, getHotOrders, getRecommendedOrders } = require('../controllers/order.controller');
+router.post('/:id/evaluate', evaluateOrder);
+router.get('/:id/evaluations', getEvaluations);
+router.post('/:id/report', reportOrder);
+router.post('/:id/share', shareOrder);
+
+// 订单搜索和推荐
+router.get('/search', searchOrders);
+router.get('/hot', getHotOrders);
+router.get('/recommended', getRecommendedOrders);
+
 module.exports = router;

@@ -9,7 +9,7 @@ exports.getConfig = async (req, res, next) => {
       data: {
         appName: '校园跑腿',
         version: '1.0.0',
-        apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:3000/api',
+        apiBaseUrl: process.env.API_BASE_URL || 'http://192.168.1.133:3000/api',
         uploadMaxSize: 10 * 1024 * 1024, // 10MB
         orderMinPrice: 1,
         orderMaxPrice: 1000,

@@ -2,7 +2,7 @@ App({
   globalData: {
     userInfo: null,
     isLogin: false,
-    baseUrl: 'http://localhost:3000/api',
+    baseUrl: 'http://192.168.1.133:3000/api',
     orderList: [],
     currentOrder: null,
     loginReady: false,

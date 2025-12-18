@@ -168,8 +168,8 @@
 
     <!-- 提交按钮 -->
     <view class="submit-section">
-      <button class="submit-btn" formType="submit">
-        <text class="submit-text">立即发布</text>
+      <button class="submit-btn {{submitting ? 'loading' : ''}}" formType="submit" disabled="{{submitting}}">
+        <text class="submit-text">{{submitting ? '发布中...' : '立即发布'}}</text>
       </button>
     </view>
   </form>

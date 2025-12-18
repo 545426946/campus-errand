@@ -1,7 +1,7 @@
 // 简单的注册登录测试
 const axios = require('axios');
 
-const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = 'http://192.168.1.133:3000/api';
 const testUsername = `test_${Date.now()}`;
 const testPassword = '123456';
 

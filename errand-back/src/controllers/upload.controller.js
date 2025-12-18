@@ -19,7 +19,7 @@ exports.uploadImage = async (req, res, next) => {
 
     // 模拟上传成功，返回图片URL
     const uploadedImages = images.map((img, index) => ({
-      url: `http://localhost:3000/uploads/images/${Date.now()}_${index}.jpg`,
+      url: `http://192.168.1.133:3000/uploads/images/${Date.now()}_${index}.jpg`,
       size: Math.floor(Math.random() * 1000000),
       name: `image_${index}.jpg`
     }));

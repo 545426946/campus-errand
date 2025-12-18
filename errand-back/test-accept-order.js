@@ -5,7 +5,7 @@ async function testAcceptOrder() {
   try {
     // 1. 先登录获取token
     console.log('1. 登录获取token...');
-    const loginRes = await axios.post('http://localhost:3000/api/auth/login', {
+    const loginRes = await axios.post('http://192.168.1.133:3000/api/auth/login', {
       email: 'student1@example.com',
       password: 'admin123'
     });
@@ -18,7 +18,7 @@ async function testAcceptOrder() {
     
     // 2. 获取订单列表
     console.log('\n2. 获取订单列表...');
-    const ordersRes = await axios.get('http://localhost:3000/api/orders', {
+    const ordersRes = await axios.get('http://192.168.1.133:3000/api/orders', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -39,7 +39,7 @@ async function testAcceptOrder() {
     // 3. 接单
     console.log('\n3. 接单...');
     const acceptRes = await axios.post(
-      `http://localhost:3000/api/orders/${pendingOrder.id}/accept`,
+      `http://192.168.1.133:3000/api/orders/${pendingOrder.id}/accept`,
       {},
       {
         headers: {

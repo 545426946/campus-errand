@@ -1,7 +1,7 @@
 // 测试用户注册和登录功能
 const axios = require('axios');
 
-const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = 'http://192.168.1.133:3000/api';
 
 // 生成随机用户名
 const randomUsername = `testuser_${Date.now()}`;

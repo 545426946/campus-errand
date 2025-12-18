@@ -11,6 +11,7 @@ Page({
       { id: 4, name: '其他服务' }
     ],
     typeIndex: 0,
+    submitting: false,
     
     formData: {
       title: '',
@@ -28,6 +29,14 @@ Page({
   onInput(e) {
     const { field } = e.currentTarget.dataset;
     const { value } = e.detail;
+    
+    // 清除该表单项的错误状态
+    const formItem = this.selectComponent(`.form-item[data-field="${field}"]`) ||
+                   e.currentTarget.closest('.form-item');
+    if (formItem && formItem.dataset) {
+      formItem.dataset.error = false;
+    }
+    
     this.setData({
       [`formData.${field}`]: value
     });
@@ -156,32 +165,38 @@ Page({
         return;
       }
 
-      wx.showLoading({ title: '发布中...' });
+      this.setData({ submitting: true });
 
       // 调用API发布订单
       const result = await orderAPI.createOrder(submitData);
 
-      wx.hideLoading();
+      this.setData({ submitting: false });
 
       wx.showToast({
         title: '发布成功',
-        icon: 'success'
+        icon: 'success',
+        duration: 2000
       });
 
+      // 添加成功动画
+      const submitBtn = this.selectComponent('.submit-btn') || 
+                       this.createSelectorQuery().select('.submit-btn');
+      
       // 跳转到订单详情
       setTimeout(() => {
         wx.redirectTo({
           url: `/pages/order/detail?id=${result.data.orderId}`
         });
-      }, 1500);
+      }, 2000);
 
     } catch (error) {
-      wx.hideLoading();
+      this.setData({ submitting: false });
       console.error('发布订单失败:', error);
 
       wx.showToast({
         title: error.message || '发布失败',
-        icon: 'none'
+        icon: 'none',
+        duration: 2000
       });
     }
   }

@@ -18,7 +18,7 @@
   <view class="order-list">
     <view 
       class="order-card" 
-      wx:for="{{filteredOrders}}" 
+      wx:for="{{orderList}}" 
       wx:key="id"
       bindtap="onOrderTap"
       data-id="{{item.id}}"
@@ -62,19 +62,19 @@
         
         <view class="order-actions">
           <block wx:if="{{item.status === 'pending' && item.isMyOrder}}">
-            <button class="action-btn cancel-btn" bindtap="onCancelOrder" data-id="{{item.id}}">取消订单</button>
+            <button class="action-btn cancel-btn" catchtap="onCancelOrder" data-id="{{item.id}}">取消订单</button>
           </block>
           <block wx:elif="{{item.status === 'pending' && !item.isMyOrder}}">
-            <button class="action-btn accept-btn" bindtap="onAcceptOrder" data-id="{{item.id}}">接单</button>
+            <button class="action-btn accept-btn" catchtap="onAcceptOrder" data-id="{{item.id}}">接单</button>
           </block>
           <block wx:elif="{{item.status === 'accepted' && item.isMyOrder}}">
-            <button class="action-btn complete-btn" bindtap="onCompleteOrder" data-id="{{item.id}}">确认完成</button>
+            <button class="action-btn complete-btn" catchtap="onCompleteOrder" data-id="{{item.id}}">确认完成</button>
           </block>
           <block wx:elif="{{item.status === 'accepted' && !item.isMyOrder}}">
-            <button class="action-btn finish-btn" bindtap="onFinishOrder" data-id="{{item.id}}">完成订单</button>
+            <button class="action-btn finish-btn" catchtap="onFinishOrder" data-id="{{item.id}}">完成订单</button>
           </block>
           <block wx:else>
-            <button class="action-btn detail-btn" bindtap="onViewDetail" data-id="{{item.id}}">查看详情</button>
+            <button class="action-btn detail-btn" catchtap="onViewDetail" data-id="{{item.id}}">查看详情</button>
           </block>
         </view>
       </view>
@@ -82,8 +82,12 @@
   </view>
 
   <!-- 空状态 -->
-  <view class="empty-state" wx:if="{{filteredOrders.length === 0}}">
-    <image class="empty-icon" src="/images/empty.png" mode="aspectFit"></image>
+  <view class="empty-state" wx:if="{{orderList.length === 0 && !loading}}">
     <text class="empty-text">暂无{{tabs[currentTab]}}订单</text>
+  </view>
+  
+  <!-- 加载状态 -->
+  <view class="empty-state" wx:if="{{loading && orderList.length === 0}}">
+    <text class="empty-text">加载中...</text>
   </view>
 </view>

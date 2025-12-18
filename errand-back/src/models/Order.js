@@ -60,8 +60,15 @@ class Order {
     const params = [];
 
     if (filters.status && filters.status !== '') {
-      query += ' AND o.status = ?';
-      params.push(filters.status);
+      // 支持多个状态，用逗号分隔
+      const statuses = filters.status.split(',').map(s => s.trim());
+      if (statuses.length > 1) {
+        query += ` AND o.status IN (${statuses.map(() => '?').join(',')})`;
+        params.push(...statuses);
+      } else {
+        query += ' AND o.status = ?';
+        params.push(filters.status);
+      }
     }
 
     if (filters.type && filters.type !== '') {

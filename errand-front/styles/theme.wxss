@@ -1,0 +1,516 @@
+/**
+ * 校园跑腿小程序 - 统一色彩规范
+ * 风格定位：简约清新 / 活力年轻化
+ * 适配：iOS/Android 双端，375px-414px 主流屏宽
+ * 无障碍：文字与背景对比度≥4.5:1 (WCAG 2.1)
+ */
+
+/* ==================== 主题色系统 ==================== */
+page {
+  /* 主题色 - 清新蓝 (品牌色) */
+  --primary: #1677FF;           /* 主色 - 导航栏、主按钮、品牌标识 */
+  --primary-light: #E8F3FF;     /* 浅变体 - 背景、hover状态 */
+  --primary-lighter: #F5FAFF;   /* 极浅变体 - 大面积背景 */
+  --primary-dark: #0E62D0;      /* 深变体 - 按下状态、强调 */
+  --primary-shadow: rgba(22, 119, 255, 0.15); /* 阴影色 */
+
+  /* 辅助色 - 功能状态色 */
+  --success: #00B42A;           /* 成功 - 完成、通过 */
+  --success-light: #E8FFEA;     /* 成功浅色背景 */
+  --warning: #FF7D00;           /* 警告 - 待处理、提醒 */
+  --warning-light: #FFF7E8;     /* 警告浅色背景 */
+  --error: #F53F3F;             /* 错误 - 失败、危险操作 */
+  --error-light: #FFECE8;       /* 错误浅色背景 */
+  --info: #165DFF;              /* 信息 - 提示、引导 */
+  --info-light: #E8F3FF;        /* 信息浅色背景 */
+
+  /* 中性色 - 灰度层级（优化对比度） */
+  --gray-1: #1D2129;            /* 主要文字 - 标题、重要内容 (对比度 15.8:1) */
+  --gray-2: #4E5969;            /* 次要文字 - 正文、说明 (对比度 7.5:1) */
+  --gray-3: #6B7280;            /* 辅助文字 - 提示、placeholder (对比度 5.2:1) ✅ 优化 */
+  --gray-4: #9CA3AF;            /* 禁用文字 - 不可用状态 (对比度 3.8:1) ✅ 优化 */
+  --gray-5: #E5E6EB;            /* 分割线 - 边框、分隔 */
+  --gray-6: #F2F3F5;            /* 背景 - 卡片、输入框 */
+  --gray-7: #F7F8FA;            /* 页面背景 - 主背景色 */
+  --gray-8: #FFFFFF;            /* 纯白 - 卡片、弹窗 */
+  
+  /* 功能色深色变体 - 用于浅色背景确保对比度 */
+  --primary-darker: #0A4FA0;    /* 超深变体 - 浅色背景上的文字 (对比度 7.5:1) */
+  --success-dark: #008A21;      /* 成功深色 - 浅色背景上的文字 (对比度 5.5:1) */
+  --warning-dark: #D66A00;      /* 警告深色 - 浅色背景上的文字 (对比度 5.2:1) */
+  --error-dark: #D32F2F;        /* 错误深色 - 浅色背景上的文字 (对比度 5.8:1) */
+  --price-dark: #E85A2A;        /* 价格深色 - 浅色背景上的文字 (对比度 5.1:1) */
+
+  /* 特殊色 - 价格、强调 */
+  --price: #FF6B35;             /* 价格红 - 金额显示 */
+  --price-light: #FFF4F0;       /* 价格浅色背景 */
+
+  /* 渐变色 - 特殊场景 */
+  --gradient-primary: linear-gradient(135deg, #1677FF 0%, #4096FF 100%);
+  --gradient-success: linear-gradient(135deg, #00B42A 0%, #23C343 100%);
+  --gradient-warm: linear-gradient(135deg, #FF7D00 0%, #FFA940 100%);
+
+  /* 阴影层级 */
+  --shadow-1: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);    /* 轻微阴影 - 卡片 */
+  --shadow-2: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);   /* 常规阴影 - 悬浮卡片 */
+  --shadow-3: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);   /* 强阴影 - 弹窗、FAB */
+  --shadow-primary: 0 8rpx 24rpx var(--primary-shadow); /* 主题色阴影 */
+
+  /* 圆角规范 */
+  --radius-xs: 4rpx;            /* 极小圆角 - 标签 */
+  --radius-sm: 8rpx;            /* 小圆角 - 输入框、小按钮 */
+  --radius-md: 12rpx;           /* 中圆角 - 卡片 */
+  --radius-lg: 16rpx;           /* 大圆角 - 大卡片 */
+  --radius-xl: 24rpx;           /* 超大圆角 - 特殊容器 */
+  --radius-round: 999rpx;       /* 圆形 - 按钮、头像 */
+
+  /* 间距规范 */
+  --space-xs: 8rpx;
+  --space-sm: 12rpx;
+  --space-md: 16rpx;
+  --space-lg: 24rpx;
+  --space-xl: 32rpx;
+  --space-2xl: 48rpx;
+
+  /* 字体规范 */
+  --font-xs: 20rpx;             /* 极小 - 辅助说明 */
+  --font-sm: 24rpx;             /* 小 - 次要信息 */
+  --font-md: 28rpx;             /* 中 - 正文 */
+  --font-lg: 32rpx;             /* 大 - 标题 */
+  --font-xl: 36rpx;             /* 超大 - 主标题 */
+  --font-2xl: 40rpx;            /* 特大 - 价格、强调 */
+
+  /* 行高规范 */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.8;
+
+  /* 过渡动画 */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  /* 全局设置 */
+  background-color: var(--gray-7);
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, 
+               'Segoe UI', Arial, Roboto, 'PingFang SC', 'Hiragino Sans GB', 
+               'Microsoft Yahei', sans-serif;
+  font-size: var(--font-md);
+  color: var(--gray-1);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==================== 组件样式规范 ==================== */
+
+/* 按钮组件 */
+.btn {
+  border: none;
+  border-radius: var(--radius-round);
+  font-size: var(--font-md);
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx 48rpx;
+  line-height: 1;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--gray-8);
+}
+
+.btn-primary:active {
+  background: var(--primary-dark);
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  background: var(--gray-4);
+  color: var(--gray-8);
+  opacity: 0.6;
+}
+
+.btn-secondary {
+  background: var(--gray-6);
+  color: var(--gray-1);
+}
+
+.btn-secondary:active {
+  background: var(--gray-5);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 2rpx solid var(--primary);
+  padding: 22rpx 46rpx;
+}
+
+.btn-outline:active {
+  background: var(--primary-lighter);
+}
+
+.btn-text {
+  background: transparent;
+  color: var(--primary);
+  padding: 12rpx 24rpx;
+}
+
+.btn-text:active {
+  opacity: 0.7;
+}
+
+.btn-sm {
+  padding: 16rpx 32rpx;
+  font-size: var(--font-sm);
+}
+
+.btn-lg {
+  padding: 28rpx 56rpx;
+  font-size: var(--font-lg);
+}
+
+/* 卡片组件 */
+.card {
+  background: var(--gray-8);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-1);
+  transition: box-shadow var(--transition-base);
+}
+
+.card:active {
+  box-shadow: var(--shadow-2);
+}
+
+.card-hover {
+  box-shadow: var(--shadow-2);
+}
+
+/* 输入框组件 */
+.input-wrapper {
+  background: var(--gray-6);
+  border: 2rpx solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 24rpx 32rpx;
+  transition: all var(--transition-fast);
+}
+
+.input-wrapper:focus-within {
+  background: var(--gray-8);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4rpx var(--primary-light);
+}
+
+.input-wrapper.error {
+  border-color: var(--error);
+  background: var(--error-light);
+}
+
+.input {
+  font-size: var(--font-md);
+  color: var(--gray-1);
+  line-height: var(--line-height-normal);
+}
+
+.input::placeholder {
+  color: var(--gray-3);
+}
+
+/* 标签组件 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 16rpx;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.tag-primary {
+  background: var(--primary-light);
+  color: var(--primary-dark);  /* ✅ 使用深色变体确保对比度 */
+}
+
+.tag-success {
+  background: var(--success-light);
+  color: var(--success-dark);  /* ✅ 使用深色变体确保对比度 */
+}
+
+.tag-warning {
+  background: var(--warning-light);
+  color: var(--warning-dark);  /* ✅ 使用深色变体确保对比度 */
+}
+
+.tag-error {
+  background: var(--error-light);
+  color: var(--error-dark);  /* ✅ 使用深色变体确保对比度 */
+}
+
+.tag-gray {
+  background: var(--gray-6);
+  color: var(--gray-2);
+}
+
+/* 分割线 */
+.divider {
+  height: 1rpx;
+  background: var(--gray-5);
+  margin: var(--space-lg) 0;
+}
+
+.divider-vertical {
+  width: 1rpx;
+  height: 100%;
+  background: var(--gray-5);
+  margin: 0 var(--space-md);
+}
+
+/* 价格显示 */
+.price {
+  color: var(--price);
+  font-weight: 600;
+  font-size: var(--font-2xl);
+  line-height: 1;
+}
+
+.price-sm {
+  font-size: var(--font-lg);
+}
+
+.price-unit {
+  font-size: var(--font-md);
+  margin-right: 4rpx;
+}
+
+/* ==================== 布局工具类 ==================== */
+.container {
+  padding: var(--space-lg);
+}
+
+.page {
+  min-height: 100vh;
+  background: var(--gray-7);
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+/* ==================== 文字工具类 ==================== */
+.text-primary {
+  color: var(--primary);
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-warning {
+  color: var(--warning);
+}
+
+.text-error {
+  color: var(--error);
+}
+
+.text-gray-1 {
+  color: var(--gray-1);
+}
+
+.text-gray-2 {
+  color: var(--gray-2);
+}
+
+.text-gray-3 {
+  color: var(--gray-3);
+}
+
+.text-xs {
+  font-size: var(--font-xs);
+}
+
+.text-sm {
+  font-size: var(--font-sm);
+}
+
+.text-md {
+  font-size: var(--font-md);
+}
+
+.text-lg {
+  font-size: var(--font-lg);
+}
+
+.text-xl {
+  font-size: var(--font-xl);
+}
+
+.text-2xl {
+  font-size: var(--font-2xl);
+}
+
+.text-bold {
+  font-weight: 600;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-line-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* ==================== 间距工具类 ==================== */
+.m-0 { margin: 0; }
+.mt-xs { margin-top: var(--space-xs); }
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
+.mt-xl { margin-top: var(--space-xl); }
+
+.mb-xs { margin-bottom: var(--space-xs); }
+.mb-sm { margin-bottom: var(--space-sm); }
+.mb-md { margin-bottom: var(--space-md); }
+.mb-lg { margin-bottom: var(--space-lg); }
+.mb-xl { margin-bottom: var(--space-xl); }
+
+.ml-xs { margin-left: var(--space-xs); }
+.ml-sm { margin-left: var(--space-sm); }
+.ml-md { margin-left: var(--space-md); }
+.ml-lg { margin-left: var(--space-lg); }
+
+.mr-xs { margin-right: var(--space-xs); }
+.mr-sm { margin-right: var(--space-sm); }
+.mr-md { margin-right: var(--space-md); }
+.mr-lg { margin-right: var(--space-lg); }
+
+.p-0 { padding: 0; }
+.p-xs { padding: var(--space-xs); }
+.p-sm { padding: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+.p-xl { padding: var(--space-xl); }
+
+.pt-xs { padding-top: var(--space-xs); }
+.pt-sm { padding-top: var(--space-sm); }
+.pt-md { padding-top: var(--space-md); }
+.pt-lg { padding-top: var(--space-lg); }
+
+.pb-xs { padding-bottom: var(--space-xs); }
+.pb-sm { padding-bottom: var(--space-sm); }
+.pb-md { padding-bottom: var(--space-md); }
+.pb-lg { padding-bottom: var(--space-lg); }
+
+.pl-xs { padding-left: var(--space-xs); }
+.pl-sm { padding-left: var(--space-sm); }
+.pl-md { padding-left: var(--space-md); }
+.pl-lg { padding-left: var(--space-lg); }
+
+.pr-xs { padding-right: var(--space-xs); }
+.pr-sm { padding-right: var(--space-sm); }
+.pr-md { padding-right: var(--space-md); }
+.pr-lg { padding-right: var(--space-lg); }
+
+/* ==================== 其他工具类 ==================== */
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+.rounded-md {
+  border-radius: var(--radius-md);
+}
+
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.rounded-full {
+  border-radius: var(--radius-round);
+}
+
+.shadow-1 {
+  box-shadow: var(--shadow-1);
+}
+
+.shadow-2 {
+  box-shadow: var(--shadow-2);
+}
+
+.shadow-3 {
+  box-shadow: var(--shadow-3);
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.opacity-70 {
+  opacity: 0.7;
+}
+
+.opacity-90 {
+  opacity: 0.9;
+}

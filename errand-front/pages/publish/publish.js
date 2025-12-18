@@ -24,6 +24,15 @@ Page({
     }
   },
 
+  // 输入事件处理
+  onInput(e) {
+    const { field } = e.currentTarget.dataset;
+    const { value } = e.detail;
+    this.setData({
+      [`formData.${field}`]: value
+    });
+  },
+
   onLoad() {
     // 检查登录状态
     const token = wx.getStorageSync('token');

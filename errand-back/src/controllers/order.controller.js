@@ -1,7 +1,7 @@
 const Order = require('../models/Order');
 const Notification = require('../models/Notification');
 
-// 获取订单列表
+// 获取订单列表（大厅）- 只显示未完成的订单
 exports.getOrders = async (req, res, next) => {
   try {
     const { page, pageSize, status, type, keyword } = req.query;
@@ -9,7 +9,8 @@ exports.getOrders = async (req, res, next) => {
     const filters = {
       page: parseInt(page) || 1,
       pageSize: parseInt(pageSize) || 10,
-      status: status || '',
+      // 大厅默认只显示pending和accepted状态的订单，不显示completed和cancelled
+      status: status || 'pending,accepted',
       type: type || '',
       keyword: keyword || ''
     };

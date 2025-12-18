@@ -145,7 +145,7 @@ exports.submitCertification = async (req, res, next) => {
     await User.updateUserInfo(req.user.id, {
       real_name: realName,
       id_card: idCard,
-      certification_status: 'approved'
+      certification_status: 'verified'
     });
     
     res.json({

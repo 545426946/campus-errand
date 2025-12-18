@@ -2,6 +2,7 @@
 const orderAPI = require('../../api/order.js');
 const { formatTime } = require('../../utils/util.js');
 const config = require('../../utils/config.js');
+const authUtil = require('../../utils/auth.js');
 
 Page({
   data: {
@@ -21,12 +22,13 @@ Page({
     serviceTypeMap: config.serviceTypeMap
   },
 
-  onLoad(options) {
-    const userInfo = wx.getStorageSync('userInfo');
+  async onLoad(options) {
+    // 检查登录状态（不强制跳转）
+    const isLoggedIn = authUtil.isLoggedIn();
     
     this.setData({
       orderId: options.id,
-      currentUserId: userInfo?.id
+      currentUserId: isLoggedIn ? authUtil.getCurrentUserId() : null
     });
     
     this.loadOrderDetail();
@@ -64,13 +66,14 @@ Page({
         order.cancelledTime = formatTime(new Date(order.cancelled_at));
       }
       
-      // 判断权限
+      // 判断权限 - 未登录用户可以查看但不能操作
+      const isLoggedIn = !!this.data.currentUserId;
       const isPublisher = order.user_id === this.data.currentUserId;
       const isAcceptor = order.acceptor_id === this.data.currentUserId;
-      const canAccept = order.status === 'pending' && !isPublisher;
-      const canCancel = (isPublisher || isAcceptor) && 
+      const canAccept = isLoggedIn && order.status === 'pending' && !isPublisher;
+      const canCancel = isLoggedIn && (isPublisher || isAcceptor) && 
                        (order.status === 'pending' || order.status === 'accepted');
-      const canComplete = isAcceptor && order.status === 'accepted';
+      const canComplete = isLoggedIn && isAcceptor && order.status === 'accepted';
       
       wx.hideLoading();
       
@@ -109,14 +112,15 @@ Page({
 
   // 接单
   async onAcceptOrder() {
+    // 检查登录 - 接单需要登录
+    if (!authUtil.isLoggedIn()) {
+      await authUtil.requireLogin({
+        content: '接单功能需要登录后使用'
+      }).catch(() => {});
+      return;
+    }
+    
     try {
-      const res = await wx.showModal({
-        title: '确认接单',
-        content: `订单金额：¥${this.data.orderDetail.price}\n确定要接这个订单吗？`
-      });
-      
-      if (!res.confirm) return;
-      
       wx.showLoading({ title: '接单中...' });
       
       await orderAPI.acceptOrder(this.data.orderId);
@@ -146,6 +150,14 @@ Page({
 
   // 完成订单
   async onCompleteOrder() {
+    // 检查登录 - 完成订单需要登录
+    if (!authUtil.isLoggedIn()) {
+      await authUtil.requireLogin({
+        content: '完成订单需要登录后使用'
+      }).catch(() => {});
+      return;
+    }
+    
     try {
       const res = await wx.showModal({
         title: '确认完成',
@@ -182,6 +194,14 @@ Page({
 
   // 取消订单
   async onCancelOrder() {
+    // 检查登录 - 取消订单需要登录
+    if (!authUtil.isLoggedIn()) {
+      await authUtil.requireLogin({
+        content: '取消订单需要登录后使用'
+      }).catch(() => {});
+      return;
+    }
+    
     try {
       // 输入取消原因
       const res = await wx.showModal({
@@ -222,6 +242,14 @@ Page({
 
   // 拨打电话
   onCallPhone() {
+    // 检查登录 - 拨打电话需要登录
+    if (!authUtil.isLoggedIn()) {
+      authUtil.requireLogin({
+        content: '查看联系方式需要登录'
+      }).catch(() => {});
+      return;
+    }
+    
     const phone = this.data.orderDetail.contact_phone;
     
     wx.makePhoneCall({
@@ -238,6 +266,14 @@ Page({
 
   // 联系发布者
   onContactPublisher() {
+    // 检查登录 - 联系发布者需要登录
+    if (!authUtil.isLoggedIn()) {
+      authUtil.requireLogin({
+        content: '联系发布者需要登录'
+      }).catch(() => {});
+      return;
+    }
+    
     const phone = this.data.orderDetail.publisher_phone;
     
     if (!phone) {
@@ -255,6 +291,14 @@ Page({
 
   // 联系接单者
   onContactAcceptor() {
+    // 检查登录 - 联系接单者需要登录
+    if (!authUtil.isLoggedIn()) {
+      authUtil.requireLogin({
+        content: '联系接单者需要登录'
+      }).catch(() => {});
+      return;
+    }
+    
     const phone = this.data.orderDetail.acceptor_phone;
     
     if (!phone) {

@@ -59,8 +59,8 @@ async function runTests() {
   
   await test('1.1 用户登录（邮箱密码）', async () => {
     const res = await api.post('/auth/login', {
-      email: 'test@example.com',
-      password: 'password123'
+      email: 'student1@example.com',
+      password: 'admin123'
     });
     authToken = res.data.token;
     if (!authToken) throw new Error('未获取到token');

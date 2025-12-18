@@ -28,20 +28,23 @@ class Request {
 
   // 默认请求拦截器
   defaultRequestInterceptor(config) {
-    // 添加token
+    // 添加通用header
+    config.header = config.header || {}
+    config.header['Content-Type'] = 'application/json'
+    
+    // 添加token（如果存在）
     const token = wx.getStorageSync('token')
     if (token) {
-      config.header = config.header || {}
       config.header['Authorization'] = `Bearer ${token}`
+      console.log('添加Token到请求头:', token.substring(0, 20) + '...')
     }
+    // 未登录时不再警告，因为允许未登录用户浏览
 
-    // 添加通用header
-    config.header = {
-      'Content-Type': 'application/json',
-      ...config.header
-    }
-
-    console.log('请求配置:', config)
+    console.log('请求配置:', {
+      url: config.url,
+      method: config.method,
+      hasToken: !!token
+    })
     return config
   }
 
@@ -62,16 +65,31 @@ class Request {
         toast.error(message)
         return Promise.reject(new Error(message))
       }
+    } else if (statusCode === 400) {
+      // 请求错误
+      const message = data.message || '请求参数错误'
+      toast.error(message)
+      console.error('400错误详情:', data)
+      return Promise.reject(new Error(message))
     } else if (statusCode === 401) {
-      // 未授权，跳转登录
-      toast.error('请先登录')
-      wx.removeStorageSync('token')
-      const app = getApp()
-      app.globalData.isLogin = false
-      wx.navigateTo({
-        url: '/pages/login/login'
-      })
-      return Promise.reject(new Error('未授权'))
+      // 未授权错误
+      const message = data.message || '认证失败'
+      
+      // 只有在已登录状态下收到 401 才清除登录信息
+      // 登录接口返回 401 不应该清除（因为本来就没登录）
+      const token = wx.getStorageSync('token')
+      if (token) {
+        // 已登录但 token 失效，清除登录信息
+        wx.removeStorageSync('token')
+        wx.removeStorageSync('userInfo')
+        const app = getApp()
+        app.globalData.isLogin = false
+        app.globalData.userInfo = null
+      }
+      
+      // 返回具体的错误信息
+      toast.error(message)
+      return Promise.reject(new Error(message))
     } else if (statusCode === 403) {
       // 权限不足
       toast.error('权限不足')
@@ -86,8 +104,9 @@ class Request {
       return Promise.reject(new Error('服务器错误'))
     } else {
       // 其他错误
-      toast.error('网络错误，请检查网络连接')
-      return Promise.reject(new Error('网络错误'))
+      const message = data.message || '网络错误'
+      toast.error(message)
+      return Promise.reject(new Error(message))
     }
   }
 

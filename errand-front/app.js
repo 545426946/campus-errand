@@ -34,50 +34,22 @@ App({
   // 自动登录
   autoLogin: function () {
     const token = wx.getStorageSync('token')
-    if (token) {
+    const userInfo = wx.getStorageSync('userInfo')
+    
+    if (token && userInfo) {
       this.globalData.isLogin = true
       this.globalData.loginReady = true
-      console.log('已有token，跳过登录')
+      this.globalData.userInfo = userInfo
+      console.log('已有token，自动登录成功')
       this.triggerLoginCallbacks()
       return
     }
 
-    // 使用邮箱密码自动登录
-    console.log('开始自动登录...')
-    
-    wx.request({
-      url: 'http://localhost:3000/api/auth/login',
-      method: 'POST',
-      data: {
-        email: 'student1@example.com',
-        password: 'admin123'
-      },
-      success: (res) => {
-        console.log('登录响应:', res.data)
-        if (res.data && res.data.success && res.data.token) {
-          wx.setStorageSync('token', res.data.token)
-          this.globalData.isLogin = true
-          this.globalData.loginReady = true
-          this.globalData.userInfo = res.data.user
-          console.log('自动登录成功')
-          wx.showToast({
-            title: '登录成功',
-            icon: 'success',
-            duration: 1500
-          })
-          this.triggerLoginCallbacks()
-        } else {
-          console.error('登录失败:', res.data)
-          this.globalData.loginReady = true
-          this.triggerLoginCallbacks()
-        }
-      },
-      fail: (err) => {
-        console.error('登录请求失败:', err)
-        this.globalData.loginReady = true
-        this.triggerLoginCallbacks()
-      }
-    })
+    // 没有token，标记为未登录
+    console.log('未登录状态')
+    this.globalData.isLogin = false
+    this.globalData.loginReady = true
+    this.triggerLoginCallbacks()
   },
 
   // 等待登录完成

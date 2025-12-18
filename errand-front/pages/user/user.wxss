@@ -1,21 +1,30 @@
+/* 用户中心页面 - 使用统一色彩规范 */
+
+.page-container {
+  min-height: 100vh;
+  background: var(--gray-7);
+}
+
 .user-header {
-  background: linear-gradient(135deg, #007aff 0%, #00d4ff 100%);
-  padding: 60rpx 30rpx 40rpx;
+  background: var(--gradient-primary);
+  padding: 60rpx var(--space-xl) var(--space-xl);
   display: flex;
   align-items: center;
-  color: #fff;
+  color: var(--gray-8);
+  position: relative;
 }
 
 .user-avatar-section {
   position: relative;
-  margin-right: 30rpx;
+  margin-right: var(--space-lg);
 }
 
 .user-avatar {
   width: 120rpx;
   height: 120rpx;
-  border-radius: 50%;
-  border: 4rpx solid rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius-round);
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
 }
 
 .login-overlay {
@@ -24,16 +33,18 @@
   left: 0;
   width: 120rpx;
   height: 120rpx;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-round);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(4rpx);
 }
 
 .login-text {
-  font-size: 24rpx;
-  color: #fff;
+  font-size: var(--font-sm);
+  color: var(--gray-8);
+  font-weight: 500;
 }
 
 .user-info {
@@ -42,54 +53,72 @@
 
 .user-name {
   font-size: 36rpx;
-  font-weight: bold;
-  margin-bottom: 15rpx;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
   display: block;
+  color: var(--gray-8);
 }
 
 .user-stats {
   display: flex;
   align-items: center;
-  gap: 20rpx;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xs);
 }
 
 .stat-item {
-  font-size: 26rpx;
-  opacity: 0.9;
+  font-size: var(--font-sm);
+  color: rgba(255, 255, 255, 0.95);  /* ✅ 提升不透明度确保清晰 */
+  font-weight: 500;
 }
 
 .stat-divider {
-  font-size: 24rpx;
-  opacity: 0.7;
+  font-size: var(--font-sm);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.user-id {
+  margin-top: var(--space-xs);
+}
+
+.id-text {
+  font-size: var(--font-xs);
+  color: rgba(255, 255, 255, 0.85);  /* ✅ 提升不透明度确保清晰 */
 }
 
 .setting-btn {
-  padding: 15rpx;
+  padding: var(--space-sm);
   font-size: 40rpx;
+  opacity: 0.9;
 }
 
 .menu-section {
-  padding: 20rpx;
+  padding: var(--space-lg);
 }
 
 .menu-group {
-  background-color: #fff;
-  border-radius: 15rpx;
-  margin-bottom: 20rpx;
+  background: var(--gray-8);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-lg);
   overflow: hidden;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-1);
 }
 
 .menu-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 30rpx 25rpx;
-  border-bottom: 1rpx solid #f8f8f8;
+  padding: var(--space-lg) var(--space-xl);
+  border-bottom: 1rpx solid var(--gray-5);
+  transition: background var(--transition-fast);
 }
 
 .menu-item:last-child {
   border-bottom: none;
+}
+
+.menu-item:active {
+  background: var(--gray-6);
 }
 
 .menu-left {
@@ -100,79 +129,94 @@
 
 .menu-icon {
   font-size: 40rpx;
-  margin-right: 20rpx;
+  margin-right: var(--space-lg);
   width: 40rpx;
   text-align: center;
 }
 
 .menu-title {
-  font-size: 32rpx;
-  color: #333;
+  font-size: var(--font-lg);
+  color: var(--gray-1);
+  font-weight: 500;
 }
 
 .menu-right {
   display: flex;
   align-items: center;
-  gap: 15rpx;
+  gap: var(--space-sm);
 }
 
 .menu-count {
-  background-color: #ff6b35;
-  color: #fff;
-  font-size: 24rpx;
+  background: var(--error);
+  color: var(--gray-8);
+  font-size: var(--font-xs);
   padding: 6rpx 12rpx;
-  border-radius: 20rpx;
-  min-width: 20rpx;
+  border-radius: var(--radius-round);
+  min-width: 32rpx;
   text-align: center;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .menu-value {
-  font-size: 32rpx;
-  color: #ff6b35;
-  font-weight: bold;
+  font-size: var(--font-lg);
+  color: var(--price);
+  font-weight: 600;
 }
 
 .cert-status {
-  font-size: 26rpx;
+  font-size: var(--font-sm);
   padding: 6rpx 12rpx;
-  border-radius: 6rpx;
+  border-radius: var(--radius-xs);
+  font-weight: 500;
 }
 
 .cert-status.verified {
-  background-color: #e8f5e8;
-  color: #4caf50;
+  background: var(--success-light);
+  color: var(--success-dark);  /* ✅ 使用深色确保对比度 */
 }
 
 .cert-status.unverified {
-  background-color: #fff3e0;
-  color: #ff9500;
+  background: var(--warning-light);
+  color: var(--warning-dark);  /* ✅ 使用深色确保对比度 */
 }
 
 .menu-arrow {
-  font-size: 32rpx;
-  color: #999;
+  font-size: var(--font-lg);
+  color: var(--gray-3);
 }
 
 .action-section {
-  padding: 40rpx 20rpx;
+  padding: var(--space-xl) var(--space-lg);
 }
 
 .logout-btn {
-  background-color: #f44336;
-  color: #fff;
+  background: var(--error);
+  color: var(--gray-8);
   border: none;
-  border-radius: 25rpx;
-  padding: 25rpx;
-  font-size: 32rpx;
+  border-radius: var(--radius-round);
+  padding: var(--space-lg);
+  font-size: var(--font-lg);
+  font-weight: 500;
   width: 100%;
+  transition: all var(--transition-fast);
+}
+
+.logout-btn::after {
+  border: none;
+}
+
+.logout-btn:active {
+  background: #E02020;
+  transform: scale(0.98);
 }
 
 .version-info {
   text-align: center;
-  padding: 30rpx 20rpx 50rpx;
+  padding: var(--space-xl) var(--space-lg) var(--space-2xl);
 }
 
 .version-text {
-  font-size: 24rpx;
-  color: #999;
+  font-size: var(--font-xs);
+  color: var(--gray-3);
 }

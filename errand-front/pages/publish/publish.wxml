@@ -1,72 +1,176 @@
-<view class="publish-container">
+<view class="page-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">发布订单</text>
+    <text class="page-subtitle">填写订单信息，快速找到帮手</text>
+  </view>
+
   <form bindsubmit="onSubmit">
-    <!-- 订单标题 -->
-    <view class="form-item">
-      <view class="label required">订单标题</view>
-      <input class="input" name="title" value="{{formData.title}}" placeholder="请输入订单标题" maxlength="50" />
-    </view>
-
-    <!-- 服务类型 -->
-    <view class="form-item">
-      <view class="label required">服务类型</view>
-      <picker name="type" mode="selector" range="{{serviceTypes}}" range-key="name" value="{{typeIndex}}" bindchange="onTypeChange">
-        <view class="picker">
-          {{serviceTypes[typeIndex].name}}
+    <view class="form-container">
+      <!-- 基本信息 -->
+      <view class="form-section">
+        <view class="section-title">基本信息</view>
+        
+        <view class="form-item">
+          <view class="label required">订单标题</view>
+          <input 
+            class="input" 
+            name="title" 
+            value="{{formData.title}}" 
+            placeholder="简短描述你的需求" 
+            placeholder-class="placeholder"
+            maxlength="50" 
+          />
         </view>
-      </picker>
-    </view>
 
-    <!-- 订单描述 -->
-    <view class="form-item">
-      <view class="label required">订单描述</view>
-      <textarea class="textarea" name="description" value="{{formData.description}}" placeholder="请详细描述订单内容" maxlength="500" />
-    </view>
+        <view class="form-item">
+          <view class="label required">服务类型</view>
+          <picker 
+            name="type" 
+            mode="selector" 
+            range="{{serviceTypes}}" 
+            range-key="name" 
+            value="{{typeIndex}}" 
+            bindchange="onTypeChange"
+          >
+            <view class="picker">
+              <text>{{serviceTypes[typeIndex].name}}</text>
+              <text class="arrow">›</text>
+            </view>
+          </picker>
+        </view>
 
-    <!-- 取货地点 -->
-    <view class="form-item">
-      <view class="label required">取货地点</view>
-      <input class="input" name="pickupLocation" value="{{formData.pickupLocation}}" placeholder="请输入取货地点" />
-    </view>
+        <view class="form-item">
+          <view class="label required">订单描述</view>
+          <textarea 
+            class="textarea" 
+            name="description" 
+            value="{{formData.description}}" 
+            placeholder="详细描述订单内容、要求和注意事项" 
+            placeholder-class="placeholder"
+            maxlength="500"
+            show-confirm-bar="{{false}}"
+            bindinput="onInput"
+            data-field="description"
+          />
+          <view class="char-count">{{formData.description.length}}/500</view>
+        </view>
+      </view>
 
-    <!-- 送达地点 -->
-    <view class="form-item">
-      <view class="label required">送达地点</view>
-      <input class="input" name="deliveryLocation" value="{{formData.deliveryLocation}}" placeholder="请输入送达地点" />
-    </view>
-
-    <!-- 联系电话 -->
-    <view class="form-item">
-      <view class="label required">联系电话</view>
-      <input class="input" name="contactPhone" type="number" value="{{formData.contactPhone}}" placeholder="请输入联系电话" maxlength="11" />
-    </view>
-
-    <!-- 订单金额 -->
-    <view class="form-item">
-      <view class="label required">订单金额</view>
-      <input class="input" name="price" type="digit" value="{{formData.price}}" placeholder="请输入订单金额" />
-      <text class="unit">元</text>
-    </view>
-
-    <!-- 上传图片 -->
-    <view class="form-item">
-      <view class="label">订单图片</view>
-      <view class="image-list">
-        <block wx:for="{{formData.images}}" wx:key="index">
-          <view class="image-item">
-            <image class="image" src="{{item}}" mode="aspectFill" bindtap="onPreviewImage" data-url="{{item}}" />
-            <view class="delete-btn" bindtap="onDeleteImage" data-index="{{index}}">×</view>
+      <!-- 地点信息 -->
+      <view class="form-section">
+        <view class="section-title">地点信息</view>
+        
+        <view class="form-item">
+          <view class="label required">
+            <text class="icon">📍</text>
+            <text>取货地点</text>
           </view>
-        </block>
-        <view class="upload-btn" bindtap="onChooseImage" wx:if="{{formData.images.length < 9}}">
-          <text class="icon">+</text>
-          <text class="text">添加图片</text>
+          <input 
+            class="input" 
+            name="pickupLocation" 
+            value="{{formData.pickupLocation}}" 
+            placeholder="请输入详细地址" 
+            placeholder-class="placeholder"
+          />
+        </view>
+
+        <view class="form-item">
+          <view class="label required">
+            <text class="icon">📌</text>
+            <text>送达地点</text>
+          </view>
+          <input 
+            class="input" 
+            name="deliveryLocation" 
+            value="{{formData.deliveryLocation}}" 
+            placeholder="请输入详细地址" 
+            placeholder-class="placeholder"
+          />
+        </view>
+      </view>
+
+      <!-- 联系方式 -->
+      <view class="form-section">
+        <view class="section-title">联系方式</view>
+        
+        <view class="form-item">
+          <view class="label required">
+            <text class="icon">📱</text>
+            <text>联系电话</text>
+          </view>
+          <input 
+            class="input" 
+            name="contactPhone" 
+            type="number" 
+            value="{{formData.contactPhone}}" 
+            placeholder="请输入11位手机号" 
+            placeholder-class="placeholder"
+            maxlength="11" 
+          />
+        </view>
+      </view>
+
+      <!-- 金额设置 -->
+      <view class="form-section">
+        <view class="section-title">金额设置</view>
+        
+        <view class="form-item price-item">
+          <view class="label required">
+            <text class="icon">💰</text>
+            <text>订单金额</text>
+          </view>
+          <view class="price-input-wrapper">
+            <text class="currency">¥</text>
+            <input 
+              class="price-input" 
+              name="price" 
+              type="digit" 
+              value="{{formData.price}}" 
+              placeholder="0.00" 
+              placeholder-class="placeholder"
+            />
+          </view>
+        </view>
+        <view class="price-tip">建议合理定价，提高接单率</view>
+      </view>
+
+      <!-- 上传图片 -->
+      <view class="form-section">
+        <view class="section-title">
+          <text>订单图片</text>
+          <text class="optional">（选填）</text>
+        </view>
+        
+        <view class="image-list">
+          <block wx:for="{{formData.images}}" wx:key="index">
+            <view class="image-item">
+              <image 
+                class="image" 
+                src="{{item}}" 
+                mode="aspectFill" 
+                catchtap="onPreviewImage" 
+                data-url="{{item}}" 
+              />
+              <view class="delete-btn" catchtap="onDeleteImage" data-index="{{index}}">
+                <text class="delete-icon">×</text>
+              </view>
+            </view>
+          </block>
+          <view class="upload-btn" catchtap="onChooseImage" wx:if="{{formData.images.length < 9}}">
+            <text class="upload-icon">📷</text>
+            <text class="upload-text">添加图片</text>
+            <text class="upload-count">{{formData.images.length}}/9</text>
+          </view>
         </view>
       </view>
     </view>
 
     <!-- 提交按钮 -->
     <view class="submit-section">
-      <button class="submit-btn" formType="submit">发布订单</button>
+      <button class="submit-btn" formType="submit">
+        <text class="submit-text">立即发布</text>
+      </button>
     </view>
   </form>
 </view>

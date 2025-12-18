@@ -1,209 +1,158 @@
 # 校园跑腿平台
 
-一个基于微信小程序的校园跑腿服务平台，包含订单发布、接单、支付等完整功能。
+一个基于微信小程序的校园跑腿服务平台，提供快递代取、外卖配送、代购等服务。
 
-## 项目结构
+## 📋 项目文档
 
-```
-campus-errand/
-├── errand-back/          # 后端服务 (Node.js + Express + MySQL)
-├── errand-front/         # 前端小程序 (微信小程序)
-└── README.md
-```
+- [项目结构说明](./docs/项目结构说明.md) - 完整的项目结构和开发指南
+- [后端 API 文档](./errand-back/API-DOCUMENTATION.md) - 后端 API 接口文档
+- [数据库文档](./errand-back/database/README.md) - 数据库结构和使用说明
+- [功能更新说明](./docs/功能更新说明.md) - 功能更新记录
+- [未登录用户体验优化](./docs/未登录用户体验优化.md) - 未登录用户体验优化说明
 
-## 📚 文档导航
+## 🚀 快速开始
 
-**[📚 文档导航.md](./📚%20文档导航.md)** - 查看所有文档的完整导航
+### 1. 启动后端服务
 
-### 快速链接
-- **[快速开始指南.md](./快速开始指南.md)** ⭐ - 5分钟快速启动
-- **[配置完成总结.md](./配置完成总结.md)** - 项目概览和核心功能
-- **[前后端数据交互配置说明.md](./前后端数据交互配置说明.md)** - 详细配置步骤
-- **[前后端数据交互测试指南.md](./前后端数据交互测试指南.md)** - 完整测试流程
-- **[验证检查清单.md](./验证检查清单.md)** - 功能验证清单
-
-## 快速开始
-
-### 后端启动
-
-1. 进入后端目录
 ```bash
 cd errand-back
-```
-
-2. 安装依赖
-```bash
 npm install
+npm start
 ```
 
-3. 配置环境变量
-复制 `.env.example` 为 `.env` 并配置数据库信息
+后端服务将在 http://localhost:3000 启动
 
-4. 初始化数据库
-```bash
-setup-database.bat
-```
-
-5. 启动服务器
-```bash
-npm run dev
-# 或使用
-start-dev.bat
-```
-
-服务器将运行在 http://localhost:3000
-
-### 前端启动
+### 2. 启动前端小程序
 
 1. 使用微信开发者工具打开 `errand-front` 目录
+2. 配置 AppID（或使用测试号）
+3. 在 **详情 > 本地设置** 中勾选：
+   - ✅ 不校验合法域名
+   - ✅ 不校验安全域名
+4. 点击编译运行
 
-2. 配置后端API地址
-在 `errand-front/utils/config.js` 中配置：
-```javascript
-baseUrl: 'http://localhost:3000/api'
+### 3. 测试账号
+
+```
+邮箱: student1@example.com
+密码: admin123
 ```
 
-3. 编译并运行
+## ✨ 主要功能
 
-## 主要功能
+### 用户系统
+- ✅ 用户注册（用户名+密码）
+- ✅ 用户登录（用户名/邮箱+密码）
+- ✅ JWT 身份认证
+- ✅ 密码加密存储（bcrypt）
+- ✅ 个人信息管理
 
-- ✅ 用户认证（微信登录/邮箱登录）
-- ✅ 订单管理（发布/接单/取消/完成）
-- ✅ 订单筛选和搜索（支持分页）
-- ✅ 用户个人中心（订单统计、钱包）
+### 订单系统
+- ✅ 订单发布与管理
+- ✅ 订单接单与完成
+- ✅ 订单搜索与筛选
 - ✅ 订单状态跟踪
-- ✅ **消息通知系统**（订单状态变更自动通知）
-- ✅ 前后端完整数据交互
-- ✅ 动态数据加载（从MySQL数据库）
 
-## 技术栈
+### 其他功能
+- ✅ 实时消息通知
+- ✅ 个人中心
+- ✅ 未登录用户浏览
+
+## 🛠 技术栈
 
 ### 后端
 - Node.js + Express
 - MySQL 数据库
-- JWT 认证
-- bcryptjs 密码加密
+- JWT 身份认证
+- bcrypt 密码加密
 
 ### 前端
-- 微信小程序
-- 微信小程序API
+- 微信小程序原生开发
+- WXML/WXSS/JavaScript
 
-## 前后端数据交互
+## 📁 项目结构
 
-### 🎯 已完成配置
-
-本项目已完成前后端完整数据交互配置：
-
-- ✅ 前端通过API从MySQL数据库动态获取数据
-- ✅ 所有页面数据均为动态加载（非静态数据）
-- ✅ 完整的认证和权限控制
-- ✅ 统一的错误处理和提示
-- ✅ 支持分页、筛选、搜索
-
-### 📚 配置文档
-
-- **[前后端数据交互配置说明.md](./前后端数据交互配置说明.md)** - 完整配置说明
-- **[前后端数据交互测试指南.md](./前后端数据交互测试指南.md)** - 详细测试步骤
-
-### 🚀 一键配置
-
-运行配置脚本自动完成所有配置：
-```bash
-配置前后端数据交互.bat
+```
+campus-errand/
+├── docs/                           # 项目文档
+│   ├── 项目结构说明.md             # 项目结构和开发指南
+│   ├── 功能更新说明.md             # 功能更新记录
+│   ├── 未登录用户体验优化.md       # 用户体验优化说明
+│   └── ...                        # 其他文档
+│
+├── errand-back/                    # 后端服务
+│   ├── src/                       # 源代码
+│   │   ├── controllers/           # 业务控制器
+│   │   ├── models/                # 数据模型
+│   │   ├── routes/                # 路由配置
+│   │   ├── middleware/            # 中间件
+│   │   └── config/                # 配置文件
+│   ├── database/                  # 数据库文件
+│   │   ├── migrations/            # 数据库迁移（表结构）
+│   │   ├── seeds/                 # 数据库种子（测试数据）
+│   │   └── README.md              # 数据库文档
+│   ├── .env.example               # 环境变量示例
+│   ├── server.js                  # 服务器入口
+│   └── setup-database.bat         # 数据库初始化脚本
+│
+└── errand-front/                   # 前端小程序
+    ├── pages/                     # 页面文件
+    │   ├── index/                 # 首页
+    │   ├── order/                 # 订单页
+    │   ├── publish/               # 发布页
+    │   ├── user/                  # 用户中心
+    │   └── login/                 # 登录页
+    ├── api/                       # API 接口封装
+    ├── utils/                     # 工具函数
+    │   ├── auth.js                # 认证工具
+    │   └── config.js              # 配置文件
+    └── components/                # 自定义组件
 ```
 
-## API文档
+## 🔧 最近更新
 
-### 认证接口
-- `POST /api/auth/login` - 用户登录（支持微信code和邮箱密码）
-- `POST /api/auth/register` - 用户注册
-- `GET /api/auth/me` - 获取当前用户信息
+### 2024-12-17
+- ✅ **用户注册登录** - 完整的注册登录功能，数据保存到 MySQL 数据库
+- ✅ **未登录用户体验优化** - 允许未登录用户浏览页面，只在操作时提示登录
+- ✅ **项目结构整理** - 整理文档和数据库文件，使项目结构更清晰
+- ✅ **修复接单接口错误** - 修复接单接口 400 错误
+- ✅ **优化登录状态管理** - 添加统一的认证工具
+- ✅ **界面优化** - 优化色彩对比度和用户界面
 
-### 订单接口
-- `GET /api/orders` - 获取订单列表（支持分页、筛选）
-- `GET /api/orders/:id` - 获取订单详情
-- `POST /api/orders` - 创建订单
-- `PUT /api/orders/:id` - 更新订单
-- `DELETE /api/orders/:id` - 删除订单
-- `POST /api/orders/:id/accept` - 接单
-- `POST /api/orders/:id/complete` - 完成订单
-- `POST /api/orders/:id/cancel` - 取消订单
-- `GET /api/orders/my-publish` - 我发布的订单
-- `GET /api/orders/my-accepted` - 我接受的订单
-- `GET /api/orders/stats` - 订单统计
+详细内容请查看：
+- [用户注册登录流程说明](./docs/用户注册登录流程说明.md)
+- [功能更新说明](./docs/功能更新说明.md)
 
-### 用户接口
-- `GET /api/users/profile` - 获取用户信息
-- `PUT /api/user/info` - 更新用户信息
-- `GET /api/user/wallet` - 获取钱包信息
+## 📝 开发说明
 
-### 通知接口
-- `GET /api/notifications` - 获取通知列表
-- `GET /api/notifications/unread-count` - 获取未读数量
-- `PUT /api/notifications/:id/read` - 标记已读
-- `PUT /api/notifications/read-all` - 全部已读
-- `DELETE /api/notifications/:id` - 删除通知
+### 环境要求
+- Node.js >= 14.0.0
+- MySQL >= 5.7
+- 微信开发者工具
 
-## 测试账号
+### 配置说明
+1. 复制 `errand-back/.env.example` 为 `.env`
+2. 修改数据库配置
+3. 运行数据库初始化脚本：`setup-database.bat`
 
-所有测试账号密码都是: `admin123`
-
-| 用户名 | 邮箱 | 角色 |
-|--------|------|------|
-| student1 | student1@example.com | 学生 |
-| student2 | student2@example.com | 学生 |
-| teacher1 | teacher1@example.com | 教师 |
-| admin | admin@example.com | 管理员 |
-
-## 测试数据
-
-数据库已包含15条测试订单：
-- 6条待接单订单
-- 3条进行中订单
-- 4条已完成订单
-- 2条已取消订单
-
-## 微信小程序配置
-
-1. 使用微信开发者工具打开 `errand-front` 目录
-2. 在 **详情 > 本地设置** 中勾选：
-   - ✅ 不校验合法域名
-   - ✅ 不校验安全域名
-3. 编译运行即可
-
-详细测试指南请查看 [测试指南.md](./测试指南.md)
-
-## 快速启动
-
-双击运行 `快速启动.bat` 即可启动后端服务器
-
-或手动启动：
+### 测试
 ```bash
 cd errand-back
-npm run dev
+
+# 测试所有API
+node test-all-apis.js
+
+# 测试接单接口
+node test-accept-order.js
+
+# 测试注册登录功能
+node test-register-login.js
 ```
 
-## 开发说明
+## 🤝 贡献
 
-- 后端默认端口: 3000
-- 数据库: MySQL 5.7+
-- Node.js版本: 14+
-- 前端自动登录: student1@example.com
+欢迎提交 Issue 和 Pull Request
 
-## 项目特点
+## 📄 许可证
 
-- ✅ 完整的前后端分离架构
-- ✅ 前端数据完全动态加载（从MySQL数据库）
-- ✅ JWT身份认证（支持微信登录）
-- ✅ **消息通知系统**（订单状态变更自动通知）
-- ✅ **实时数据同步**（前端操作触发后端数据变更）
-- ✅ RESTful API设计
-- ✅ 统一的响应格式
-- ✅ 完善的错误处理
-- ✅ 分页、筛选、搜索功能
-- ✅ 测试数据完备
-- ✅ 一键配置脚本
-
-## 许可证
-
-MIT
+MIT License

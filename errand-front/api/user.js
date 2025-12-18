@@ -2,17 +2,34 @@ const request = require('./request.js')
 
 // 用户相关的API
 const userAPI = {
-  // 用户登录
+  // 用户注册
+  register(username, password, confirmPassword) {
+    return request.post('/auth/register', { 
+      username, 
+      password, 
+      confirmPassword 
+    })
+  },
+
+  // 账号密码登录
+  accountLogin(username, password) {
+    return request.post('/auth/login', { 
+      username, 
+      password 
+    })
+  },
+
+  // 微信登录
   login(code) {
     return request.post('/auth/login', { code })
   },
 
-  // 获取用户信息
+  // 获取用户信息 (同 getUserProfile)
   getUserInfo() {
-    return request.get('/users/profile')
+    return request.get('/user/profile')
   },
 
-  // 更新用户信息
+  // 更新用户信息 (基础信息)
   updateUserInfo(userInfo) {
     return request.put('/user/info', userInfo)
   },

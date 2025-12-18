@@ -27,12 +27,23 @@
 ### 1.1 用户登录
 **接口**: `POST /auth/login`
 
-**用途**: 微信登录或邮箱密码登录
+**用途**: 支持三种登录方式：微信登录、用户名密码登录、邮箱密码登录
 
 **请求参数**:
 ```json
+// 微信登录
 {
-  "code": "微信登录code",
+  "code": "微信登录code"
+}
+
+// 用户名密码登录
+{
+  "username": "user123",
+  "password": "password123"
+}
+
+// 邮箱密码登录
+{
   "email": "user@example.com",
   "password": "password123"
 }
@@ -48,13 +59,52 @@
     "id": 1,
     "username": "user123",
     "email": "user@example.com",
-    "role": "student"
+    "role": "student",
+    "nickname": "小明",
+    "avatar": "http://..."
   },
   "message": "登录成功"
 }
 ```
 
-### 1.2 发送验证码
+### 1.2 用户注册
+**接口**: `POST /auth/register`
+
+**用途**: 使用用户名和密码注册新账号
+
+**请求参数**:
+```json
+{
+  "username": "user123",
+  "password": "password123",
+  "confirmPassword": "password123",
+  "email": "user@example.com" // 可选
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "code": 0,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "username": "user123",
+    "email": "user@example.com",
+    "role": "student"
+  },
+  "message": "注册成功"
+}
+```
+
+**注意事项**:
+- 用户名必须唯一
+- 密码长度至少6位
+- 如果提供confirmPassword，必须与password一致
+- email字段可选
+
+### 1.3 发送验证码
 **接口**: `POST /auth/send-code`
 
 **请求参数**:
@@ -66,7 +116,7 @@
 }
 ```
 
-### 1.3 验证验证码
+### 1.4 验证验证码
 **接口**: `POST /auth/verify-code`
 
 **请求参数**:
@@ -77,7 +127,7 @@
 }
 ```
 
-### 1.4 退出登录
+### 1.5 退出登录
 **接口**: `POST /auth/logout`
 
 **需要认证**: ✅
@@ -275,15 +325,19 @@
 
 ### 3.1 订单CRUD操作
 
-#### 获取订单列表
+#### 获取订单列表（大厅）
 **接口**: `GET /orders`
 
 **需要认证**: ✅
 
+**用途**: 获取订单大厅列表，默认只显示未完成的订单（pending和accepted状态）
+
 **查询参数**:
 - `page`: 页码 (默认1)
 - `pageSize`: 每页数量 (默认10)
-- `status`: 状态筛选 (pending/accepted/completed/cancelled)
+- `status`: 状态筛选 (默认: pending,accepted)
+  - 可选值: pending/accepted/completed/cancelled
+  - 支持多个状态，用逗号分隔，如: pending,accepted
 - `type`: 类型筛选
 - `keyword`: 关键词搜索
 
@@ -295,17 +349,24 @@
   "data": [
     {
       "id": 1,
+      "user_id": 1,
       "title": "快递代取",
       "description": "帮忙取个快递",
       "type": 1,
       "price": 5.00,
       "status": "pending",
       "publisher_name": "小明",
+      "publisher_avatar": "http://...",
       "created_at": "2024-01-01T00:00:00.000Z"
     }
   ]
 }
 ```
+
+**说明**:
+- 订单大厅默认不显示已完成(completed)和已取消(cancelled)的订单
+- 已完成的订单会保留在数据库中，可通过"我发布的订单"或"我接受的订单"查看
+- 每个订单都绑定了发布者的user_id
 
 #### 获取订单详情
 **接口**: `GET /orders/:orderId`

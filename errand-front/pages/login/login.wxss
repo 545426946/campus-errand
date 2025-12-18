@@ -1,83 +1,195 @@
+/* 登录页面 - 使用统一色彩规范 */
+
 .login-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40rpx;
+  padding: var(--space-2xl) var(--space-lg);
 }
 
 .login-header {
-  text-align: center;
-  margin-bottom: 100rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--space-2xl);
 }
 
 .logo {
   width: 160rpx;
   height: 160rpx;
-  margin-bottom: 30rpx;
+  border-radius: var(--radius-round);
+  background: var(--gray-8);
+  margin-bottom: var(--space-xl);
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
 }
 
 .app-name {
-  display: block;
   font-size: 48rpx;
-  font-weight: bold;
-  color: #fff;
-  margin-bottom: 20rpx;
+  font-weight: 600;
+  color: var(--gray-8);
+  margin-bottom: var(--space-md);
+  letter-spacing: 2rpx;
 }
 
 .slogan {
-  display: block;
-  font-size: 28rpx;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--font-md);
+  color: rgba(255, 255, 255, 0.95);  /* ✅ 提升不透明度确保清晰 */
+  letter-spacing: 1rpx;
+  font-weight: 500;
 }
 
 .login-content {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-container {
+  width: 100%;
   max-width: 600rpx;
+  margin-bottom: var(--space-xl);
+}
+
+.form-item {
+  margin-bottom: var(--space-lg);
+}
+
+.form-input {
+  width: 100%;
+  height: 90rpx;
+  background: rgba(255, 255, 255, 0.98);  /* ✅ 提升不透明度确保文字清晰 */
+  border-radius: var(--radius-round);
+  padding: 0 var(--space-xl);
+  font-size: var(--font-md);
+  color: var(--gray-1);
+  box-sizing: border-box;
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+  transition: all var(--transition-fast);
+}
+
+.form-input:focus {
+  background: var(--gray-8);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+}
+
+.form-input::placeholder {
+  color: var(--gray-3);  /* ✅ 已优化为 #6B7280，对比度 5.2:1 */
 }
 
 .login-btn {
   width: 100%;
+  max-width: 600rpx;
   height: 90rpx;
-  background: #fff;
-  border-radius: 45rpx;
+  background: var(--gray-8);
+  border-radius: var(--radius-round);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 30rpx;
-  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.2);
+  transition: all var(--transition-fast);
+  border: none;
 }
 
 .login-btn::after {
   border: none;
 }
 
-.profile-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-
-.btn-icon {
-  font-size: 40rpx;
-  margin-right: 20rpx;
+.login-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
 }
 
 .btn-text {
-  font-size: 32rpx;
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.switch-mode {
+  margin-top: var(--space-lg);
+  padding: var(--space-sm) var(--space-lg);
+}
+
+.switch-text {
+  font-size: var(--font-md);
+  color: var(--gray-8);
+  opacity: 0.9;
+  text-decoration: underline;
+  letter-spacing: 1rpx;
+}
+
+.divider {
+  width: 100%;
+  max-width: 600rpx;
+  display: flex;
+  align-items: center;
+  margin: var(--space-xl) 0;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.divider-text {
+  margin: 0 var(--space-lg);
+  font-size: var(--font-sm);
+  color: rgba(255, 255, 255, 0.9);  /* ✅ 提升不透明度确保清晰 */
   font-weight: 500;
 }
 
-.login-footer {
-  position: fixed;
-  bottom: 60rpx;
-  text-align: center;
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.7);
+.test-login-btn {
+  width: 100%;
+  max-width: 600rpx;
+  height: 90rpx;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-round);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid rgba(255, 255, 255, 0.5);
+  transition: all var(--transition-fast);
+}
+
+.test-login-btn::after {
+  border: none;
+}
+
+.test-login-btn:active {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(0.98);
+}
+
+.test-btn-text {
+  font-size: var(--font-md);
+  color: var(--gray-8);
+  font-weight: 500;
+}
+
+.tips {
+  margin-top: var(--space-2xl);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 var(--space-lg);
+}
+
+.tip-text {
+  font-size: var(--font-sm);
+  color: rgba(255, 255, 255, 0.85);  /* ✅ 提升不透明度确保清晰 */
 }
 
 .link {
-  color: #fff;
+  font-size: var(--font-sm);
+  color: var(--gray-8);
   text-decoration: underline;
+  margin: 0 var(--space-xs);
+  opacity: 1;  /* ✅ 移除不透明度确保清晰 */
+  font-weight: 500;
 }

@@ -6,26 +6,64 @@
   </view>
 
   <view class="login-content">
-    <button class="login-btn" bindtap="onTestLogin">
-      <text class="btn-icon">🔑</text>
-      <text class="btn-text">测试账号登录</text>
-    </button>
-    
-    <button class="login-btn" bindtap="onWechatLogin">
-      <text class="btn-icon">📱</text>
-      <text class="btn-text">微信快速登录</text>
-    </button>
-    
-    <button class="login-btn profile-btn" bindtap="onGetUserProfile">
-      <text class="btn-icon">👤</text>
-      <text class="btn-text">获取头像昵称</text>
-    </button>
-  </view>
+    <view class="form-container">
+      <view class="form-item">
+        <input 
+          class="form-input" 
+          placeholder="请输入用户名" 
+          value="{{username}}"
+          bindinput="onUsernameInput"
+        />
+      </view>
+      
+      <view class="form-item">
+        <input 
+          class="form-input" 
+          placeholder="请输入密码" 
+          password="{{true}}"
+          value="{{password}}"
+          bindinput="onPasswordInput"
+        />
+      </view>
+      
+      <view class="form-item" wx:if="{{isRegisterMode}}">
+        <input 
+          class="form-input" 
+          placeholder="请确认密码" 
+          password="{{true}}"
+          value="{{confirmPassword}}"
+          bindinput="onConfirmPasswordInput"
+        />
+      </view>
+    </view>
 
-  <view class="login-footer">
-    <text class="tips">登录即表示同意</text>
-    <text class="link">《用户协议》</text>
-    <text class="tips">和</text>
-    <text class="link">《隐私政策》</text>
+    <button 
+      class="login-btn" 
+      type="primary" 
+      bindtap="{{isRegisterMode ? 'onRegister' : 'onAccountLogin'}}"
+    >
+      <text class="btn-text">{{isRegisterMode ? '注册' : '登录'}}</text>
+    </button>
+
+    <view class="switch-mode" bindtap="toggleMode">
+      <text class="switch-text">{{isRegisterMode ? '已有账号？去登录' : '没有账号？去注册'}}</text>
+    </view>
+
+    <view class="divider">
+      <view class="divider-line"></view>
+      <text class="divider-text">或</text>
+      <view class="divider-line"></view>
+    </view>
+
+    <button class="test-login-btn" bindtap="onTestLogin">
+      <text class="test-btn-text">使用测试账号登录</text>
+    </button>
+    
+    <view class="tips">
+      <text class="tip-text">点击登录即表示同意</text>
+      <text class="link">《用户协议》</text>
+      <text class="tip-text">和</text>
+      <text class="link">《隐私政策》</text>
+    </view>
   </view>
 </view>

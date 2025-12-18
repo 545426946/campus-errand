@@ -25,7 +25,7 @@ Page({
 
   onLoad: function (options) {
     console.log('订单页面加载');
-    this.checkLogin();
+    // 不再调用 checkLogin，直接加载订单列表
     this.loadOrderList();
   },
 
@@ -45,29 +45,20 @@ Page({
     this.loadMoreOrders();
   },
 
-  // 检查登录状态
+  // 检查登录状态（不强制跳转）
   checkLogin: function() {
     const token = wx.getStorageSync('token');
     if (!token) {
-      wx.showModal({
-        title: '提示',
-        content: '请先登录查看订单',
-        confirmText: '去登录',
-        showCancel: false,
-        success: () => {
-          wx.navigateTo({
-            url: '/pages/login/login'
-          });
-        }
-      });
-      return false;
+      console.log('用户未登录，可以浏览但部分功能受限');
+      // 不再强制跳转到登录页面，让用户自由浏览
     }
-    return true;
+    return !!token;
   },
 
   // 加载订单列表（从后端获取）
   loadOrderList: async function (refresh = false) {
-    if (!this.checkLogin()) return;
+    // 检查登录状态，但不阻止加载
+    const isLoggedIn = this.checkLogin();
     
     if (this.data.loading) return;
     
@@ -85,21 +76,24 @@ Page({
       let result;
       const { currentTab } = this.data;
       
-      // 根据标签页调用不同的API
-      if (currentTab === 0) {
-        // 我发布的订单
-        result = await orderAPI.getMyPublishOrders({
-          page: this.data.page,
-          pageSize: this.data.pageSize
-        });
-      } else if (currentTab === 1) {
-        // 我接受的订单
-        result = await orderAPI.getMyAcceptedOrders({
-          page: this.data.page,
-          pageSize: this.data.pageSize
-        });
-      } else {
-        // 按状态筛选
+      // 未登录时，只能查看公开订单列表
+      if (!isLoggedIn) {
+        if (currentTab === 0 || currentTab === 1) {
+          // "我发布的"和"我接受的"需要登录
+          this.setData({
+            orderList: [],
+            hasMore: false,
+            loading: false
+          });
+          
+          wx.showToast({
+            title: '请先登录',
+            icon: 'none'
+          });
+          return;
+        }
+        
+        // 未登录用户可以查看公开订单列表
         const statusMap = {
           2: 'pending',
           3: 'accepted',
@@ -110,6 +104,33 @@ Page({
           pageSize: this.data.pageSize,
           status: statusMap[currentTab]
         });
+      } else {
+        // 已登录用户，根据标签页调用不同的API
+        if (currentTab === 0) {
+          // 我发布的订单
+          result = await orderAPI.getMyPublishOrders({
+            page: this.data.page,
+            pageSize: this.data.pageSize
+          });
+        } else if (currentTab === 1) {
+          // 我接受的订单
+          result = await orderAPI.getMyAcceptedOrders({
+            page: this.data.page,
+            pageSize: this.data.pageSize
+          });
+        } else {
+          // 按状态筛选
+          const statusMap = {
+            2: 'pending',
+            3: 'accepted',
+            4: 'completed'
+          };
+          result = await orderAPI.getOrderList({
+            page: this.data.page,
+            pageSize: this.data.pageSize,
+            status: statusMap[currentTab]
+          });
+        }
       }
       
       // 处理订单数据
@@ -122,7 +143,11 @@ Page({
           statusClass: `status-${order.status}`,
           createTime: this.formatTimeAgo(order.created_at),
           isMyOrder: order.user_id === userInfo?.id,
-          isAccepted: order.acceptor_id === userInfo?.id
+          isAccepted: order.acceptor_id === userInfo?.id,
+          // 字段映射
+          pickupLocation: order.pickup_location || order.pickupLocation || '',
+          deliveryLocation: order.delivery_location || order.deliveryLocation || '',
+          orderNo: order.order_no || order.orderNo || order.id
         };
       });
       
@@ -161,6 +186,26 @@ Page({
   // 切换标签
   switchTab: function (e) {
     const index = e.currentTarget.dataset.index;
+    const isLoggedIn = this.checkLogin();
+    
+    // 未登录时，切换到"我发布的"或"我接受的"标签页需要提示登录
+    if (!isLoggedIn && (index === 0 || index === 1)) {
+      wx.showModal({
+        title: '需要登录',
+        content: '查看个人订单需要登录，是否前往登录？',
+        confirmText: '去登录',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({
+              url: '/pages/login/login'
+            });
+          }
+        }
+      });
+      return;
+    }
+    
     this.setData({
       currentTab: index
     });
@@ -177,48 +222,60 @@ Page({
   },
 
   // 接单
-  onAcceptOrder: async function (e) {
+  onAcceptOrder: function (e) {
     const orderId = e.currentTarget.dataset.id;
-    console.log('接受订单:', orderId);
+    console.log('接单按钮点击:', orderId);
     
-    try {
-      const res = await wx.showModal({
-        title: '确认接单',
-        content: '确定要接受这个订单吗？'
+    // 检查登录状态
+    const token = wx.getStorageSync('token');
+    
+    if (!token) {
+      // 未登录：弹窗提示需要登录
+      wx.showModal({
+        title: '需要登录',
+        content: '接单功能需要登录后使用，是否前往登录？',
+        confirmText: '去登录',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({
+              url: '/pages/login/login'
+            });
+          }
+        }
       });
-      
-      if (!res.confirm) return;
-      
-      wx.showLoading({ title: '接单中...' });
-      
-      await orderAPI.acceptOrder(orderId);
-      
-      wx.hideLoading();
-      
-      wx.showToast({
-        title: '接单成功',
-        icon: 'success'
-      });
-      
-      setTimeout(() => {
-        this.loadOrderList(true);
-      }, 1500);
-      
-    } catch (error) {
-      wx.hideLoading();
-      console.error('接单失败:', error);
-      
-      wx.showToast({
-        title: error.message || '接单失败',
-        icon: 'none'
-      });
+      return;
     }
+    
+    // 已登录：直接跳转到订单详情页面
+    wx.navigateTo({
+      url: `/pages/order/detail?id=${orderId}`
+    });
   },
 
   // 取消订单
   onCancelOrder: async function (e) {
     const orderId = e.currentTarget.dataset.id;
     console.log('取消订单:', orderId);
+
+    // 检查登录 - 取消订单需要登录
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.showModal({
+        title: '需要登录',
+        content: '取消订单需要登录后使用，是否前往登录？',
+        confirmText: '去登录',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({
+              url: '/pages/login/login'
+            });
+          }
+        }
+      });
+      return;
+    }
 
     try {
       const res = await wx.showModal({
@@ -261,6 +318,25 @@ Page({
   onCompleteOrder: async function (e) {
     const orderId = e.currentTarget.dataset.id;
     console.log('完成订单:', orderId);
+
+    // 检查登录 - 完成订单需要登录
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.showModal({
+        title: '需要登录',
+        content: '完成订单需要登录后使用，是否前往登录？',
+        confirmText: '去登录',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({
+              url: '/pages/login/login'
+            });
+          }
+        }
+      });
+      return;
+    }
 
     try {
       const res = await wx.showModal({

@@ -2,18 +2,21 @@
   <!-- 用户信息头部 -->
   <view class="user-header">
     <view class="user-avatar-section" bindtap="onAvatarTap">
-      <image class="user-avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <image class="user-avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
       <view class="login-overlay" wx:if="{{!isLogin}}">
         <text class="login-text">点击登录</text>
       </view>
     </view>
     
     <view class="user-info">
-      <text class="user-name">{{userInfo.nickName || '未登录'}}</text>
+      <text class="user-name">{{isLogin ? (userInfo.nickname || userInfo.username || '用户') : '未登录'}}</text>
       <view class="user-stats" wx:if="{{isLogin}}">
         <text class="stat-item">已完成 {{userStats.completedOrders}}</text>
         <text class="stat-divider">|</text>
-        <text class="stat-item">好评率 {{userStats.goodRate}}%</text>
+        <text class="stat-item">发布 {{userStats.publishedOrders}}</text>
+      </view>
+      <view class="user-id" wx:if="{{isLogin}}">
+        <text class="id-text">ID: {{userInfo.id}}</text>
       </view>
     </view>
     

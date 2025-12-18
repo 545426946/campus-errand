@@ -9,14 +9,46 @@ const generateToken = (id) => {
 
 exports.register = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { username, password, confirmPassword, email, role } = req.body;
 
+    // 验证必填字段
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '用户名和密码不能为空'
+      });
+    }
+
+    // 验证密码确认
+    if (confirmPassword && password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '两次输入的密码不一致'
+      });
+    }
+
+    // 检查用户名是否已存在
+    const existingUser = await User.findByUsername(username);
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '用户名已存在'
+      });
+    }
+
+    console.log('创建用户:', { username, email: email || null, role: role || 'student' });
+    
     const user = await User.create({
       username,
-      email,
+      email: email || null, // email可选
       password,
-      role
+      role: role || 'student'
     });
+
+    console.log('用户创建成功:', user);
 
     const token = generateToken(user.id);
 
@@ -43,7 +75,7 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { email, password, code } = req.body;
+    const { username, email, password, code } = req.body;
 
     // 微信登录
     if (code) {
@@ -78,22 +110,52 @@ exports.login = async (req, res) => {
       });
     }
 
-    // 邮箱密码登录
-    if (!email || !password) {
+    // 账号密码登录（支持用户名或邮箱）
+    if (!password) {
       return res.status(400).json({
         success: false,
         code: 400,
-        message: '请提供邮箱和密码'
+        message: '请提供密码'
       });
     }
 
-    const user = await User.findByEmail(email);
+    if (!username && !email) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '请提供用户名或邮箱'
+      });
+    }
 
-    if (!user || !(await User.comparePassword(password, user.password))) {
+    // 优先使用用户名登录，其次使用邮箱
+    let user;
+    if (username) {
+      user = await User.findByUsername(username);
+      console.log('通过用户名查找用户:', username, '结果:', user ? '找到' : '未找到');
+    } else if (email) {
+      user = await User.findByEmail(email);
+      console.log('通过邮箱查找用户:', email, '结果:', user ? '找到' : '未找到');
+    }
+
+    if (!user) {
+      console.log('用户不存在');
       return res.status(401).json({
         success: false,
         code: 401,
-        message: '邮箱或密码错误'
+        message: '用户名/邮箱或密码错误'
+      });
+    }
+
+    // 验证密码
+    const isPasswordValid = await User.comparePassword(password, user.password);
+    console.log('密码验证结果:', isPasswordValid);
+    
+    if (!isPasswordValid) {
+      console.log('密码错误');
+      return res.status(401).json({
+        success: false,
+        code: 401,
+        message: '用户名/邮箱或密码错误'
       });
     }
 
@@ -107,7 +169,9 @@ exports.login = async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        nickname: user.nickname,
+        avatar: user.avatar
       },
       message: '登录成功'
     });

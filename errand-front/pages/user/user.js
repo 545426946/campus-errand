@@ -51,10 +51,16 @@ Page({
     const token = wx.getStorageSync('token');
     const userInfo = wx.getStorageSync('userInfo');
     
+    console.log('更新用户信息 - Token:', token ? '存在' : '不存在');
+    console.log('更新用户信息 - UserInfo:', userInfo);
+    
     this.setData({
       isLogin: !!token,
       userInfo: userInfo || {}
     });
+    
+    console.log('页面状态 - isLogin:', this.data.isLogin);
+    console.log('页面状态 - userInfo:', this.data.userInfo);
   },
 
   // 加载用户数据（从后端获取）
@@ -116,16 +122,8 @@ Page({
 
   // 登录
   login: function () {
-    wx.showModal({
-      title: '登录提示',
-      content: '请使用微信授权登录',
-      confirmText: '去登录',
-      showCancel: false,
-      success: () => {
-        wx.navigateTo({
-          url: '/pages/login/login'
-        });
-      }
+    wx.navigateTo({
+      url: '/pages/login/login'
     });
   },
 
@@ -156,7 +154,17 @@ Page({
     const needLoginTypes = ['myOrders', 'myPublish', 'myWallet', 'favorite', 'history', 'certification', 'notification'];
     
     if (needLoginTypes.includes(type) && !this.data.isLogin) {
-      this.login();
+      wx.showModal({
+        title: '需要登录',
+        content: '此功能需要登录后使用，是否前往登录？',
+        confirmText: '去登录',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            this.login();
+          }
+        }
+      });
       return;
     }
 
@@ -216,20 +224,15 @@ Page({
 
   // 退出登录
   onLogout: function () {
+    const authUtil = require('../../utils/auth.js');
+    
     wx.showModal({
       title: '退出登录',
       content: '确定要退出登录吗？',
       success: (res) => {
         if (res.confirm) {
-          // 清除本地存储
-          wx.removeStorageSync('token');
-          wx.removeStorageSync('userInfo');
-          
-          // 更新全局状态
-          if (app.globalData) {
-            app.globalData.isLogin = false;
-            app.globalData.userInfo = null;
-          }
+          // 使用认证工具清除登录信息
+          authUtil.clearLoginInfo();
           
           // 更新页面状态
           this.setData({

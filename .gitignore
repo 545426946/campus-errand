@@ -34,3 +34,6 @@ out/
 # Temporary files
 tmp/
 temp/
+
+# 前端文件夹（临时排除）
+errand-front/

@@ -1,40 +1,120 @@
 const path = require('path');
-const fs = require('fs').promises;
+const fs = require('fs');
 
-// 图片上传
-exports.uploadImage = async (req, res, next) => {
-  try {
-    // 简化版：模拟文件上传
-    // 实际项目中应该使用 multer 等中间件处理文件上传
-    
-    const { images } = req.body;
+class UploadController {
+  // 上传单张图片
+  static async uploadSingle(req, res) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: '请选择要上传的图片'
+        });
+      }
 
-    if (!images || !Array.isArray(images)) {
-      return res.status(400).json({
+      const uploadType = req.body.type || req.query.type || 'orders';
+      const imageUrl = `/uploads/${uploadType === 'avatar' ? 'avatars' : 'orders'}/${req.file.filename}`;
+
+      res.json({
+        success: true,
+        message: '上传成功',
+        data: {
+          url: imageUrl,
+          filename: req.file.filename,
+          size: req.file.size,
+          mimetype: req.file.mimetype
+        }
+      });
+    } catch (error) {
+      console.error('上传失败:', error);
+      res.status(500).json({
         success: false,
-        code: 400,
-        message: '请提供要上传的图片'
+        message: '上传失败',
+        error: error.message
       });
     }
-
-    // 模拟上传成功，返回图片URL
-    const uploadedImages = images.map((img, index) => ({
-      url: `http://192.168.1.133:3000/uploads/images/${Date.now()}_${index}.jpg`,
-      size: Math.floor(Math.random() * 1000000),
-      name: `image_${index}.jpg`
-    }));
-
-    res.json({
-      success: true,
-      code: 0,
-      data: {
-        images: uploadedImages
-      },
-      message: '图片上传成功'
-    });
-  } catch (error) {
-    next(error);
   }
-};
 
-module.exports = exports;
+  // 上传多张图片
+  static async uploadMultiple(req, res) {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: '请选择要上传的图片'
+        });
+      }
+
+      const uploadType = req.body.type || req.query.type || 'orders';
+      const images = req.files.map(file => ({
+        url: `/uploads/${uploadType === 'avatar' ? 'avatars' : 'orders'}/${file.filename}`,
+        filename: file.filename,
+        size: file.size,
+        mimetype: file.mimetype
+      }));
+
+      res.json({
+        success: true,
+        message: '上传成功',
+        data: {
+          images,
+          count: images.length
+        }
+      });
+    } catch (error) {
+      console.error('上传失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '上传失败',
+        error: error.message
+      });
+    }
+  }
+
+  // 删除图片
+  static async deleteImage(req, res) {
+    try {
+      const { filename, type } = req.body;
+
+      if (!filename) {
+        return res.status(400).json({
+          success: false,
+          message: '缺少文件名'
+        });
+      }
+
+      const uploadType = type || 'orders';
+      const filePath = path.join(
+        __dirname,
+        '../../uploads',
+        uploadType === 'avatar' ? 'avatars' : 'orders',
+        filename
+      );
+
+      // 检查文件是否存在
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({
+          success: false,
+          message: '文件不存在'
+        });
+      }
+
+      // 删除文件
+      fs.unlinkSync(filePath);
+
+      res.json({
+        success: true,
+        message: '删除成功'
+      });
+    } catch (error) {
+      console.error('删除失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '删除失败',
+        error: error.message
+      });
+    }
+  }
+}
+
+module.exports = UploadController;

@@ -591,15 +591,77 @@
 
 ### 5.2 文件上传
 
-#### 图片上传
-**接口**: `POST /upload/image`
+#### 上传单张图片
+**接口**: `POST /upload/single`
+
+**需要认证**: ✅
+
+**请求格式**: `multipart/form-data`
+
+**请求参数**:
+- `image` (file, 必填): 图片文件
+- `type` (string, 可选): 上传类型
+  - `avatar`: 用户头像
+  - `orders`: 订单图片（默认）
+
+**响应**:
+```json
+{
+  "success": true,
+  "message": "上传成功",
+  "data": {
+    "url": "/uploads/avatars/1703001234567-123456789.jpg",
+    "filename": "1703001234567-123456789.jpg",
+    "size": 102400,
+    "mimetype": "image/jpeg"
+  }
+}
+```
+
+**限制**:
+- 文件大小: 最大 5MB
+- 支持格式: jpeg, jpg, png, gif, webp
+
+#### 上传多张图片
+**接口**: `POST /upload/multiple`
+
+**需要认证**: ✅
+
+**请求格式**: `multipart/form-data`
+
+**请求参数**:
+- `images` (file[], 必填): 图片文件数组（最多9张）
+- `type` (string, 可选): 上传类型，默认 `orders`
+
+**响应**:
+```json
+{
+  "success": true,
+  "message": "上传成功",
+  "data": {
+    "images": [
+      {
+        "url": "/uploads/orders/1703001234567-123456789.jpg",
+        "filename": "1703001234567-123456789.jpg",
+        "size": 102400,
+        "mimetype": "image/jpeg"
+      }
+    ],
+    "count": 1
+  }
+}
+```
+
+#### 删除图片
+**接口**: `DELETE /upload/delete`
 
 **需要认证**: ✅
 
 **请求参数**:
 ```json
 {
-  "images": ["base64图片数据"]
+  "filename": "1703001234567-123456789.jpg",
+  "type": "avatar"
 }
 ```
 
@@ -607,18 +669,21 @@
 ```json
 {
   "success": true,
-  "code": 0,
-  "data": {
-    "images": [
-      {
-        "url": "http://...",
-        "size": 123456,
-        "name": "image.jpg"
-      }
-    ]
-  }
+  "message": "删除成功"
 }
 ```
+
+#### 访问图片
+**URL格式**: `/uploads/{type}/{filename}`
+
+**示例**:
+- 头像: `http://localhost:3000/uploads/avatars/1703001234567-123456789.jpg`
+- 订单图片: `http://localhost:3000/uploads/orders/1703001234567-123456789.jpg`
+
+**说明**:
+- 图片通过静态文件服务直接访问
+- 无需认证即可访问
+- 数据库中存储相对路径，如 `/uploads/avatars/xxx.jpg`
 
 ### 5.3 位置服务
 

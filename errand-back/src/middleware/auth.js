@@ -40,6 +40,9 @@ exports.protect = async (req, res, next) => {
   }
 };
 
+// 别名，为了兼容性
+exports.authenticate = exports.protect;
+
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {

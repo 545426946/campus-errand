@@ -151,7 +151,7 @@ Page({
     const type = e.currentTarget.dataset.type;
     
     // 需要登录的功能
-    const needLoginTypes = ['myOrders', 'myPublish', 'myWallet', 'favorite', 'history', 'certification', 'notification'];
+    const needLoginTypes = ['myOrders', 'myPublish', 'myWallet', 'profile', 'favorite', 'history', 'certification', 'notification'];
     
     if (needLoginTypes.includes(type) && !this.data.isLogin) {
       wx.showModal({
@@ -187,6 +187,11 @@ Page({
       case 'myWallet':
         wx.navigateTo({
           url: '/pages/wallet/wallet'
+        });
+        break;
+      case 'profile':
+        wx.navigateTo({
+          url: '/pages/profile/profile'
         });
         break;
       case 'favorite':

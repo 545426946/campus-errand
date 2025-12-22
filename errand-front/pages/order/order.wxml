@@ -25,13 +25,14 @@
     >
       <view class="order-header">
         <view class="order-type-info">
-          <text class="order-type">{{item.type}}</text>
+          <text class="order-type">{{item.typeText}}</text>
           <text class="order-id">订单号: {{item.orderNo}}</text>
         </view>
         <text class="order-status {{item.statusClass}}">{{item.statusText}}</text>
       </view>
       
       <view class="order-content">
+        <text class="order-title">{{item.title}}</text>
         <text class="order-desc">{{item.description}}</text>
         
         <view class="order-details">

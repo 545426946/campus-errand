@@ -2,7 +2,7 @@
   <!-- 用户信息头部 -->
   <view class="user-header">
     <view class="user-avatar-section" bindtap="onAvatarTap">
-      <image class="user-avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <image class="user-avatar" src="{{userInfo.avatar || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjVGNUY1Ii8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjgwIiByPSI0MCIgZmlsbD0iI0Q5RDlEOSIvPgo8ZWxsaXBzZSBjeD0iMTAwIiBjeT0iMTYwIiByeD0iNjAiIHJ5PSI0MCIgZmlsbD0iI0Q5RDlEOSIvPgo8L3N2Zz4='}}" mode="aspectFill"></image>
       <view class="login-overlay" wx:if="{{!isLogin}}">
         <text class="login-text">点击登录</text>
       </view>
@@ -77,6 +77,16 @@
         <view class="menu-left">
           <text class="menu-icon">📝</text>
           <text class="menu-title">历史记录</text>
+        </view>
+        <view class="menu-right">
+          <text class="menu-arrow">></text>
+        </view>
+      </view>
+      
+      <view class="menu-item" bindtap="onMenuTap" data-type="profile">
+        <view class="menu-left">
+          <text class="menu-icon">👤</text>
+          <text class="menu-title">个人信息</text>
         </view>
         <view class="menu-right">
           <text class="menu-arrow">></text>

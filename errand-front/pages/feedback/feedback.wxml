@@ -1,0 +1,112 @@
+<view class="page-container">
+  <!-- 反馈类型选择 -->
+  <view class="type-section">
+    <text class="section-title">反馈类型</text>
+    <view class="type-grid">
+      <view class="type-item {{selectedType.id === type.id ? 'selected' : ''}}"
+            wx:for="{{feedbackTypes}}" 
+            wx:key="id"
+            bindtap="selectType"
+            data-type="{{type}}">
+        <text class="type-icon">{{type.icon}}</text>
+        <text class="type-name">{{type.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 反馈表单 -->
+  <view class="form-section">
+    <view class="form-item">
+      <text class="form-label">反馈标题 *</text>
+      <input class="form-input {{errors.title ? 'error' : ''}}"
+             placeholder="请简要描述您的问题或建议"
+             value="{{formData.title}}"
+             bindinput="onInputChange"
+             data-field="title"
+             maxlength="50" />
+      <text class="error-text" wx:if="{{errors.title}}">{{errors.title}}</text>
+      <text class="char-count">{{formData.title.length}}/50</text>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">详细描述 *</text>
+      <textarea class="form-textarea {{errors.content ? 'error' : ''}}"
+                placeholder="请详细描述您遇到的问题或建议，以便我们更好地为您服务"
+                value="{{formData.content}}"
+                bindinput="onInputChange"
+                data-field="content"
+                maxlength="500"
+                auto-height></textarea>
+      <text class="error-text" wx:if="{{errors.content}}">{{errors.content}}</text>
+      <text class="char-count">{{formData.content.length}}/500</text>
+    </view>
+
+    <view class="form-item">
+      <text class="form-label">联系方式</text>
+      <input class="form-input {{errors.contact ? 'error' : ''}}"
+             placeholder="手机号或邮箱，方便我们联系您（选填）"
+             value="{{formData.contact}}"
+             bindinput="onInputChange"
+             data-field="contact" />
+      <text class="error-text" wx:if="{{errors.contact}}">{{errors.contact}}</text>
+    </view>
+
+    <!-- 图片上传 -->
+    <view class="form-item">
+      <text class="form-label">相关图片</text>
+      <view class="image-upload">
+        <view class="image-list">
+          <view class="image-item" 
+                wx:for="{{formData.images}}" 
+                wx:key="*this">
+            <image class="uploaded-image" 
+                   src="{{item}}" 
+                   mode="aspectFill"
+                   bindtap="onPreviewImage"
+                   data-url="{{item}}"></image>
+            <view class="delete-btn" 
+                  bindtap="onDeleteImage"
+                  data-index="{{index}}">
+              <text class="delete-icon">✕</text>
+            </view>
+          </view>
+          
+          <view class="upload-btn {{formData.images.length >= 4 ? 'disabled' : ''}}"
+                bindtap="onUploadImage"
+                wx:if="{{formData.images.length < 4}}">
+            <text class="upload-icon">📷</text>
+            <text class="upload-text">添加图片</text>
+          </view>
+        </view>
+        <text class="upload-desc">最多上传4张图片，每张不超过5MB</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-section">
+    <button class="submit-btn {{submitting ? 'loading' : ''}}" 
+            bindtap="onSubmitFeedback"
+            disabled="{{submitting}}">
+      {{submitting ? '提交中...' : '提交反馈'}}
+    </button>
+    
+    <view class="action-links">
+      <text class="link-text" bindtap="onViewHistory">查看反馈记录</text>
+    </view>
+  </view>
+
+  <!-- 温馨提示 -->
+  <view class="tips-section">
+    <view class="tips-header">
+      <text class="tips-icon">💡</text>
+      <text class="tips-title">温馨提示</text>
+    </view>
+    <view class="tips-list">
+      <text class="tips-item">• 请尽可能详细地描述您遇到的问题</text>
+      <text class="tips-item">• 上传相关截图能帮助我们更快定位问题</text>
+      <text class="tips-item">• 我们会在收到反馈后24小时内回复您</text>
+      <text class="tips-item">• 如有紧急问题，请直接联系客服</text>
+    </view>
+  </view>
+</view>

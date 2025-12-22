@@ -1,0 +1,254 @@
+/* 历史记录页面样式 */
+page {
+  background-color: #f8f8f8;
+}
+
+.page-container {
+  padding: 20rpx;
+}
+
+/* 统计卡片 */
+.stats-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.stats-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.clear-btn {
+  padding: 8rpx 16rpx;
+  border-radius: 16rpx;
+  background: #fff3cd;
+  border: 1rpx solid #ffeaa7;
+}
+
+.clear-text {
+  font-size: 24rpx;
+  color: #856404;
+}
+
+.stats-content {
+  display: flex;
+  align-items: center;
+}
+
+.stats-item {
+  flex: 1;
+  text-align: center;
+}
+
+.stats-number {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.stats-label {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.stats-divider {
+  width: 1rpx;
+  height: 40rpx;
+  background: #e5e5e5;
+  margin: 0 20rpx;
+}
+
+/* 筛选标签 */
+.filter-tabs {
+  display: flex;
+  background: white;
+  border-radius: 16rpx;
+  padding: 8rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.filter-tab {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.filter-tab.active {
+  background: #007aff;
+  color: white;
+  font-weight: 600;
+}
+
+/* 历史记录列表 */
+.history-list {
+  margin-bottom: 20rpx;
+}
+
+.history-item {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.item-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: #f0f9ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.icon-text {
+  font-size: 28rpx;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 6rpx;
+}
+
+.item-desc {
+  font-size: 24rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 6rpx;
+  line-height: 1.4;
+}
+
+.item-time {
+  font-size: 22rpx;
+  color: #999;
+  display: block;
+}
+
+.item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12rpx;
+}
+
+.item-amount {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #666;
+}
+
+.item-amount.positive {
+  color: #0ea5e9;
+}
+
+.item-amount.negative {
+  color: #ef4444;
+}
+
+.delete-btn {
+  opacity: 0;
+  transition: opacity 0.3s;
+  padding: 8rpx;
+  border-radius: 50%;
+}
+
+.history-item:hover .delete-btn {
+  opacity: 1;
+}
+
+.delete-icon {
+  font-size: 28rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 120rpx 40rpx;
+  background: white;
+  border-radius: 16rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 12rpx;
+  font-weight: 500;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #999;
+  display: block;
+}
+
+/* 加载状态 */
+.loading-state {
+  text-align: center;
+  padding: 40rpx;
+  background: white;
+  border-radius: 16rpx;
+  margin-top: 20rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 没有更多 */
+.no-more {
+  text-align: center;
+  padding: 40rpx;
+  background: white;
+  border-radius: 16rpx;
+  margin-top: 20rpx;
+}
+
+.no-more-text {
+  font-size: 26rpx;
+  color: #999;
+}

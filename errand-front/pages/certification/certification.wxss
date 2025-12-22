@@ -1,0 +1,391 @@
+/* 实名认证页面样式 */
+page {
+  background-color: #f8f8f8;
+}
+
+.page-container {
+  padding: 20rpx;
+  padding-bottom: 100rpx;
+}
+
+/* 步骤指示器 */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40rpx;
+  padding: 0 40rpx;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.step-number {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: #e5e5e5;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.step-item.active .step-number {
+  background: #007aff;
+  color: white;
+}
+
+.step-text {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.step-item.active .step-text {
+  color: #007aff;
+  font-weight: 600;
+}
+
+.step-line {
+  flex: 1;
+  height: 2rpx;
+  background: #e5e5e5;
+  margin: 0 16rpx;
+  margin-top: -24rpx;
+}
+
+.step-line.active {
+  background: #007aff;
+}
+
+/* 步骤内容 */
+.step-content {
+  background: white;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.form-section,
+.upload-section,
+.summary-section {
+  margin-bottom: 40rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 30rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+/* 表单样式 */
+.form-item {
+  margin-bottom: 30rpx;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #333;
+  display: block;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.form-input {
+  width: 100%;
+  padding: 24rpx;
+  border: 1rpx solid #e5e5e5;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  background: #fafafa;
+}
+
+.form-input.error {
+  border-color: #ff4757;
+  background: #fff5f5;
+}
+
+.error-text {
+  font-size: 24rpx;
+  color: #ff4757;
+  margin-top: 8rpx;
+  display: block;
+}
+
+/* 提示区域 */
+.tips-section,
+.notice-section {
+  background: #f0f9ff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  border-left: 4rpx solid #007aff;
+}
+
+.tips-title,
+.notice-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.tips-icon,
+.notice-icon {
+  font-size: 28rpx;
+  margin-right: 12rpx;
+}
+
+.tips-text,
+.notice-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #007aff;
+}
+
+.tips-list,
+.notice-content {
+  padding-left: 40rpx;
+}
+
+.tips-item,
+.notice-item {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+/* 上传区域 */
+.upload-grid {
+  display: flex;
+  gap: 30rpx;
+  margin-bottom: 40rpx;
+}
+
+.upload-item {
+  flex: 1;
+}
+
+.upload-label {
+  font-size: 26rpx;
+  color: #333;
+  display: block;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.upload-area {
+  aspect-ratio: 1.586;
+  border: 2rpx dashed #d1d5db;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+}
+
+.upload-area.has-image {
+  border-style: solid;
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+
+.upload-icon {
+  font-size: 48rpx;
+  margin-bottom: 16rpx;
+}
+
+.upload-text {
+  font-size: 26rpx;
+  color: #333;
+  margin-bottom: 8rpx;
+  font-weight: 500;
+}
+
+.upload-desc {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 图片预览 */
+.image-preview {
+  position: relative;
+  aspect-ratio: 1.586;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+}
+
+.image-actions {
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+}
+
+.delete-btn {
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 8rpx 16rpx;
+  border-radius: 16rpx;
+  font-size: 22rpx;
+}
+
+/* 信息卡片 */
+.info-card {
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #e9ecef;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.info-value {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 结果内容 */
+.result-content {
+  text-align: center;
+  padding: 80rpx 40rpx;
+}
+
+.result-icon {
+  font-size: 120rpx;
+  margin-bottom: 24rpx;
+}
+
+.result-icon.success {
+  color: #10b981;
+}
+
+.result-icon.pending {
+  color: #f59e0b;
+}
+
+.result-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.result-desc {
+  font-size: 28rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 40rpx;
+}
+
+.cert-info {
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  text-align: left;
+  margin-bottom: 30rpx;
+}
+
+.cert-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12rpx 0;
+}
+
+.cert-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.cert-value {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.pending-info {
+  background: #fef3c7;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  border-left: 4rpx solid #f59e0b;
+  text-align: left;
+}
+
+.pending-item {
+  font-size: 24rpx;
+  color: #92400e;
+  line-height: 1.6;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+/* 操作按钮 */
+.action-section {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 40rpx;
+}
+
+.primary-btn,
+.secondary-btn {
+  flex: 1;
+  padding: 24rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  text-align: center;
+}
+
+.primary-btn {
+  background: #007aff;
+  color: white;
+  border: none;
+}
+
+.primary-btn.loading {
+  background: #94a3b8;
+}
+
+.primary-btn[disabled] {
+  background: #94a3b8;
+}
+
+.secondary-btn {
+  background: #f8f9fa;
+  color: #333;
+  border: 1rpx solid #dee2e6;
+}

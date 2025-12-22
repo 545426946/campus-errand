@@ -1,0 +1,69 @@
+<view class="page-container">
+  <!-- 搜索栏 -->
+  <view class="search-section">
+    <view class="search-box">
+      <input class="search-input"
+             placeholder="搜索帮助内容"
+             value="{{searchKeyword}}"
+             bindinput="onSearchInput" />
+      <text class="clear-icon" wx:if="{{searchKeyword}}" bindtap="clearSearch">✕</text>
+    </view>
+  </view>
+
+  <!-- 搜索结果 -->
+  <view class="search-results" wx:if="{{searchResults.length > 0}}">
+    <text class="result-title">搜索结果</text>
+    <view class="result-list">
+      <view class="result-item" wx:for="{{searchResults}}" wx:key="id">
+        <view class="result-header">
+          <text class="result-category">{{item.categoryIcon}} {{item.categoryName}}</text>
+          <text class="result-title-text">{{item.title}}</text>
+        </view>
+        <text class="result-content">{{item.content}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 分类内容 -->
+  <view class="content-section" wx:else>
+    <!-- 分类标签 -->
+    <view class="category-tabs">
+      <view class="category-tab {{currentCategory.id === category.id ? 'active' : ''}}"
+            wx:for="{{categories}}" 
+            wx:for-item="category"
+            wx:key="id"
+            bindtap="switchCategory"
+            data-category="{{category}}">
+        <text class="tab-icon">{{category.icon}}</text>
+        <text class="tab-text">{{category.name}}</text>
+      </view>
+    </view>
+
+    <!-- 帮助列表 -->
+    <view class="help-list">
+      <view class="help-item {{expandedItems.includes(item.id) ? 'expanded' : ''}}"
+            wx:for="{{currentCategory.items}}" 
+            wx:key="id"
+            bindtap="toggleItem"
+            data-id="{{item.id}}">
+        
+        <view class="help-header">
+          <text class="help-title">{{item.title}}</text>
+          <text class="expand-icon {{expandedItems.includes(item.id) ? 'expanded' : ''}}">▼</text>
+        </view>
+        
+        <view class="help-content" wx:if="{{expandedItems.includes(item.id)}}">
+          <text class="help-text">{{item.content}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系客服 -->
+  <view class="contact-section">
+    <text class="contact-title">没有找到答案？</text>
+    <button class="contact-btn" bindtap="contactService">
+      联系客服
+    </button>
+  </view>
+</view>

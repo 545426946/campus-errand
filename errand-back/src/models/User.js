@@ -43,11 +43,70 @@ class User {
   }
 
   static async updateProfile(id, profileData) {
-    const { avatar, phone, student_id, major, grade } = profileData;
-    await db.execute(
-      'UPDATE users SET avatar = ?, phone = ?, student_id = ?, major = ?, grade = ? WHERE id = ?',
-      [avatar, phone, student_id, major, grade, id]
-    );
+    const { 
+      avatar, 
+      phone, 
+      student_id, 
+      major, 
+      grade,
+      nickname,
+      email,
+      gender,
+      school,
+      bio
+    } = profileData;
+    
+    // 构建动态更新语句
+    const fields = [];
+    const values = [];
+    
+    if (avatar !== undefined) {
+      fields.push('avatar = ?');
+      values.push(avatar);
+    }
+    if (phone !== undefined) {
+      fields.push('phone = ?');
+      values.push(phone);
+    }
+    if (student_id !== undefined) {
+      fields.push('student_id = ?');
+      values.push(student_id);
+    }
+    if (major !== undefined) {
+      fields.push('major = ?');
+      values.push(major);
+    }
+    if (grade !== undefined) {
+      fields.push('grade = ?');
+      values.push(grade);
+    }
+    if (nickname !== undefined) {
+      fields.push('nickname = ?');
+      values.push(nickname);
+    }
+    if (email !== undefined) {
+      fields.push('email = ?');
+      values.push(email);
+    }
+    if (gender !== undefined) {
+      fields.push('gender = ?');
+      values.push(gender);
+    }
+    if (school !== undefined) {
+      fields.push('school = ?');
+      values.push(school);
+    }
+    if (bio !== undefined) {
+      fields.push('bio = ?');
+      values.push(bio);
+    }
+    
+    if (fields.length > 0) {
+      const query = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
+      values.push(id);
+      await db.execute(query, values);
+    }
+    
     return await this.findById(id);
   }
 

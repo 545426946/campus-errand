@@ -57,12 +57,28 @@ Page({
 
   // 加载订单列表（从后端获取）
   loadOrderList: async function (refresh = false) {
+    console.log('========== 开始加载订单列表 ==========');
+    console.log('当前标签页:', this.data.currentTab);
+    console.log('标签页名称:', this.data.tabs[this.data.currentTab]);
+    console.log('是否刷新:', refresh);
+    
     // 检查登录状态，但不阻止加载
     const isLoggedIn = this.checkLogin();
+    console.log('登录状态:', isLoggedIn);
     
-    if (this.data.loading) return;
+    // 检查用户信息
+    const token = wx.getStorageSync('token');
+    const userInfo = wx.getStorageSync('userInfo');
+    console.log('Token存在:', !!token);
+    console.log('UserInfo:', userInfo);
+    
+    if (this.data.loading) {
+      console.log('正在加载中，跳过');
+      return;
+    }
     
     if (refresh) {
+      console.log('重置分页数据');
       this.setData({
         page: 1,
         orderList: [],
@@ -78,8 +94,10 @@ Page({
       
       // 未登录时，只能查看公开订单列表
       if (!isLoggedIn) {
+        console.log('用户未登录');
         if (currentTab === 0 || currentTab === 1) {
           // "我发布的"和"我接受的"需要登录
+          console.log('需要登录才能查看此标签页');
           this.setData({
             orderList: [],
             hasMore: false,
@@ -94,11 +112,13 @@ Page({
         }
         
         // 未登录用户可以查看公开订单列表
+        console.log('查看公开订单列表');
         const statusMap = {
           2: 'pending',
           3: 'accepted',
           4: 'completed'
         };
+        console.log('调用API: getOrderList, status:', statusMap[currentTab]);
         result = await orderAPI.getOrderList({
           page: this.data.page,
           pageSize: this.data.pageSize,
@@ -106,14 +126,17 @@ Page({
         });
       } else {
         // 已登录用户，根据标签页调用不同的API
+        console.log('用户已登录，用户ID:', userInfo?.id);
         if (currentTab === 0) {
           // 我发布的订单
+          console.log('调用API: getMyPublishOrders');
           result = await orderAPI.getMyPublishOrders({
             page: this.data.page,
             pageSize: this.data.pageSize
           });
         } else if (currentTab === 1) {
           // 我接受的订单
+          console.log('调用API: getMyAcceptedOrders');
           result = await orderAPI.getMyAcceptedOrders({
             page: this.data.page,
             pageSize: this.data.pageSize
@@ -125,6 +148,7 @@ Page({
             3: 'accepted',
             4: 'completed'
           };
+          console.log('调用API: getOrderList, status:', statusMap[currentTab]);
           result = await orderAPI.getOrderList({
             page: this.data.page,
             pageSize: this.data.pageSize,
@@ -133,10 +157,22 @@ Page({
         }
       }
       
+      console.log('API返回结果:', result);
+      console.log('订单数量:', result.data?.length);
+      
       // 处理订单数据
-      const orders = result.data.map(order => {
+      console.log('开始处理订单数据...');
+      const orders = result.data.map((order, index) => {
         const userInfo = wx.getStorageSync('userInfo');
-        return {
+        console.log(`处理订单 ${index + 1}:`, {
+          id: order.id,
+          title: order.title,
+          user_id: order.user_id,
+          status: order.status,
+          type: order.type
+        });
+        
+        const processedOrder = {
           ...order,
           statusText: this.data.statusMap[order.status],
           typeText: this.data.serviceTypeMap[order.type],
@@ -149,26 +185,43 @@ Page({
           deliveryLocation: order.delivery_location || order.deliveryLocation || '',
           orderNo: order.order_no || order.orderNo || order.id
         };
+        
+        console.log(`处理后的订单 ${index + 1}:`, {
+          id: processedOrder.id,
+          title: processedOrder.title,
+          statusText: processedOrder.statusText,
+          typeText: processedOrder.typeText
+        });
+        
+        return processedOrder;
       });
       
       const newList = refresh ? orders : [...this.data.orderList, ...orders];
       
+      console.log('设置订单列表，总数:', newList.length);
       this.setData({
         orderList: newList,
         hasMore: orders.length >= this.data.pageSize,
         loading: false
       });
       
-      console.log('订单列表加载成功，共', newList.length, '条');
+      console.log('✅ 订单列表加载成功，共', newList.length, '条');
+      console.log('========== 加载完成 ==========');
       
     } catch (error) {
-      console.error('加载订单失败:', error);
+      console.error('❌ 加载订单失败:', error);
+      console.error('错误详情:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response
+      });
       this.setData({ loading: false });
       
       wx.showToast({
         title: error.message || '加载失败',
         icon: 'none'
       });
+      console.log('========== 加载失败 ==========');
     }
   },
 

@@ -1,0 +1,251 @@
+/* 钱包页面样式 */
+page {
+  background-color: #f8f8f8;
+}
+
+.page-container {
+  padding: 20rpx;
+}
+
+/* 钱包卡片 */
+.wallet-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20rpx;
+  padding: 40rpx 30rpx;
+  color: white;
+  margin-bottom: 30rpx;
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.2);
+}
+
+.wallet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+.wallet-title {
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.wallet-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  border-radius: 30rpx;
+  padding: 12rpx 24rpx;
+  font-size: 24rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.action-btn.withdraw {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.balance-section {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.balance-label {
+  font-size: 28rpx;
+  opacity: 0.8;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.balance-amount {
+  font-size: 64rpx;
+  font-weight: 700;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.wallet-stats {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.stat-item {
+  text-align: center;
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  opacity: 0.8;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.stat-value {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.stat-divider {
+  width: 1rpx;
+  height: 40rpx;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 区域标题 */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 0 10rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.record-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 交易记录列表 */
+.detail-list {
+  background: white;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  position: relative;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-right: 24rpx;
+}
+
+.detail-icon.income {
+  background: #f0f9ff;
+  color: #0ea5e9;
+}
+
+.detail-icon.expense {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.detail-icon.freeze {
+  background: #f9fafb;
+  color: #6b7280;
+}
+
+.detail-info {
+  flex: 1;
+}
+
+.detail-title {
+  font-size: 28rpx;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+  font-weight: 500;
+}
+
+.detail-time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.detail-amount {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.detail-amount.income {
+  color: #0ea5e9;
+}
+
+.detail-amount.expense {
+  color: #ef4444;
+}
+
+.detail-amount.freeze {
+  color: #6b7280;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 120rpx 40rpx;
+  background: white;
+  border-radius: 16rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 12rpx;
+  font-weight: 500;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #999;
+  display: block;
+}
+
+/* 加载状态 */
+.loading-state {
+  text-align: center;
+  padding: 40rpx;
+  background: white;
+  border-radius: 16rpx;
+  margin-top: 20rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 没有更多 */
+.no-more {
+  text-align: center;
+  padding: 40rpx;
+  background: white;
+  border-radius: 16rpx;
+  margin-top: 20rpx;
+}
+
+.no-more-text {
+  font-size: 26rpx;
+  color: #999;
+}

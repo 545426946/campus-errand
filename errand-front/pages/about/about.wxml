@@ -1,0 +1,78 @@
+<view class="page-container">
+  <!-- 应用信息 -->
+  <view class="app-info-section">
+    <view class="app-header">
+      <image class="app-logo" src="/images/logo.png" mode="aspectFit"></image>
+      <view class="app-title">
+        <text class="app-name">校园跑腿</text>
+        <text class="app-version">v{{version}}</text>
+      </view>
+    </view>
+    
+    <text class="app-description">{{company.description}}</text>
+  </view>
+
+  <!-- 特色功能 -->
+  <view class="features-section">
+    <text class="section-title">特色功能</text>
+    <view class="features-grid">
+      <view class="feature-item" wx:for="{{features}}" wx:key="title">
+        <text class="feature-icon">{{item.icon}}</text>
+        <text class="feature-title">{{item.title}}</text>
+        <text class="feature-desc">{{item.description}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系我们 -->
+  <view class="contact-section">
+    <text class="section-title">联系我们</text>
+    
+    <view class="contact-item" bindtap="copyContact" data-text="{{company.email}}">
+      <text class="contact-icon">📧</text>
+      <view class="contact-info">
+        <text class="contact-label">邮箱</text>
+        <text class="contact-value">{{company.email}}</text>
+      </view>
+      <text class="copy-icon">复制</text>
+    </view>
+
+    <view class="contact-item" bindtap="copyContact" data-text="{{company.phone}}">
+      <text class="contact-icon">📞</text>
+      <view class="contact-info">
+        <text class="contact-label">客服电话</text>
+        <text class="contact-value">{{company.phone}}</text>
+      </view>
+      <text class="copy-icon">复制</text>
+    </view>
+
+    <view class="contact-item" bindtap="openWebsite">
+      <text class="contact-icon">🌐</text>
+      <view class="contact-info">
+        <text class="contact-label">官网</text>
+        <text class="contact-value">{{company.website}}</text>
+      </view>
+      <text class="arrow-icon">></text>
+    </view>
+  </view>
+
+  <!-- 相关政策 -->
+  <view class="policy-section">
+    <text class="section-title">相关政策</text>
+    <view class="policy-list">
+      <view class="policy-item" wx:for="{{policies}}" wx:key="title"
+            bindtap="viewPolicy" data-policy="{{item}}">
+        <text class="policy-icon">{{item.icon}}</text>
+        <text class="policy-title">{{item.title}}</text>
+        <text class="arrow-icon">></text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 版本信息 -->
+  <view class="version-section">
+    <text class="copyright">© 2024 {{company.name}} 版权所有</text>
+    <text class="version-text">当前版本 {{version}}</text>
+    <button class="update-btn" bindtap="checkUpdate">检查更新</button>
+  </view>
+</view>

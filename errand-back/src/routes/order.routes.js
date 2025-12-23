@@ -23,7 +23,7 @@ const { evaluateOrder, getEvaluations, reportOrder, shareOrder, searchOrders, ge
 // 公开接口 - 不需要认证（未登录用户可以浏览）
 router.get('/', getOrders);  // 订单列表
 router.get('/search', searchOrders);  // 搜索订单
-router.get('/hot', getHotOrders);  // 热门订单
+router.get('/hot', getHotOrders);  // 全部订单
 router.get('/recommended', getRecommendedOrders);  // 推荐订单
 
 // 我的订单 - 需要认证（必须在 /:id 之前）

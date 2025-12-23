@@ -83,7 +83,7 @@ const orderAPI = {
     })
   },
 
-  // 获取热门订单
+  // 获取全部订单
   getHotOrders(params = {}) {
     return request.get('/orders/hot', {
       limit: params.limit || 10

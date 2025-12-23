@@ -630,7 +630,7 @@ exports.searchOrders = async (req, res, next) => {
   }
 };
 
-// 获取热门订单
+// 获取全部订单
 exports.getHotOrders = async (req, res, next) => {
   try {
     const { page = 1, pageSize = 10 } = req.query;
@@ -646,7 +646,7 @@ exports.getHotOrders = async (req, res, next) => {
       success: true,
       code: 0,
       data: orders,
-      message: '获取热门订单成功'
+      message: '获取全部订单成功'
     });
   } catch (error) {
     next(error);

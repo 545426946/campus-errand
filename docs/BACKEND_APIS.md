@@ -57,7 +57,7 @@
 | GET | `/my-publish` | 获取我发布的订单 | `?page, pageSize, status` |
 | GET | `/my-accepted` | 获取我接受的订单 | `?page, pageSize, status` |
 | GET | `/search` | 搜索订单 | `?keyword, ...` |
-| GET | `/hot` | 获取热门订单 | `?limit` |
+| GET | `/hot` | 获取全部订单 | `?limit` |
 | GET | `/recommended` | 获取推荐订单 | `?limit, location` |
 
 ## 4. 通知模块 (Notification) - `/api/notifications`

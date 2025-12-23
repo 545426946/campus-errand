@@ -31,10 +31,10 @@
     </view>
   </view>
 
-  <!-- 热门订单 -->
+  <!-- 全部订单 -->
   <view class="orders-section">
     <view class="section-header">
-      <text class="section-title">热门订单</text>
+      <text class="section-title">全部订单</text>
       <text class="more-text" bindtap="onViewMore">查看更多</text>
     </view>
     

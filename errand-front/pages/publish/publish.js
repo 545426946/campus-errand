@@ -39,7 +39,31 @@ Page({
   onLoad() {
     // 检查登录状态
     const token = wx.getStorageSync('token');
-    if (!token) {
+    const userInfo = wx.getStorageSync('userInfo');
+    
+    if (!token || !userInfo) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录',
+        showCancel: false,
+        success: () => {
+          wx.navigateTo({
+            url: '/pages/login/login'
+          });
+        }
+      });
+      return;
+    }
+    
+    console.log('发布订单页面加载完成，用户已登录');
+  },
+
+  onShow() {
+    // 每次显示页面时检查登录状态
+    const token = wx.getStorageSync('token');
+    const userInfo = wx.getStorageSync('userInfo');
+    
+    if (!token || !userInfo) {
       wx.showModal({
         title: '提示',
         content: '请先登录',
@@ -186,6 +210,21 @@ Page({
     } catch (error) {
       this.setData({ submitting: false });
       console.error('发布订单失败:', error);
+
+      // 特殊处理401错误（Token无效）
+      if (error.message === 'Token无效或已过期' || error.message === '认证失败') {
+        wx.showModal({
+          title: '登录已过期',
+          content: '您的登录状态已过期，请重新登录',
+          showCancel: false,
+          success: () => {
+            wx.navigateTo({
+              url: '/pages/login/login'
+            });
+          }
+        });
+        return;
+      }
 
       wx.showToast({
         title: error.message || '发布失败',

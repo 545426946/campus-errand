@@ -36,9 +36,10 @@ class Request {
     const token = wx.getStorageSync('token')
     if (token) {
       config.header['Authorization'] = `Bearer ${token}`
-      console.log('添加Token到请求头:', token.substring(0, 20) + '...')
+      console.log('添加Token到请求头:', token.substring(0, 20) + '...', '完整长度:', token.length)
+    } else {
+      console.log('未找到Token，发送未授权请求')
     }
-    // 未登录时不再警告，因为允许未登录用户浏览
 
     console.log('请求配置:', {
       url: config.url,
@@ -78,17 +79,34 @@ class Request {
       // 只有在已登录状态下收到 401 才清除登录信息
       // 登录接口返回 401 不应该清除（因为本来就没登录）
       const token = wx.getStorageSync('token')
-      if (token) {
-        // 已登录但 token 失效，清除登录信息
+      if (token && data.tokenExpired) {
+        // Token 已过期，清除登录信息
+        console.log('Token已过期，清除登录状态')
         wx.removeStorageSync('token')
         wx.removeStorageSync('userInfo')
         const app = getApp()
-        app.globalData.isLogin = false
-        app.globalData.userInfo = null
+        if (app) {
+          app.globalData.isLogin = false
+          app.globalData.userInfo = null
+        }
+        
+        // 提示用户重新登录
+        wx.showModal({
+          title: '登录已过期',
+          content: '您的登录状态已过期，请重新登录',
+          showCancel: false,
+          success: () => {
+            wx.reLaunch({
+              url: '/pages/login/login'
+            })
+          }
+        })
       }
       
       // 返回具体的错误信息
-      toast.error(message)
+      if (!data.tokenExpired) {
+        toast.error(message)
+      }
       return Promise.reject(new Error(message))
     } else if (statusCode === 403) {
       // 权限不足

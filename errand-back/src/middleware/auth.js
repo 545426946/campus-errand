@@ -17,7 +17,20 @@ exports.protect = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // 验证 token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (jwtError) {
+      console.error('JWT验证失败:', jwtError.message);
+      return res.status(401).json({ 
+        success: false,
+        code: 401,
+        message: 'Token无效或已过期',
+        tokenExpired: true // 标记 token 已过期
+      });
+    }
+
     const user = await User.findById(decoded.id);
     
     if (!user) {
@@ -35,7 +48,8 @@ exports.protect = async (req, res, next) => {
     res.status(401).json({ 
       success: false,
       code: 401,
-      message: 'Token无效或已过期' 
+      message: 'Token无效或已过期',
+      tokenExpired: true
     });
   }
 };

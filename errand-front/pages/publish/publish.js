@@ -203,10 +203,6 @@ Page({
         duration: 2000
       });
 
-      // 添加成功动画（暂时禁用，避免查询节点错误）
-      // const submitBtn = this.selectComponent('.submit-btn') || 
-      //                  this.createSelectorQuery().select('.submit-btn');
-      
       // 跳转到订单详情
       setTimeout(() => {
         wx.redirectTo({
@@ -218,26 +214,14 @@ Page({
       this.setData({ submitting: false });
       console.error('发布订单失败:', error);
 
-      // 特殊处理401错误（Token无效）
-      if (error.message === 'Token无效或已过期' || error.message === '认证失败') {
-        wx.showModal({
-          title: '登录已过期',
-          content: '您的登录状态已过期，请重新登录',
-          showCancel: false,
-          success: () => {
-            wx.navigateTo({
-              url: '/pages/login/login'
-            });
-          }
+      // 401错误已在请求拦截器中统一处理，这里只处理其他错误
+      if (error.message !== 'Token无效或已过期' && error.message !== '认证失败') {
+        wx.showToast({
+          title: error.message || '发布失败',
+          icon: 'none',
+          duration: 2000
         });
-        return;
       }
-
-      wx.showToast({
-        title: error.message || '发布失败',
-        icon: 'none',
-        duration: 2000
-      });
     }
   }
 });

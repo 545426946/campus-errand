@@ -153,8 +153,14 @@ exports.acceptOrder = async (req, res, next) => {
       });
     }
 
+    console.log('=== 接单调试信息 ===');
+    console.log('订单ID:', id);
+    console.log('接单者ID:', acceptorId);
+    
     const accepted = await Order.accept(id, acceptorId);
 
+    console.log('接单结果:', accepted);
+    
     if (!accepted) {
       return res.status(400).json({
         success: false,

@@ -111,11 +111,24 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: transform var(--transition-fast);
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+  cursor: pointer;
 }
 
 .service-item:active {
   transform: scale(0.95);
+}
+
+.service-item-selected {
+  background: var(--gray-5);
+  color: var(--gray-1);
+}
+
+.service-item-selected .service-name {
+  color: var(--gray-1);
+  font-weight: 600;
 }
 
 .service-icon {

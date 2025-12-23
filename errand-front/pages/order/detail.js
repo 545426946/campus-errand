@@ -54,6 +54,8 @@ Page({
       order.typeText = this.data.serviceTypeMap[order.type];
       order.createdTime = formatTime(new Date(order.created_at));
       
+      // 简化处理：不再添加额外字段，直接在模板中处理
+      
       if (order.accepted_at) {
         order.acceptedTime = formatTime(new Date(order.accepted_at));
       }
@@ -86,7 +88,14 @@ Page({
         canComplete
       });
       
-      console.log('订单详情加载成功:', order);
+      console.log('=== 订单详情调试信息 ===');
+      console.log('原始数据:', JSON.stringify(order, null, 2));
+      console.log('接单者信息:', {
+        acceptor_id: order.acceptor_id,
+        acceptor_name: order.acceptor_name,
+        acceptor_username: order.acceptor_username
+      });
+      console.log('=== 调试信息结束 ===');
       
     } catch (error) {
       wx.hideLoading();

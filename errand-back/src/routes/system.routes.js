@@ -21,6 +21,20 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
+// 健康检查（公开）
+router.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    code: 0,
+    data: {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0'
+    },
+    message: '服务器运行正常'
+  });
+});
+
 // 系统配置（公开）
 router.get('/config', getConfig);
 router.get('/service-types', getServiceTypes);

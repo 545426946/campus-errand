@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const WalletTransaction = require('../models/WalletTransaction');
 
 // 获取用户信息
 exports.getUserProfile = async (req, res, next) => {
@@ -46,14 +47,18 @@ exports.updateUserInfo = async (req, res, next) => {
 // 获取钱包信息
 exports.getWalletInfo = async (req, res, next) => {
   try {
-    // 简化版：返回固定余额
+    // 模拟数据，用于测试
+    const mockBalance = 150.50;
+    const mockFrozen = 20.00;
+    const mockTotal = mockBalance + mockFrozen;
+
     res.json({
       success: true,
       code: 0,
       data: {
-        balance: 0,
-        frozen: 0,
-        total: 0
+        balance: mockBalance,
+        frozen: mockFrozen,
+        total: mockTotal
       },
       message: '获取钱包信息成功'
     });
@@ -202,15 +207,74 @@ exports.getWalletDetails = async (req, res, next) => {
   try {
     const { page = 1, pageSize = 20, type } = req.query;
     
-    // 简化版：返回空列表
+    // 模拟交易记录数据
+    const mockTransactions = [
+      {
+        id: 1,
+        type: 'recharge',
+        amount: 100.00,
+        title: '账户充值',
+        description: '通过微信充值 ¥100.00',
+        createTime: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30分钟前
+        status: 'completed',
+        balanceBefore: 50.50,
+        balanceAfter: 150.50
+      },
+      {
+        id: 2,
+        type: 'income',
+        amount: 15.00,
+        title: '订单收入',
+        description: '完成跑腿订单获得收入',
+        createTime: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2小时前
+        status: 'completed',
+        balanceBefore: 35.50,
+        balanceAfter: 50.50
+      },
+      {
+        id: 3,
+        type: 'expense',
+        amount: 5.00,
+        title: '服务费',
+        description: '平台服务费扣除',
+        createTime: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1天前
+        status: 'completed',
+        balanceBefore: 40.50,
+        balanceAfter: 35.50
+      },
+      {
+        id: 4,
+        type: 'recharge',
+        amount: 50.00,
+        title: '账户充值',
+        description: '通过微信充值 ¥50.00',
+        createTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(), // 2天前
+        status: 'completed',
+        balanceBefore: 0,
+        balanceAfter: 50.00
+      }
+    ];
+
+    // 根据类型过滤
+    let filteredTransactions = mockTransactions;
+    if (type) {
+      filteredTransactions = mockTransactions.filter(t => t.type === type);
+    }
+
+    // 分页
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + parseInt(pageSize);
+    const paginatedList = filteredTransactions.slice(startIndex, endIndex);
+
     res.json({
       success: true,
       code: 0,
       data: {
-        list: [],
-        total: 0,
+        list: paginatedList,
+        total: filteredTransactions.length,
         page: parseInt(page),
-        pageSize: parseInt(pageSize)
+        pageSize: parseInt(pageSize),
+        hasMore: endIndex < filteredTransactions.length
       },
       message: '获取钱包明细成功'
     });
@@ -231,12 +295,42 @@ exports.withdraw = async (req, res, next) => {
         message: '提现金额必须大于0'
       });
     }
-    
-    // 简化版：直接返回成功
+
+    // 检查用户余额
+    const user = await User.findById(req.user.id);
+    const currentBalance = parseFloat(user.balance) || 0;
+
+    if (currentBalance < amount) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '余额不足'
+      });
+    }
+
+    // 执行提现操作
+    const result = await WalletTransaction.updateUserBalance(
+      req.user.id,
+      amount,
+      'withdraw',
+      {
+        title: '账户提现',
+        description: `提现到${account || '微信'} ¥${amount}`,
+        status: 'pending' // 提现通常需要审核
+      }
+    );
+
     res.json({
       success: true,
       code: 0,
-      message: '提现申请已提交'
+      data: {
+        amount: parseFloat(amount),
+        account: account || '微信',
+        balance_before: result.balance_before,
+        balance_after: result.balance_after,
+        transaction_id: result.id
+      },
+      message: '提现申请已提交，预计1-3个工作日到账'
     });
   } catch (error) {
     next(error);
@@ -255,17 +349,31 @@ exports.recharge = async (req, res, next) => {
         message: '充值金额必须大于0'
       });
     }
-    
-    // 简化版：返回支付信息
+
+    if (amount > 10000) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '单次充值金额不能超过10000元'
+      });
+    }
+
+    // 模拟充值成功
+    const balanceBefore = 150.50;
+    const balanceAfter = balanceBefore + parseFloat(amount);
+
     res.json({
       success: true,
       code: 0,
       data: {
         orderId: `recharge_${Date.now()}`,
-        amount,
-        paymentMethod
+        amount: parseFloat(amount),
+        paymentMethod: paymentMethod || 'wechat',
+        balance_before: balanceBefore,
+        balance_after: balanceAfter,
+        transaction_id: Date.now()
       },
-      message: '充值订单创建成功'
+      message: '充值成功'
     });
   } catch (error) {
     next(error);

@@ -4,6 +4,7 @@
     
     <!-- 订单状态 -->
     <view class="status-card">
+      <view class="status-decoration"></view>
       <view class="status-icon status-{{orderDetail.status}}">
         <text wx:if="{{orderDetail.status === 'pending'}}">⏰</text>
         <text wx:if="{{orderDetail.status === 'accepted'}}">🚀</text>
@@ -11,6 +12,7 @@
         <text wx:if="{{orderDetail.status === 'cancelled'}}">❌</text>
       </view>
       <view class="status-text">{{orderDetail.statusText}}</view>
+      <view class="status-desc">{{orderDetail.status === 'pending' ? '等待接单中' : orderDetail.status === 'accepted' ? '订单进行中' : orderDetail.status === 'completed' ? '订单已完成' : '订单已取消'}}</view>
       <view class="status-time">{{orderDetail.createdTime}}</view>
     </view>
 
@@ -78,9 +80,12 @@
     <view class="user-card">
       <view class="card-title">发布者</view>
       <view class="user-info">
-        <image class="user-avatar" src="{{orderDetail.publisher_avatar || '/images/default-avatar.png'}}" />
+        <view class="user-avatar {{!orderDetail.publisher_avatar ? 'avatar-placeholder' : ''}}">
+          <image wx:if="{{orderDetail.publisher_avatar}}" src="{{orderDetail.publisher_avatar}}" mode="aspectFill" />
+          <view wx:else class="avatar-icon">👤</view>
+        </view>
         <view class="user-detail">
-          <view class="user-name">{{orderDetail.publisher_name || '用户'}}</view>
+          <view class="user-name">{{orderDetail.publisher_name || orderDetail.publisher_username || '发布用户'}}</view>
           <view class="user-phone" wx:if="{{orderDetail.publisher_phone}}" bindtap="onContactPublisher">
             联系发布者 📞
           </view>
@@ -92,9 +97,12 @@
     <view wx:if="{{orderDetail.acceptor_id}}" class="user-card">
       <view class="card-title">接单者</view>
       <view class="user-info">
-        <image class="user-avatar" src="{{orderDetail.acceptor_avatar || '/images/default-avatar.png'}}" />
+        <view class="user-avatar {{!orderDetail.acceptor_avatar ? 'avatar-placeholder' : ''}}">
+          <image wx:if="{{orderDetail.acceptor_avatar}}" src="{{orderDetail.acceptor_avatar}}" mode="aspectFill" />
+          <view wx:else class="avatar-icon">👤</view>
+        </view>
         <view class="user-detail">
-          <view class="user-name">{{orderDetail.acceptor_name || '用户'}}</view>
+          <view class="user-name">{{orderDetail.acceptor_name || orderDetail.acceptor_username || '接单用户'}}</view>
           <view class="user-phone" wx:if="{{orderDetail.acceptor_phone}}" bindtap="onContactAcceptor">
             联系接单者 📞
           </view>

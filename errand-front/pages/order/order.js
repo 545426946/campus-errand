@@ -25,7 +25,6 @@ Page({
 
   onLoad: function (options) {
     console.log('订单页面加载');
-    // 不再调用 checkLogin，直接加载订单列表
     this.loadOrderList();
   },
 
@@ -50,35 +49,24 @@ Page({
     const token = wx.getStorageSync('token');
     if (!token) {
       console.log('用户未登录，可以浏览但部分功能受限');
-      // 不再强制跳转到登录页面，让用户自由浏览
     }
     return !!token;
   },
 
   // 加载订单列表（从后端获取）
   loadOrderList: async function (refresh = false) {
-    console.log('========== 开始加载订单列表 ==========');
-    console.log('当前标签页:', this.data.currentTab);
-    console.log('标签页名称:', this.data.tabs[this.data.currentTab]);
-    console.log('是否刷新:', refresh);
+    console.log(`加载订单列表: ${this.data.tabs[this.data.currentTab]}, 刷新: ${refresh}`);
     
-    // 检查登录状态，但不阻止加载
+    // 检查登录状态
     const isLoggedIn = this.checkLogin();
-    console.log('登录状态:', isLoggedIn);
-    
-    // 检查用户信息
-    const token = wx.getStorageSync('token');
     const userInfo = wx.getStorageSync('userInfo');
-    console.log('Token存在:', !!token);
-    console.log('UserInfo:', userInfo);
+    const { currentTab } = this.data;
     
     if (this.data.loading) {
-      console.log('正在加载中，跳过');
       return;
     }
     
     if (refresh) {
-      console.log('重置分页数据');
       this.setData({
         page: 1,
         orderList: [],
@@ -90,20 +78,22 @@ Page({
     
     try {
       let result;
-      const { currentTab } = this.data;
       
-      // 未登录时，只能查看公开订单列表
+      // 状态映射（只有需要筛选状态的页面才需要）
+      const statusMap = {
+        2: 'pending', // 待接单
+        3: 'accepted', // 进行中  
+        4: 'completed' // 已完成
+      };
+      
       if (!isLoggedIn) {
-        console.log('用户未登录');
+        // 未登录：只能查看公开订单
         if (currentTab === 0 || currentTab === 1) {
-          // "我发布的"和"我接受的"需要登录
-          console.log('需要登录才能查看此标签页');
           this.setData({
             orderList: [],
             hasMore: false,
             loading: false
           });
-          
           wx.showToast({
             title: '请先登录',
             icon: 'none'
@@ -111,44 +101,28 @@ Page({
           return;
         }
         
-        // 未登录用户可以查看公开订单列表
-        console.log('查看公开订单列表');
-        const statusMap = {
-          2: 'pending',
-          3: 'accepted',
-          4: 'completed'
-        };
-        console.log('调用API: getOrderList, status:', statusMap[currentTab]);
+        // 查看公开订单
         result = await orderAPI.getOrderList({
           page: this.data.page,
           pageSize: this.data.pageSize,
           status: statusMap[currentTab]
         });
       } else {
-        // 已登录用户，根据标签页调用不同的API
-        console.log('用户已登录，用户ID:', userInfo?.id);
+        // 已登录用户
         if (currentTab === 0) {
           // 我发布的订单
-          console.log('调用API: getMyPublishOrders');
           result = await orderAPI.getMyPublishOrders({
             page: this.data.page,
             pageSize: this.data.pageSize
           });
         } else if (currentTab === 1) {
           // 我接受的订单
-          console.log('调用API: getMyAcceptedOrders');
           result = await orderAPI.getMyAcceptedOrders({
             page: this.data.page,
             pageSize: this.data.pageSize
           });
         } else {
           // 按状态筛选
-          const statusMap = {
-            2: 'pending',
-            3: 'accepted',
-            4: 'completed'
-          };
-          console.log('调用API: getOrderList, status:', statusMap[currentTab]);
           result = await orderAPI.getOrderList({
             page: this.data.page,
             pageSize: this.data.pageSize,
@@ -157,71 +131,52 @@ Page({
         }
       }
       
-      console.log('API返回结果:', result);
-      console.log('订单数量:', result.data?.length);
+      // 处理API响应
+      const ordersData = Array.isArray(result.data) ? result.data : [];
+      console.log(`API返回${this.data.tabs[currentTab]}订单:`, ordersData.length, '条');
       
       // 处理订单数据
-      console.log('开始处理订单数据...');
-      const orders = result.data.map((order, index) => {
-        const userInfo = wx.getStorageSync('userInfo');
-        console.log(`处理订单 ${index + 1}:`, {
-          id: order.id,
-          title: order.title,
-          user_id: order.user_id,
-          status: order.status,
-          type: order.type
-        });
-        
-        const processedOrder = {
+      const orders = ordersData.map((order) => {
+        return {
           ...order,
-          statusText: this.data.statusMap[order.status],
-          typeText: this.data.serviceTypeMap[order.type],
+          statusText: this.data.statusMap[order.status] || order.status || '未知状态',
+          typeText: this.data.serviceTypeMap[order.type] || order.type || '未知类型',
           statusClass: `status-${order.status}`,
-          createTime: this.formatTimeAgo(order.created_at),
+          createTime: this.formatTimeAgo(order.created_at || order.created_at),
           isMyOrder: order.user_id === userInfo?.id,
           isAccepted: order.acceptor_id === userInfo?.id,
-          // 字段映射
-          pickupLocation: order.pickup_location || order.pickupLocation || '',
-          deliveryLocation: order.delivery_location || order.deliveryLocation || '',
-          orderNo: order.order_no || order.orderNo || order.id
+          // 确保字段存在
+          title: order.title || '无标题',
+          description: order.description || '暂无描述',
+          price: order.price || '0',
+          // 字段映射 - 兼容不同的API响应格式
+          pickupLocation: order.pickup_location || order.pickupLocation || '未知地点',
+          deliveryLocation: order.delivery_location || order.deliveryLocation || '未知地点',
+          orderNo: order.order_no || order.orderNo || `#${order.id}`,
+          // 用户信息显示
+          publisherName: order.publisher_name || order.publisher_username || '未知用户',
+          acceptorName: order.acceptor_name || order.acceptor_username || '未知用户'
         };
-        
-        console.log(`处理后的订单 ${index + 1}:`, {
-          id: processedOrder.id,
-          title: processedOrder.title,
-          statusText: processedOrder.statusText,
-          typeText: processedOrder.typeText
-        });
-        
-        return processedOrder;
       });
       
       const newList = refresh ? orders : [...this.data.orderList, ...orders];
       
-      console.log('设置订单列表，总数:', newList.length);
       this.setData({
         orderList: newList,
         hasMore: orders.length >= this.data.pageSize,
         loading: false
       });
       
-      console.log('✅ 订单列表加载成功，共', newList.length, '条');
-      console.log('========== 加载完成 ==========');
+      console.log(`✅ ${this.data.tabs[currentTab]}订单加载成功，共`, newList.length, '条');
       
     } catch (error) {
       console.error('❌ 加载订单失败:', error);
-      console.error('错误详情:', {
-        message: error.message,
-        stack: error.stack,
-        response: error.response
-      });
       this.setData({ loading: false });
       
       wx.showToast({
         title: error.message || '加载失败',
         icon: 'none'
       });
-      console.log('========== 加载失败 ==========');
     }
   },
 
@@ -283,7 +238,6 @@ Page({
     const token = wx.getStorageSync('token');
     
     if (!token) {
-      // 未登录：弹窗提示需要登录
       wx.showModal({
         title: '需要登录',
         content: '接单功能需要登录后使用，是否前往登录？',

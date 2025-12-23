@@ -17,7 +17,7 @@
     <view class="section-title">服务分类</view>
     <view class="service-grid">
       <view 
-        class="service-item" 
+        class="service-item {{selectedServiceType === item.id ? 'service-item-selected' : ''}}" 
         wx:for="{{serviceTypes}}" 
         wx:key="id"
         bindtap="onServiceTap"

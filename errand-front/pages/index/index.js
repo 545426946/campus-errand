@@ -29,6 +29,7 @@ Page({
     // 筛选
     filterStatus: '', // pending, accepted, completed, cancelled
     serviceType: '', // 1-快递代取，2-外卖配送，3-代购服务，4-其他
+    selectedServiceType: '', // 用于显示选中状态的样式
     
     // 配置
     statusMap: config.orderStatusMap,
@@ -163,8 +164,11 @@ Page({
     const { id } = e.currentTarget.dataset;
     console.log('选择服务类型:', id);
     
+    const newSelectedType = id === this.data.selectedServiceType ? '' : id;
+    
     this.setData({
-      serviceType: id === this.data.serviceType ? '' : id
+      serviceType: newSelectedType,
+      selectedServiceType: newSelectedType
     });
     
     this.loadOrderList(true);

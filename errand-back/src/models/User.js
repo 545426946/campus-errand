@@ -16,7 +16,7 @@ class User {
 
   static async findById(id) {
     const [rows] = await db.execute(
-      'SELECT id, username, email, role, avatar, phone, student_id, major, grade, created_at FROM users WHERE id = ?',
+      'SELECT id, username, email, role, avatar, phone, student_id, major, grade, balance, frozen_balance, total_income, total_expense, certification_status, real_name, id_card, created_at FROM users WHERE id = ?',
       [id]
     );
     return rows[0];
@@ -124,27 +124,31 @@ class User {
   static async findByWechatCode(code) {
     // 简化版：通过openid查找用户
     const [rows] = await db.execute(
-      'SELECT id, nickname, avatar, phone, openid FROM users WHERE openid LIKE ? LIMIT 1',
-      [`%${code}%`]
+      'SELECT id, username, nickname, avatar, phone, openid FROM users WHERE openid LIKE ? OR username LIKE ? LIMIT 1',
+      [`%${code}%`, `%${code}%`]
     );
+    
     return rows[0];
   }
 
   static async createWechatUser(userData) {
     const { openid, nickname, avatar, username } = userData;
+    const timestamp = Date.now();
+    const finalUsername = username || `wx_user_${timestamp}`;
+    const finalNickname = nickname || '微信用户';
     
     const [result] = await db.execute(
       'INSERT INTO users (openid, nickname, avatar, role, username, password) VALUES (?, ?, ?, ?, ?, ?)',
-      [openid, nickname, avatar, 'student', username || `wx_user_${Date.now()}`, '']
+      [openid, finalNickname, avatar, 'student', finalUsername, '']
     );
     
     return {
       id: result.insertId,
       openid,
-      nickname,
+      nickname: finalNickname,
       avatar,
       phone: null,
-      username: username || `wx_user_${Date.now()}`
+      username: finalUsername
     };
   }
 
@@ -153,7 +157,7 @@ class User {
     const values = [];
 
     // 支持更多字段
-    const allowedFields = ['nickname', 'avatar', 'phone', 'real_name', 'id_card', 'certification_status'];
+    const allowedFields = ['nickname', 'avatar', 'phone', 'real_name', 'id_card', 'certification_status', 'balance', 'frozen_balance'];
     
     allowedFields.forEach(field => {
       if (userData[field] !== undefined) {

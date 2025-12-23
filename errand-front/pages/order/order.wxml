@@ -22,6 +22,7 @@
       wx:key="id"
       bindtap="onOrderTap"
       data-id="{{item.id}}"
+      wx:if="{{item}}"
     >
       <view class="order-header">
         <view class="order-type-info">
@@ -34,6 +35,17 @@
       <view class="order-content">
         <text class="order-title">{{item.title}}</text>
         <text class="order-desc">{{item.description}}</text>
+        
+        <view class="order-users" wx:if="{{currentTab === 0 || currentTab === 1}}">
+          <view class="user-info-row" wx:if="{{item.publisherName}}">
+            <text class="user-label">发布者:</text>
+            <text class="user-value">{{item.publisherName}}</text>
+          </view>
+          <view class="user-info-row" wx:if="{{item.acceptorName}}">
+            <text class="user-label">接单者:</text>
+            <text class="user-value">{{item.acceptorName}}</text>
+          </view>
+        </view>
         
         <view class="order-details">
           <view class="detail-item">

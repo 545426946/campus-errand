@@ -52,7 +52,7 @@ class Order {
   // 获取订单列表
   static async findAll(filters = {}) {
     let query = `
-      SELECT o.*, u.nickname as publisher_name, u.avatar as publisher_avatar
+      SELECT o.*, u.nickname as publisher_name, u.username as publisher_username, u.avatar as publisher_avatar
       FROM orders o
       LEFT JOIN users u ON o.user_id = u.id
       WHERE 1=1
@@ -100,11 +100,13 @@ class Order {
 
   // 根据ID获取订单
   static async findById(orderId) {
+    console.log('=== 强制调试：查询订单详情，ID:', orderId, '===');
+    
     const query = `
       SELECT o.*, 
-        u.nickname as publisher_name, u.avatar as publisher_avatar,
+        u.nickname as publisher_name, u.username as publisher_username, u.avatar as publisher_avatar,
         u.phone as publisher_phone,
-        a.nickname as acceptor_name, a.avatar as acceptor_avatar,
+        a.nickname as acceptor_name, a.username as acceptor_username, a.avatar as acceptor_avatar,
         a.phone as acceptor_phone
       FROM orders o
       LEFT JOIN users u ON o.user_id = u.id
@@ -115,11 +117,42 @@ class Order {
     const [rows] = await db.execute(query, [orderId]);
     
     if (rows.length === 0) {
+      console.log('订单不存在');
       return null;
     }
 
     const order = rows[0];
     order.images = safeJSONParse(order.images);
+    
+    // 强制查询接单者信息，确保有数据
+    if (order.acceptor_id) {
+      console.log('强制查询接单者信息，ID:', order.acceptor_id);
+      try {
+        const [acceptorRows] = await db.execute(
+          'SELECT username, nickname, avatar, phone FROM users WHERE id = ?',
+          [order.acceptor_id]
+        );
+        
+        console.log('接单者查询结果:', acceptorRows);
+        
+        if (acceptorRows.length > 0) {
+          const acceptor = acceptorRows[0];
+          order.acceptor_name = acceptor.nickname;
+          order.acceptor_username = acceptor.username;
+          order.acceptor_avatar = acceptor.avatar;
+          order.acceptor_phone = acceptor.phone;
+          
+          console.log('设置接单者信息成功:', {
+            acceptor_name: order.acceptor_name,
+            acceptor_username: order.acceptor_username
+          });
+        } else {
+          console.log('未找到接单者信息，ID:', order.acceptor_id);
+        }
+      } catch (error) {
+        console.error('强制查询接单者信息失败:', error);
+      }
+    }
     
     return order;
   }
@@ -149,6 +182,10 @@ class Order {
 
   // 接单
   static async accept(orderId, acceptorId) {
+    console.log('=== Order.accept 调试 ===');
+    console.log('订单ID:', orderId);
+    console.log('接单者ID:', acceptorId);
+    
     const query = `
       UPDATE orders 
       SET acceptor_id = ?, status = 'accepted', accepted_at = NOW(), updated_at = NOW()
@@ -156,7 +193,20 @@ class Order {
     `;
 
     const [result] = await db.execute(query, [acceptorId, orderId]);
-    return result.affectedRows > 0;
+    const success = result.affectedRows > 0;
+    
+    console.log('更新结果:', { affectedRows: result.affectedRows, success });
+    
+    if (success) {
+      // 验证更新是否成功
+      const [verifyRows] = await db.execute(
+        'SELECT acceptor_id, status FROM orders WHERE id = ?',
+        [orderId]
+      );
+      console.log('验证更新结果:', verifyRows[0]);
+    }
+    
+    return success;
   }
 
   // 取消订单
@@ -186,8 +236,11 @@ class Order {
   // 获取用户发布的订单
   static async findByPublisher(userId, filters = {}) {
     let query = `
-      SELECT o.*, a.nickname as acceptor_name, a.avatar as acceptor_avatar
+      SELECT o.*, 
+        u.nickname as publisher_name, u.username as publisher_username, u.avatar as publisher_avatar,
+        a.nickname as acceptor_name, a.username as acceptor_username, a.avatar as acceptor_avatar
       FROM orders o
+      LEFT JOIN users u ON o.user_id = u.id
       LEFT JOIN users a ON o.acceptor_id = a.id
       WHERE o.user_id = ?
     `;
@@ -217,9 +270,12 @@ class Order {
   // 获取用户接受的订单
   static async findByAcceptor(acceptorId, filters = {}) {
     let query = `
-      SELECT o.*, u.nickname as publisher_name, u.avatar as publisher_avatar
+      SELECT o.*, 
+        u.nickname as publisher_name, u.username as publisher_username, u.avatar as publisher_avatar,
+        a.nickname as acceptor_name, a.username as acceptor_username, a.avatar as acceptor_avatar
       FROM orders o
       LEFT JOIN users u ON o.user_id = u.id
+      LEFT JOIN users a ON o.acceptor_id = a.id
       WHERE o.acceptor_id = ?
     `;
     const params = [acceptorId];

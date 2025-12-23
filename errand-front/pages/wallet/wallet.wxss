@@ -175,6 +175,14 @@ page {
 .detail-time {
   font-size: 24rpx;
   color: #999;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.detail-desc {
+  font-size: 22rpx;
+  color: #bbb;
+  display: block;
 }
 
 .detail-amount {

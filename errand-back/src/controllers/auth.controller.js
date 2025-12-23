@@ -83,12 +83,16 @@ exports.login = async (req, res) => {
       let user = await User.findByWechatCode(code);
       
       if (!user) {
-        // 创建新用户
+        // 创建新用户，使用更合理的用户名
+        const timestamp = Date.now();
+        const username = `wx_user_${timestamp}`;
+        const openid = `wx_${code}_${timestamp}`;
+        
         user = await User.createWechatUser({
-          openid: `wx_${code}_${Date.now()}`,
+          openid: openid,
           nickname: '微信用户',
           avatar: '',
-          username: `wx_user_${Date.now()}`
+          username: username
         });
       }
 

@@ -45,6 +45,7 @@
       <view class="detail-info">
         <text class="detail-title">{{item.title}}</text>
         <text class="detail-time">{{item.createTime}}</text>
+        <text class="detail-desc" wx:if="{{item.description}}">{{item.description}}</text>
       </view>
       
       <view class="detail-amount {{item.type}}">

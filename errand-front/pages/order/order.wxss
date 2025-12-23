@@ -82,6 +82,36 @@
   color: var(--gray-1);
 }
 
+/* 订单状态样式 */
+.order-status {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  padding: 6rpx 12rpx;
+  border-radius: var(--radius-xs);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.status-pending {
+  background: var(--warning-light);
+  color: var(--warning-dark);
+}
+
+.status-accepted {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.status-completed {
+  background: var(--success-light);
+  color: var(--success-dark);
+}
+
+.status-cancelled {
+  background: var(--error-light);
+  color: var(--error-dark);
+}
+
 .order-id {
   font-size: var(--font-xs);
   color: var(--gray-3);
@@ -89,6 +119,43 @@
 
 .order-content {
   margin-bottom: var(--space-xl);
+}
+
+.order-users {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: var(--gray-6);
+  border-radius: var(--radius-sm);
+}
+
+.user-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+}
+
+.user-label {
+  font-size: var(--font-xs);
+  color: var(--gray-2);
+  font-weight: 500;
+}
+
+.user-value {
+  font-size: var(--font-xs);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.order-title {
+  width: 100%;
+  font-size: var(--font-lg);
+  color: var(--gray-1);
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+  line-height: var(--line-height-tight);
+  word-wrap: break-word;
+  word-break: break-all;
 }
 
 .order-desc {

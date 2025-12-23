@@ -20,6 +20,8 @@
             placeholder="简短描述你的需求" 
             placeholder-class="placeholder"
             maxlength="50" 
+            bindinput="onInput"
+            data-field="title"
           />
         </view>
 
@@ -72,6 +74,8 @@
             value="{{formData.pickupLocation}}" 
             placeholder="请输入详细地址" 
             placeholder-class="placeholder"
+            bindinput="onInput"
+            data-field="pickupLocation"
           />
         </view>
 
@@ -86,6 +90,8 @@
             value="{{formData.deliveryLocation}}" 
             placeholder="请输入详细地址" 
             placeholder-class="placeholder"
+            bindinput="onInput"
+            data-field="deliveryLocation"
           />
         </view>
       </view>
@@ -107,6 +113,8 @@
             placeholder="请输入11位手机号" 
             placeholder-class="placeholder"
             maxlength="11" 
+            bindinput="onInput"
+            data-field="contactPhone"
           />
         </view>
       </view>
@@ -129,6 +137,8 @@
               value="{{formData.price}}" 
               placeholder="0.00" 
               placeholder-class="placeholder"
+              bindinput="onInput"
+              data-field="price"
             />
           </view>
         </view>

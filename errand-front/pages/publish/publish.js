@@ -30,13 +30,7 @@ Page({
     const { field } = e.currentTarget.dataset;
     const { value } = e.detail;
     
-    // 清除该表单项的错误状态
-    const formItem = this.selectComponent(`.form-item[data-field="${field}"]`) ||
-                   e.currentTarget.closest('.form-item');
-    if (formItem && formItem.dataset) {
-      formItem.dataset.error = false;
-    }
-    
+    // 更新对应的表单字段
     this.setData({
       [`formData.${field}`]: value
     });
@@ -178,9 +172,9 @@ Page({
         duration: 2000
       });
 
-      // 添加成功动画
-      const submitBtn = this.selectComponent('.submit-btn') || 
-                       this.createSelectorQuery().select('.submit-btn');
+      // 添加成功动画（暂时禁用，避免查询节点错误）
+      // const submitBtn = this.selectComponent('.submit-btn') || 
+      //                  this.createSelectorQuery().select('.submit-btn');
       
       // 跳转到订单详情
       setTimeout(() => {

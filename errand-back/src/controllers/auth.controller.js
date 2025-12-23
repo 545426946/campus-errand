@@ -101,14 +101,12 @@ exports.login = async (req, res) => {
       return res.json({
         success: true,
         code: 0,
-        data: {
-          token,
-          user: {
-            id: user.id,
-            nickname: user.nickname,
-            avatar: user.avatar,
-            phone: user.phone
-          }
+        token,
+        user: {
+          id: user.id,
+          nickname: user.nickname,
+          avatar: user.avatar,
+          phone: user.phone
         },
         message: '登录成功'
       });

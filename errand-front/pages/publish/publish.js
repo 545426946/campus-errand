@@ -41,6 +41,13 @@ Page({
     const token = wx.getStorageSync('token');
     const userInfo = wx.getStorageSync('userInfo');
     
+    console.log('发布页面 - Token检查:', {
+      hasToken: !!token,
+      hasUserInfo: !!userInfo,
+      token: token ? token.substring(0, 20) + '...' : null,
+      userInfo: userInfo ? { id: userInfo.id, username: userInfo.username } : null
+    });
+    
     if (!token || !userInfo) {
       wx.showModal({
         title: '提示',

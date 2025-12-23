@@ -161,15 +161,36 @@ Page({
     this.setData({ saving: true });
 
     try {
+      // 准备发送的数据，过滤掉不需要的字段
+      const updateData = {
+        nickname: this.data.userInfo.nickname,
+        phone: this.data.userInfo.phone,
+        email: this.data.userInfo.email,
+        gender: this.data.userInfo.gender,
+        school: this.data.userInfo.school,
+        bio: this.data.userInfo.bio
+      };
+
+      // 只有头像不是默认的base64字符串时才包含
+      if (this.data.userInfo.avatar && !this.data.userInfo.avatar.startsWith('data:image/svg+xml;base64,')) {
+        updateData.avatar = this.data.userInfo.avatar;
+      }
+
+      console.log('发送更新数据:', updateData);
+
       // 调用后端API更新用户信息
-      const result = await userAPI.updateUserProfile(this.data.userInfo);
+      const result = await userAPI.updateUserProfile(updateData);
+      
+      console.log('更新响应:', result);
       
       if (result.code === 0 || result.success === true) {
         // 更新本地存储
-        wx.setStorageSync('userInfo', {
-          ...wx.getStorageSync('userInfo'),
-          ...this.data.userInfo
-        });
+        const currentUserInfo = wx.getStorageSync('userInfo') || {};
+        const updatedUserInfo = {
+          ...currentUserInfo,
+          ...updateData
+        };
+        wx.setStorageSync('userInfo', updatedUserInfo);
 
         wx.showToast({
           title: '保存成功',

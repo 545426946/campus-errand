@@ -1,7 +1,7 @@
 // Token 问题测试脚本
 const http = require('http');
 
-const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = 'http://192.168.1.168:3000/api';
 
 // 简单的 HTTP 请求封装
 function request(method, path, data = null, headers = {}) {

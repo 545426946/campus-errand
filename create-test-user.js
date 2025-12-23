@@ -3,7 +3,7 @@ const http = require('http');
 
 function request(method, path, data = null) {
   return new Promise((resolve, reject) => {
-    const url = new URL('http://localhost:3000/api' + path);
+    const url = new URL('http://192.168.1.168:3000/api' + path);
     const options = {
       hostname: url.hostname,
       port: url.port,

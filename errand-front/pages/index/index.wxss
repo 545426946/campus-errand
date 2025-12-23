@@ -275,6 +275,33 @@
   transform: scale(0.95);
 }
 
+/* 状态文本样式 */
+.accepted-text, .completed-text, .cancelled-text {
+  padding: 14rpx 36rpx;
+  font-size: var(--font-md);
+  font-weight: 500;
+  margin: 0;
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border-radius: var(--radius-round);
+}
+
+.accepted-text {
+  background: var(--warning);
+  color: var(--gray-8);
+}
+
+.completed-text {
+  background: var(--success);
+  color: var(--gray-8);
+}
+
+.cancelled-text {
+  background: var(--gray-3);
+  color: var(--gray-5);
+}
+
 .fab {
   position: fixed;
   right: 40rpx;

@@ -638,8 +638,7 @@ exports.getHotOrders = async (req, res, next) => {
     const orders = await Order.findAll({
       page: parseInt(page),
       pageSize: parseInt(pageSize),
-      status: 'pending',
-      orderBy: 'view_count DESC'
+      orderBy: 'created_at DESC'
     });
 
     res.json({

@@ -61,7 +61,10 @@
         
         <view class="order-footer">
           <text class="order-price">¥{{item.price}}</text>
-          <button class="accept-btn" catchtap="onAcceptOrder" data-id="{{item.id}}">接单</button>
+          <button class="accept-btn" wx:if="{{item.status === 'pending'}}" catchtap="onAcceptOrder" data-id="{{item.id}}">接单</button>
+          <text class="accepted-text" wx:elif="{{item.status === 'accepted'}}">进行中</text>
+          <text class="completed-text" wx:elif="{{item.status === 'completed'}}">已完成</text>
+          <text class="cancelled-text" wx:elif="{{item.status === 'cancelled'}}">已取消</text>
         </view>
       </view>
     </view>

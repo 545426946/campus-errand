@@ -1,4 +1,4 @@
-const db = require('./src/database/connection');
+const db = require('./src/config/database');
 
 async function debugUserOrders() {
   try {

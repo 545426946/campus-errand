@@ -408,11 +408,18 @@ exports.getMyPublishOrders = async (req, res, next) => {
     const userId = req.user.id;
     const { page, pageSize, status } = req.query;
 
+    console.log('=== getMyPublishOrders 调试 ===');
+    console.log('用户ID:', userId, '类型:', typeof userId);
+    console.log('查询参数:', { page, pageSize, status });
+
     const orders = await Order.findByPublisher(userId, {
       page: parseInt(page) || 1,
       pageSize: parseInt(pageSize) || 10,
       status
     });
+
+    console.log('查询结果数量:', orders.length);
+    console.log('订单数据:', orders);
 
     res.json({
       success: true,
@@ -431,11 +438,18 @@ exports.getMyAcceptedOrders = async (req, res, next) => {
     const userId = req.user.id;
     const { page, pageSize, status } = req.query;
 
+    console.log('=== getMyAcceptedOrders 调试 ===');
+    console.log('用户ID:', userId, '类型:', typeof userId);
+    console.log('查询参数:', { page, pageSize, status });
+
     const orders = await Order.findByAcceptor(userId, {
       page: parseInt(page) || 1,
       pageSize: parseInt(pageSize) || 10,
       status
     });
+
+    console.log('查询结果数量:', orders.length);
+    console.log('订单数据:', orders);
 
     res.json({
       success: true,

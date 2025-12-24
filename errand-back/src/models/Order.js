@@ -235,6 +235,10 @@ class Order {
 
   // 获取用户发布的订单
   static async findByPublisher(userId, filters = {}) {
+    console.log('=== Order.findByPublisher 调试 ===');
+    console.log('查询用户ID:', userId, '类型:', typeof userId);
+    console.log('过滤条件:', filters);
+    
     let query = `
       SELECT o.*, 
         u.nickname as publisher_name, u.username as publisher_username, u.avatar as publisher_avatar,
@@ -246,7 +250,7 @@ class Order {
     `;
     const params = [userId];
 
-    if (filters.status) {
+    if (filters.status && filters.status !== 'undefined') {
       query += ' AND o.status = ?';
       params.push(filters.status);
     }
@@ -259,7 +263,15 @@ class Order {
       query += ` LIMIT ${pageSize} OFFSET ${offset}`;
     }
 
+    console.log('执行SQL:', query);
+    console.log('SQL参数:', params);
+
     const [rows] = await db.execute(query, params);
+    
+    console.log('SQL返回行数:', rows.length);
+    if (rows.length > 0) {
+      console.log('第一条数据:', rows[0]);
+    }
     
     return rows.map(row => ({
       ...row,
@@ -269,6 +281,10 @@ class Order {
 
   // 获取用户接受的订单
   static async findByAcceptor(acceptorId, filters = {}) {
+    console.log('=== Order.findByAcceptor 调试 ===');
+    console.log('查询接单者ID:', acceptorId, '类型:', typeof acceptorId);
+    console.log('过滤条件:', filters);
+    
     let query = `
       SELECT o.*, 
         u.nickname as publisher_name, u.username as publisher_username, u.avatar as publisher_avatar,
@@ -280,7 +296,7 @@ class Order {
     `;
     const params = [acceptorId];
 
-    if (filters.status) {
+    if (filters.status && filters.status !== 'undefined') {
       query += ' AND o.status = ?';
       params.push(filters.status);
     }
@@ -293,7 +309,15 @@ class Order {
       query += ` LIMIT ${pageSize} OFFSET ${offset}`;
     }
 
+    console.log('执行SQL:', query);
+    console.log('SQL参数:', params);
+
     const [rows] = await db.execute(query, params);
+    
+    console.log('SQL返回行数:', rows.length);
+    if (rows.length > 0) {
+      console.log('第一条数据:', rows[0]);
+    }
     
     return rows.map(row => ({
       ...row,

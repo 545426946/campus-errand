@@ -60,10 +60,13 @@ Page({
     // 检查登录状态
     const isLoggedIn = this.checkLogin();
     const userInfo = wx.getStorageSync('userInfo');
+    const token = wx.getStorageSync('token');
     const { currentTab } = this.data;
     
     console.log('当前用户信息:', userInfo);
     console.log('用户ID:', userInfo?.id);
+    console.log('Token存在:', !!token);
+    console.log('Token内容:', token ? token.substring(0, 50) + '...' : '无');
     
     if (this.data.loading) {
       return;
@@ -162,6 +165,7 @@ Page({
       // 处理API响应
       const ordersData = Array.isArray(result.data) ? result.data : [];
       console.log(`API返回${this.data.tabs[currentTab]}订单:`, ordersData.length, '条');
+      console.log('完整API响应:', result);
       
       // 处理订单数据
       const orders = ordersData.map((order) => {
@@ -213,7 +217,19 @@ Page({
       
     } catch (error) {
       console.error('❌ 加载订单失败:', error);
+      console.error('错误详情:', {
+        message: error.message,
+        stack: error.stack,
+        error: error
+      });
       this.setData({ loading: false });
+      
+      // 检查是否是认证错误
+      if (error.message && (error.message.includes('Token') || error.message.includes('认证') || error.message.includes('登录'))) {
+        console.log('检测到认证错误，可能需要重新登录');
+        // 不显示toast，因为响应拦截器已经处理了
+        return;
+      }
       
       wx.showToast({
         title: error.message || '加载失败',

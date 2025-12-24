@@ -14,7 +14,8 @@
     "pages/certification/certification",
     "pages/help/help",
     "pages/about/about",
-    "pages/feedback/feedback"
+    "pages/feedback/feedback",
+    "pages/test-order/test-order"
   ],
   "window": {
     "backgroundTextStyle": "light",

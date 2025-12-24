@@ -1,0 +1,123 @@
+<view class="page-container">
+  <view class="header">
+    <text class="title">订单功能测试</text>
+  </view>
+  
+  <view class="content">
+    <view class="test-section">
+      <text class="section-title">测试步骤：</text>
+      <text class="step">1. 确保已登录</text>
+      <text class="step">2. 点击下方按钮创建测试订单</text>
+      <text class="step">3. 跳转到"我的订单"查看是否显示</text>
+    </view>
+    
+    <view class="buttons">
+      <button 
+        class="test-btn" 
+        bindtap="createTestOrder"
+        loading="{{loading}}"
+        disabled="{{loading}}"
+      >
+        {{loading ? '创建中...' : '创建测试订单'}}
+      </button>
+      
+      <button 
+        class="goto-btn" 
+        bindtap="goToOrders"
+      >
+        查看我的订单
+      </button>
+    </view>
+    
+    <view class="note">
+      <text class="note-text">如果订单不显示，请检查控制台日志查看详细错误信息</text>
+    </view>
+  </view>
+</view>
+
+<style>
+.page-container {
+  padding: 20px;
+  background: #f8f8f8;
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.test-section {
+  margin-bottom: 30px;
+}
+
+.section-title {
+  display: block;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.step {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+  padding-left: 20px;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.test-btn {
+  background: #007aff;
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.test-btn[disabled] {
+  background: #ccc;
+}
+
+.goto-btn {
+  background: #4cd964;
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.note {
+  padding: 15px;
+  background: #fff3cd;
+  border-radius: 6px;
+  border-left: 4px solid #ffc107;
+}
+
+.note-text {
+  font-size: 13px;
+  color: #856404;
+}
+</style>

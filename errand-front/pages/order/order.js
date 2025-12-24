@@ -62,6 +62,9 @@ Page({
     const userInfo = wx.getStorageSync('userInfo');
     const { currentTab } = this.data;
     
+    console.log('当前用户信息:', userInfo);
+    console.log('用户ID:', userInfo?.id);
+    
     if (this.data.loading) {
       return;
     }
@@ -122,12 +125,37 @@ Page({
             pageSize: this.data.pageSize
           });
         } else {
-          // 按状态筛选
-          result = await orderAPI.getOrderList({
-            page: this.data.page,
-            pageSize: this.data.pageSize,
-            status: statusMap[currentTab]
-          });
+          // 按状态筛选 - 对于已登录用户，显示与他们相关的该状态订单
+          // 对于未登录用户，只显示公开的订单（但可能限制某些状态）
+          if (currentTab >= 2) { // 待接单、进行中、已完成
+            // 先获取用户相关的所有订单，然后在前端按状态过滤
+            const myPublishResult = await orderAPI.getMyPublishOrders({
+              page: this.data.page,
+              pageSize: this.data.pageSize
+            });
+            const myAcceptedResult = await orderAPI.getMyAcceptedOrders({
+              page: this.data.page,
+              pageSize: this.data.pageSize
+            });
+            
+            // 合并结果
+            const allMyOrders = [...(myPublishResult.data || []), ...(myAcceptedResult.data || [])];
+            // 按状态过滤
+            const filteredOrders = allMyOrders.filter(order => 
+              order.status === statusMap[currentTab] || 
+              (currentTab === 4 && order.status === 'completed') // 已完成
+            );
+            
+            result = {
+              data: filteredOrders
+            };
+          } else {
+            result = await orderAPI.getOrderList({
+              page: this.data.page,
+              pageSize: this.data.pageSize,
+              status: statusMap[currentTab]
+            });
+          }
         }
       }
       
@@ -137,14 +165,28 @@ Page({
       
       // 处理订单数据
       const orders = ordersData.map((order) => {
+        const currentUserId = userInfo?.id;
+        const isPublisher = parseInt(order.user_id) === parseInt(currentUserId);
+        const isAcceptor = parseInt(order.acceptor_id) === parseInt(currentUserId);
+        
+        console.log(`订单 ${order.id} - 用户关系判断:`, {
+          currentUserId,
+          orderUserId: order.user_id,
+          orderAcceptorId: order.acceptor_id,
+          isPublisher,
+          isAcceptor,
+          publisherName: order.publisher_name,
+          acceptorName: order.acceptor_name
+        });
+        
         return {
           ...order,
           statusText: this.data.statusMap[order.status] || order.status || '未知状态',
           typeText: this.data.serviceTypeMap[order.type] || order.type || '未知类型',
           statusClass: `status-${order.status}`,
           createTime: this.formatTimeAgo(order.created_at || order.created_at),
-          isMyOrder: order.user_id === userInfo?.id,
-          isAccepted: order.acceptor_id === userInfo?.id,
+          isMyOrder: isPublisher,
+          isAccepted: isAcceptor,
           // 确保字段存在
           title: order.title || '无标题',
           description: order.description || '暂无描述',

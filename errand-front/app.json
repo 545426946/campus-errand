@@ -14,7 +14,8 @@
     "pages/certification/certification",
     "pages/help/help",
     "pages/about/about",
-    "pages/feedback/feedback"
+    "pages/feedback/feedback",
+    "pages/test-order/test-order"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -35,7 +36,7 @@
       },
       {
         "pagePath": "pages/order/order",
-        "text": "订单"
+        "text": "我的订单"
       },
       {
         "pagePath": "pages/user/user",

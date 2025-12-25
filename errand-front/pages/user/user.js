@@ -23,11 +23,7 @@ Page({
       balance: '0.00'
     },
     
-    // 认证状态（从后端获取）
-    userCertification: {
-      status: 'unverified',
-      statusText: '未认证'
-    },
+
     
     // 未读通知数量
     unreadNotificationCount: 0
@@ -151,7 +147,7 @@ Page({
     const type = e.currentTarget.dataset.type;
     
     // 需要登录的功能
-    const needLoginTypes = ['myOrders', 'myPublish', 'myWallet', 'profile', 'favorite', 'history', 'certification', 'notification'];
+    const needLoginTypes = ['myOrders', 'myWallet', 'profile', 'favorite', 'history', 'notification'];
     
     if (needLoginTypes.includes(type) && !this.data.isLogin) {
       wx.showModal({
@@ -179,11 +175,6 @@ Page({
           url: '/pages/order/order'
         });
         break;
-      case 'myPublish':
-        wx.navigateTo({
-          url: '/pages/my-publish/my-publish'
-        });
-        break;
       case 'myWallet':
         wx.navigateTo({
           url: '/pages/wallet/wallet'
@@ -202,11 +193,6 @@ Page({
       case 'history':
         wx.navigateTo({
           url: '/pages/history/history'
-        });
-        break;
-      case 'certification':
-        wx.navigateTo({
-          url: '/pages/certification/certification'
         });
         break;
       case 'help':

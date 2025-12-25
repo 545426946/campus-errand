@@ -1,5 +1,5 @@
 // 最终完整测试脚本
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://192.168.1.161:3000';
 
 async function request(endpoint, method = 'GET', body = null) {
   const options = {

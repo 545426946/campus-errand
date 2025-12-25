@@ -20,7 +20,7 @@ npm install
 npm start
 ```
 
-后端服务将在 http://localhost:3000 启动
+后端服务将在 http://192.168.1.161:3000 启动
 
 ### 2. 启动前端小程序
 

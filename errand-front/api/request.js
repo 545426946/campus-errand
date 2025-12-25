@@ -36,6 +36,13 @@ class Request {
     const token = wx.getStorageSync('token')
     if (token) {
       config.header['Authorization'] = `Bearer ${token}`
+      
+      // 修复：对于demo格式token，同时添加到查询参数
+      if (token.startsWith('demo_token_')) {
+        config.url = config.url + (config.url.includes('?') ? '&' : '?') + `token=${token}`
+        console.log('添加Demo Token到查询参数:', token)
+      }
+      
       console.log('添加Token到请求头:', token.substring(0, 20) + '...', '完整长度:', token.length)
     } else {
       console.log('未找到Token，发送未授权请求')

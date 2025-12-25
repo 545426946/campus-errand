@@ -100,7 +100,7 @@ wx.chooseImage({
   count: 1,
   success: (res) => {
     wx.uploadFile({
-      url: 'http://localhost:3000/api/upload/single',
+      url: 'http://192.168.1.161:3000/api/upload/single',
       filePath: res.tempFilePaths[0],
       name: 'image',
       formData: { type: 'avatar' },

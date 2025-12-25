@@ -7,7 +7,7 @@ const role = 'student';
 
 const token = jwt.sign(
   { id: userId, username, role },
-  'your_jwt_secret_key_here',
+  'errand_jwt_secret_key_2024',
   { expiresIn: '24h' }
 );
 

@@ -7,7 +7,7 @@ const config = {
   api: {
     // 开发环境API
     development: {
-      baseUrl: 'http://192.168.1.168:3000/api',
+      baseUrl: 'http://192.168.1.148:3000/api',
       timeout: 10000
     },
     // 生产环境API

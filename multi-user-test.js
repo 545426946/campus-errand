@@ -1,5 +1,5 @@
 // 多用户钱包功能测试脚本
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://192.168.1.161:3000';
 
 // 存储用户token
 const userTokens = new Map();

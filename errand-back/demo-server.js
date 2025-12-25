@@ -240,6 +240,51 @@ let mockOrders = [
     publisher_nickname: '测试用户',
     accepter_nickname: '测试用户',
     created_at: new Date().toISOString()
+  },
+  {
+    id: 3,
+    title: '帮忙取外卖',
+    description: '点了一份奶茶外卖，帮忙取一下送到图书馆',
+    service_type: 1,
+    fee: 6.00,
+    location: '校门口外卖架',
+    destination: '图书馆门口',
+    status: 'pending',
+    publisher_id: 15,
+    publisher_nickname: 'user15',
+    created_at: new Date(Date.now() - 3600000).toISOString()
+  },
+  {
+    id: 4,
+    title: '代购生活用品',
+    description: '帮忙去超市买一瓶洗发水和一管牙膏',
+    service_type: 3,
+    fee: 10.00,
+    location: '校园超市',
+    destination: '宿舍楼下',
+    status: 'completed',
+    publisher_id: 15,
+    accepter_id: 2,
+    publisher_nickname: 'user15',
+    accepter_nickname: 'user2',
+    created_at: new Date(Date.now() - 7200000).toISOString(),
+    completed_at: new Date(Date.now() - 1800000).toISOString()
+  },
+  {
+    id: 5,
+    title: '送文件到办公室',
+    description: '有一份文件需要从宿舍送到老师办公室',
+    service_type: 4,
+    fee: 8.00,
+    location: '学生宿舍',
+    destination: '行政楼201',
+    status: 'accepted',
+    publisher_id: 15,
+    accepter_id: 3,
+    publisher_nickname: 'user15',
+    accepter_nickname: 'user3',
+    created_at: new Date(Date.now() - 1800000).toISOString(),
+    accepted_at: new Date(Date.now() - 900000).toISOString()
   }
 ];
 
@@ -423,6 +468,35 @@ app.get('/api/user/profile', authMiddleware, (req, res) => {
   }
 });
 
+// 更新用户信息
+app.put('/api/user/profile', authMiddleware, (req, res) => {
+  try {
+    console.log('=== 更新用户信息 ===');
+    console.log('请求用户:', req.user);
+    console.log('更新数据:', req.body);
+    
+    // 确保用户存在，如果不存在则创建
+    const user = createOrUpdateUser(req.user.id, req.user.username);
+    
+    // 更新用户信息
+    Object.assign(user, req.body);
+    
+    console.log('更新后用户信息:', user);
+    
+    res.json({
+      success: true,
+      data: user,
+      message: '更新用户信息成功'
+    });
+  } catch (error) {
+    console.error('更新用户信息失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '更新用户信息失败'
+    });
+  }
+});
+
 // 获取钱包信息
 app.get('/api/user/wallet', authMiddleware, (req, res) => {
   try {
@@ -430,8 +504,22 @@ app.get('/api/user/wallet', authMiddleware, (req, res) => {
     console.log('请求用户:', req.user);
     console.log('请求token:', req.token);
     
-    // 确保用户存在，如果不存在则创建
-    const user = createOrUpdateUser(req.user.id, req.user.username);
+    // 直接从mockUsers数组中查找用户，如果不存在则创建
+    let user = mockUsers.find(u => u.id === req.user.id);
+    
+    if (!user) {
+      // 用户不存在，创建新用户
+      user = createOrUpdateUser(req.user.id, req.user.username);
+      // 再次尝试获取，确保用户在数组中
+      user = mockUsers.find(u => u.id === req.user.id);
+    }
+    
+    console.log('获取钱包信息 - 找到用户:', {
+      userId: user.id,
+      username: user.username,
+      balance: user.balance,
+      frozen: user.frozen
+    });
     
     // 计算总余额（包括冻结金额）
     const totalBalance = (user.balance || 0) + (user.frozen || 0);
@@ -557,9 +645,32 @@ app.post('/api/user/wallet/recharge', authMiddleware, (req, res) => {
       });
     }
 
-    // 确保用户存在，如果不存在则创建
-    const user = createOrUpdateUser(req.user.id, req.user.username);
-    const oldBalance = parseFloat(user.balance || 0);
+    // 首先检查用户是否已在数组中存在
+    let userIndex = mockUsers.findIndex(u => u.id === req.user.id);
+    let user;
+    let oldBalance;
+    
+    if (userIndex !== -1) {
+      // 用户已存在，使用现有用户数据
+      user = mockUsers[userIndex];
+      oldBalance = parseFloat(user.balance || 0);
+      console.log('找到现有用户:', {
+        id: user.id,
+        username: user.username,
+        currentBalance: oldBalance
+      });
+    } else {
+      // 用户不存在，创建新用户
+      user = createOrUpdateUser(req.user.id, req.user.username);
+      oldBalance = parseFloat(user.balance || 0);
+      userIndex = mockUsers.findIndex(u => u.id === req.user.id);
+      console.log('创建新用户:', {
+        id: user.id,
+        username: user.username,
+        initialBalance: oldBalance
+      });
+    }
+    
     const rechargeAmount = parseFloat(amount);
     const newBalance = oldBalance + rechargeAmount;
     
@@ -588,7 +699,6 @@ app.post('/api/user/wallet/recharge', authMiddleware, (req, res) => {
     console.log('创建交易记录:', {
       transactionId: transaction.id,
       user_id: transaction.user_id,
-      user_id_type: typeof transaction.user_id,
       amount: transaction.amount,
       description: transaction.description,
       status: transaction.status
@@ -596,17 +706,23 @@ app.post('/api/user/wallet/recharge', authMiddleware, (req, res) => {
     
     // 添加交易记录到数组开头
     walletTransactions.unshift(transaction);
-    
     console.log(`添加后总交易记录数: ${walletTransactions.length}`);
     
-    // 更新用户余额（关键：更新到正确的用户）
-    user.balance = newBalance;
-    user.total = parseFloat(user.total || 0) + rechargeAmount;
-    
-    // 更新用户数组中的数据
-    const userIndex = mockUsers.findIndex(u => u.id === user.id);
+    // 关键修复：直接更新数组中用户的余额和总额
     if (userIndex !== -1) {
-      mockUsers[userIndex] = user;
+      mockUsers[userIndex].balance = newBalance;
+      mockUsers[userIndex].total = parseFloat(mockUsers[userIndex].total || 0) + rechargeAmount;
+      
+      console.log('✅ 用户余额已更新到数组:', {
+        userId: mockUsers[userIndex].id,
+        username: mockUsers[userIndex].username,
+        newBalance: mockUsers[userIndex].balance,
+        newTotal: mockUsers[userIndex].total
+      });
+      
+      // 验证更新结果
+      const updatedUser = mockUsers[userIndex];
+      console.log('更新验证 - 用户当前余额:', updatedUser.balance);
     }
     
     console.log('✅ 充值处理完成:', {
@@ -870,6 +986,98 @@ app.put('/api/orders/:id/complete', (req, res) => {
   }
 });
 
+// 获取我发布的订单
+app.get('/api/orders/my-publish', authMiddleware, (req, res) => {
+  try {
+    const { page = 1, pageSize = 20, status } = req.query;
+    const userId = req.user.id;
+    
+    console.log('=== 获取我发布的订单 ===');
+    console.log('用户ID:', userId);
+    console.log('查询参数:', { page, pageSize, status });
+    
+    // 过滤用户发布的订单
+    let myOrders = mockOrders.filter(order => order.user_id === userId);
+    
+    // 按状态过滤
+    if (status) {
+      myOrders = myOrders.filter(order => order.status === status);
+    }
+    
+    // 分页
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + parseInt(pageSize);
+    const paginatedOrders = myOrders.slice(startIndex, endIndex);
+    
+    // 添加状态和服务类型文字
+    const ordersWithText = paginatedOrders.map(order => ({
+      ...order,
+      service_type_text: serviceTypeMap[order.service_type] || '其他服务',
+      status_text: statusMap[order.status] || '未知状态'
+    }));
+    
+    console.log(`用户${userId}发布的订单数量:`, myOrders.length);
+    console.log(`返回${ordersWithText.length}条订单`);
+    
+    res.json({
+      success: true,
+      data: ordersWithText
+    });
+  } catch (error) {
+    console.error('获取我发布的订单失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取订单失败'
+    });
+  }
+});
+
+// 获取我接受的订单
+app.get('/api/orders/my-accepted', authMiddleware, (req, res) => {
+  try {
+    const { page = 1, pageSize = 20, status } = req.query;
+    const userId = req.user.id;
+    
+    console.log('=== 获取我接受的订单 ===');
+    console.log('用户ID:', userId);
+    console.log('查询参数:', { page, pageSize, status });
+    
+    // 过滤用户接受的订单
+    let myOrders = mockOrders.filter(order => order.acceptor_id === userId);
+    
+    // 按状态过滤
+    if (status) {
+      myOrders = myOrders.filter(order => order.status === status);
+    }
+    
+    // 分页
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + parseInt(pageSize);
+    const paginatedOrders = myOrders.slice(startIndex, endIndex);
+    
+    // 添加状态和服务类型文字
+    const ordersWithText = paginatedOrders.map(order => ({
+      ...order,
+      service_type_text: serviceTypeMap[order.service_type] || '其他服务',
+      status_text: statusMap[order.status] || '未知状态'
+    }));
+    
+    console.log(`用户${userId}接受的订单数量:`, myOrders.length);
+    console.log(`返回${ordersWithText.length}条订单`);
+    
+    res.json({
+      success: true,
+      data: ordersWithText
+    });
+  } catch (error) {
+    console.error('获取我接受的订单失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取订单失败'
+    });
+  }
+});
+
 // 获取服务类型
 app.get('/api/service-types', (req, res) => {
   try {
@@ -894,7 +1102,7 @@ app.get('/api/service-types', (req, res) => {
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 服务器启动成功！`);
   console.log(`📍 地址: http://192.168.1.163:${PORT}`);
-  console.log(`📍 本地: http://localhost:${PORT}`);
+  console.log(`📍 本地: http://192.168.1.161:${PORT}`);
   console.log(`🔧 模式: 演示模式 (无需数据库)`);
   console.log(`👤 测试账号: test / 123456`);
   console.log(`⏰ 时间: ${new Date().toLocaleString()}`);

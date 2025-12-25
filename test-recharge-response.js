@@ -1,5 +1,5 @@
 // 测试充值API返回数据结构
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://192.168.1.161:3000';
 
 async function testRechargeResponse() {
   console.log('🧪 测试充值API返回数据结构...');

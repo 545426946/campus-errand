@@ -1,7 +1,7 @@
 // 测试钱包API功能
 const axios = require('axios');
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://192.168.1.161:3000';
 
 // 模拟用户token（需要先登录获取）
 const TEST_TOKEN = 'your_test_token_here';

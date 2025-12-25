@@ -2,7 +2,7 @@
 
 ## 基础配置
 
-- **基础URL**: `http://localhost:3000/api` (开发环境)
+- **基础URL**: `http://192.168.1.161:3000/api` (开发环境)
 - **认证方式**: Bearer Token (JWT)
 - **请求格式**: JSON
 - **超时时间**: 10秒
@@ -565,7 +565,7 @@
   "data": {
     "appName": "校园跑腿",
     "version": "1.0.0",
-    "apiBaseUrl": "http://localhost:3000/api",
+    "apiBaseUrl": "http://192.168.1.161:3000/api",
     "uploadMaxSize": 10485760,
     "orderMinPrice": 1,
     "orderMaxPrice": 1000
@@ -677,8 +677,8 @@
 **URL格式**: `/uploads/{type}/{filename}`
 
 **示例**:
-- 头像: `http://localhost:3000/uploads/avatars/1703001234567-123456789.jpg`
-- 订单图片: `http://localhost:3000/uploads/orders/1703001234567-123456789.jpg`
+- 头像: `http://192.168.1.161:3000/uploads/avatars/1703001234567-123456789.jpg`
+- 订单图片: `http://192.168.1.161:3000/uploads/orders/1703001234567-123456789.jpg`
 
 **说明**:
 - 图片通过静态文件服务直接访问

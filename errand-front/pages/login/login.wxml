@@ -55,6 +55,14 @@
       <view class="divider-line"></view>
     </view>
 
+    <!-- 微信一键登录 -->
+    <button 
+      class="wechat-login-btn" 
+      bindtap="onWechatLogin"
+    >
+      <text class="wechat-btn-text">💬 微信一键登录</text>
+    </button>
+
     <button class="test-login-btn" bindtap="onTestLogin">
       <text class="test-btn-text">使用测试账号登录</text>
     </button>

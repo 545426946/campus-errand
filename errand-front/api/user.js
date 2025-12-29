@@ -19,9 +19,26 @@ const userAPI = {
     })
   },
 
-  // 微信登录
+  // 微信登录（标准流程）
+  wechatLogin(code, userInfo = null) {
+    return request.post('/auth/wechat/login', { 
+      code,
+      nickname: userInfo?.nickName || null,
+      avatar: userInfo?.avatarUrl || null
+    })
+  },
+
+  // 旧版微信登录（兼容）
   login(code) {
     return request.post('/auth/login', { code })
+  },
+
+  // 绑定微信手机号
+  bindWechatPhone(encryptedData, iv) {
+    return request.post('/auth/wechat/bind-phone', {
+      encryptedData,
+      iv
+    })
   },
 
   // 获取用户信息 (同 getUserProfile)

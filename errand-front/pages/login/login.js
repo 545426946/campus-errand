@@ -210,8 +210,117 @@ Page({
     }
   },
 
-  // 微信登录（暂时保留）
+  // 微信登录（推荐使用）
   async onWechatLogin() {
+    try {
+      wx.showLoading({ title: '登录中...', mask: true });
+
+      // 1. 获取微信登录 code
+      const loginRes = await wx.login();
+      
+      if (!loginRes.code) {
+        throw new Error('获取登录凭证失败');
+      }
+
+      console.log('获取到微信登录 code:', loginRes.code);
+
+      // 2. 获取用户信息（头像昵称）
+      let userInfo = null;
+      try {
+        const profileRes = await wx.getUserProfile({
+          desc: '用于完善用户资料'
+        });
+        userInfo = profileRes.userInfo;
+        console.log('获取到用户信息:', userInfo);
+      } catch (error) {
+        console.log('用户取消授权或获取信息失败，使用默认信息');
+      }
+
+      // 3. 调用后端登录接口
+      const result = await userAPI.wechatLogin(loginRes.code, userInfo);
+      
+      console.log('微信登录成功:', result);
+      
+      // 4. 保存登录信息
+      authUtil.saveLoginInfo(result.token, result.user);
+      
+      wx.hideLoading();
+      
+      wx.showToast({
+        title: '登录成功',
+        icon: 'success',
+        duration: 1500
+      });
+      
+      // 5. 跳转到首页
+      setTimeout(() => {
+        wx.switchTab({
+          url: '/pages/index/index'
+        });
+      }, 1500);
+      
+    } catch (error) {
+      wx.hideLoading();
+      console.error('微信登录失败:', error);
+      
+      wx.showToast({
+        title: error.message || '登录失败',
+        icon: 'none',
+        duration: 2000
+      });
+    }
+  },
+
+  // 获取手机号（需要用户授权）
+  async onGetPhoneNumber(e) {
+    try {
+      console.log('获取手机号回调:', e);
+
+      if (e.detail.errMsg !== 'getPhoneNumber:ok') {
+        wx.showToast({
+          title: '获取手机号失败',
+          icon: 'none'
+        });
+        return;
+      }
+
+      wx.showLoading({ title: '绑定中...', mask: true });
+
+      // 调用后端接口解密手机号
+      const result = await userAPI.bindWechatPhone(
+        e.detail.encryptedData,
+        e.detail.iv
+      );
+
+      wx.hideLoading();
+
+      wx.showToast({
+        title: '手机号绑定成功',
+        icon: 'success'
+      });
+
+      console.log('手机号绑定成功:', result.data.phone);
+
+      // 更新本地用户信息
+      const userInfo = authUtil.getUserInfo();
+      if (userInfo) {
+        userInfo.phone = result.data.phone;
+        authUtil.saveLoginInfo(authUtil.getToken(), userInfo);
+      }
+
+    } catch (error) {
+      wx.hideLoading();
+      console.error('绑定手机号失败:', error);
+      
+      wx.showToast({
+        title: error.message || '绑定失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 旧版微信登录（兼容保留）
+  async onWechatLoginOld() {
     // 暂时使用测试登录
     this.onTestLogin();
     return;

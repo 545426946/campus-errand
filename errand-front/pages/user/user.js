@@ -43,17 +43,38 @@ Page({
   },
 
   // 更新用户信息
-  updateUserInfo: function () {
+  updateUserInfo: async function () {
     const token = wx.getStorageSync('token');
-    const userInfo = wx.getStorageSync('userInfo');
+    const localUserInfo = wx.getStorageSync('userInfo');
     
     console.log('更新用户信息 - Token:', token ? '存在' : '不存在');
-    console.log('更新用户信息 - UserInfo:', userInfo);
+    console.log('更新用户信息 - LocalUserInfo:', localUserInfo);
+    
+    const isLogin = !!token;
     
     this.setData({
-      isLogin: !!token,
-      userInfo: userInfo || {}
+      isLogin: isLogin,
+      userInfo: localUserInfo || {}
     });
+    
+    // 如果已登录，从后端获取最新的用户信息
+    if (isLogin) {
+      try {
+        const result = await userAPI.getUserProfile();
+        if (result.code === 0 && result.data) {
+          console.log('从后端获取到最新用户信息:', result.data);
+          
+          // 更新本地存储和页面显示
+          wx.setStorageSync('userInfo', result.data);
+          this.setData({
+            userInfo: result.data
+          });
+        }
+      } catch (error) {
+        console.error('获取用户信息失败，使用本地缓存:', error);
+        // 失败时继续使用本地缓存的信息
+      }
+    }
     
     console.log('页面状态 - isLogin:', this.data.isLogin);
     console.log('页面状态 - userInfo:', this.data.userInfo);

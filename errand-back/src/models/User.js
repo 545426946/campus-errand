@@ -16,7 +16,7 @@ class User {
 
   static async findById(id) {
     const [rows] = await db.execute(
-      'SELECT id, username, email, role, avatar, phone, student_id, major, grade, balance, frozen_balance, total_income, total_expense, certification_status, real_name, id_card, created_at FROM users WHERE id = ?',
+      'SELECT id, username, email, role, nickname, avatar, phone, student_id, major, grade, balance, frozen_balance, total_income, total_expense, certification_status, real_name, id_card, created_at FROM users WHERE id = ?',
       [id]
     );
     return rows[0];
@@ -34,6 +34,22 @@ class User {
     const [rows] = await db.execute(
       'SELECT * FROM users WHERE username = ?',
       [username]
+    );
+    return rows[0];
+  }
+
+  static async findByOpenid(openid) {
+    const [rows] = await db.execute(
+      'SELECT * FROM users WHERE openid = ?',
+      [openid]
+    );
+    return rows[0];
+  }
+
+  static async findByUnionid(unionid) {
+    const [rows] = await db.execute(
+      'SELECT * FROM users WHERE unionid = ?',
+      [unionid]
     );
     return rows[0];
   }
@@ -62,43 +78,55 @@ class User {
     
     if (avatar !== undefined) {
       fields.push('avatar = ?');
-      values.push(avatar);
+      values.push(avatar === '' ? null : avatar);
     }
     if (phone !== undefined) {
       fields.push('phone = ?');
-      values.push(phone);
+      values.push(phone === '' ? null : phone);
     }
     if (student_id !== undefined) {
       fields.push('student_id = ?');
-      values.push(student_id);
+      values.push(student_id === '' ? null : student_id);
     }
     if (major !== undefined) {
       fields.push('major = ?');
-      values.push(major);
+      values.push(major === '' ? null : major);
     }
     if (grade !== undefined) {
       fields.push('grade = ?');
-      values.push(grade);
+      values.push(grade === '' ? null : grade);
     }
     if (nickname !== undefined) {
       fields.push('nickname = ?');
-      values.push(nickname);
+      values.push(nickname === '' ? null : nickname);
     }
     if (email !== undefined) {
       fields.push('email = ?');
-      values.push(email);
+      // 空字符串转换为 NULL，避免唯一索引冲突
+      values.push(email === '' ? null : email);
     }
     if (gender !== undefined) {
+      // 处理 gender 字段：数据库使用 ENUM('male','female','other')
+      let genderValue = gender;
+      if (typeof gender === 'string') {
+        // 确保值是有效的 ENUM 值
+        const validGenders = ['male', 'female', 'other'];
+        genderValue = validGenders.includes(gender.toLowerCase()) ? gender.toLowerCase() : 'other';
+      } else if (typeof gender === 'number') {
+        // 如果传入数字，转换为字符串
+        const genderMap = { 1: 'male', 2: 'female', 0: 'other' };
+        genderValue = genderMap[gender] || 'other';
+      }
       fields.push('gender = ?');
-      values.push(gender);
+      values.push(genderValue);
     }
     if (school !== undefined) {
       fields.push('school = ?');
-      values.push(school);
+      values.push(school === '' ? null : school);
     }
     if (bio !== undefined) {
       fields.push('bio = ?');
-      values.push(bio);
+      values.push(bio === '' ? null : bio);
     }
     
     if (fields.length > 0) {
@@ -121,35 +149,59 @@ class User {
     return rows;
   }
 
-  static async findByWechatCode(code) {
-    // 简化版：通过openid查找用户
-    const [rows] = await db.execute(
-      'SELECT id, username, nickname, avatar, phone, openid FROM users WHERE openid LIKE ? OR username LIKE ? LIMIT 1',
-      [`%${code}%`, `%${code}%`]
-    );
-    
-    return rows[0];
-  }
-
   static async createWechatUser(userData) {
-    const { openid, nickname, avatar, username } = userData;
+    const { openid, unionid, session_key, nickname, avatar, phone } = userData;
     const timestamp = Date.now();
-    const finalUsername = username || `wx_user_${timestamp}`;
+    const username = `wx_${timestamp}`;
     const finalNickname = nickname || '微信用户';
     
     const [result] = await db.execute(
-      'INSERT INTO users (openid, nickname, avatar, role, username, password) VALUES (?, ?, ?, ?, ?, ?)',
-      [openid, finalNickname, avatar, 'student', finalUsername, '']
+      'INSERT INTO users (openid, unionid, session_key, nickname, avatar, phone, role, username, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [openid, unionid || null, session_key || null, finalNickname, avatar || '', phone || null, 'student', username, '']
     );
     
     return {
       id: result.insertId,
       openid,
+      unionid,
       nickname: finalNickname,
       avatar,
-      phone: null,
-      username: finalUsername
+      phone,
+      username
     };
+  }
+
+  static async updateWechatInfo(id, wechatData) {
+    const { session_key, nickname, avatar, phone } = wechatData;
+    const fields = [];
+    const values = [];
+
+    if (session_key !== undefined) {
+      fields.push('session_key = ?');
+      values.push(session_key);
+    }
+    if (nickname !== undefined) {
+      fields.push('nickname = ?');
+      values.push(nickname);
+    }
+    if (avatar !== undefined) {
+      fields.push('avatar = ?');
+      values.push(avatar);
+    }
+    if (phone !== undefined) {
+      fields.push('phone = ?');
+      values.push(phone);
+    }
+
+    if (fields.length === 0) return await this.findById(id);
+
+    values.push(id);
+    await db.execute(
+      `UPDATE users SET ${fields.join(', ')} WHERE id = ?`,
+      values
+    );
+
+    return await this.findById(id);
   }
 
   static async updateUserInfo(id, userData) {

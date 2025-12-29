@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const wechatService = require('../services/wechat.service');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -77,39 +78,9 @@ exports.login = async (req, res) => {
   try {
     const { username, email, password, code } = req.body;
 
-    // 微信登录
+    // 微信登录 - 使用标准流程
     if (code) {
-      // 简化版：直接创建或查找用户（实际应该调用微信API验证code）
-      let user = await User.findByWechatCode(code);
-      
-      if (!user) {
-        // 创建新用户，使用更合理的用户名
-        const timestamp = Date.now();
-        const username = `wx_user_${timestamp}`;
-        const openid = `wx_${code}_${timestamp}`;
-        
-        user = await User.createWechatUser({
-          openid: openid,
-          nickname: '微信用户',
-          avatar: '',
-          username: username
-        });
-      }
-
-      const token = generateToken(user.id);
-
-      return res.json({
-        success: true,
-        code: 0,
-        token,
-        user: {
-          id: user.id,
-          nickname: user.nickname,
-          avatar: user.avatar,
-          phone: user.phone
-        },
-        message: '登录成功'
-      });
+      return await exports.wechatLogin(req, res);
     }
 
     // 账号密码登录（支持用户名或邮箱）
@@ -279,6 +250,137 @@ exports.verifyCode = async (req, res) => {
       success: false,
       code: 400,
       message: error.message
+    });
+  }
+};
+
+// 微信小程序登录
+exports.wechatLogin = async (req, res) => {
+  try {
+    const { code, nickname, avatar } = req.body;
+
+    if (!code) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '缺少微信登录凭证'
+      });
+    }
+
+    // 调用微信接口获取 openid 和 session_key
+    const wechatData = await wechatService.code2Session(code);
+    const { openid, session_key, unionid } = wechatData;
+
+    // 查找用户（优先使用 unionid，其次使用 openid）
+    let user = null;
+    if (unionid) {
+      user = await User.findByUnionid(unionid);
+    }
+    if (!user) {
+      user = await User.findByOpenid(openid);
+    }
+
+    // 如果用户不存在，创建新用户
+    if (!user) {
+      user = await User.createWechatUser({
+        openid,
+        unionid,
+        session_key,
+        nickname: nickname || '微信用户',
+        avatar: avatar || ''
+      });
+    } else {
+      // 更新 session_key，只在明确传递了新值时才更新昵称和头像
+      const updateData = { session_key };
+      
+      // 只有前端明确传递了昵称和头像时才更新（避免覆盖用户已修改的信息）
+      if (nickname) {
+        updateData.nickname = nickname;
+      }
+      if (avatar) {
+        updateData.avatar = avatar;
+      }
+      
+      user = await User.updateWechatInfo(user.id, updateData);
+    }
+
+    // 生成 token
+    const token = generateToken(user.id);
+
+    res.json({
+      success: true,
+      code: 0,
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        nickname: user.nickname,
+        avatar: user.avatar,
+        phone: user.phone,
+        openid: user.openid
+      },
+      message: '登录成功'
+    });
+  } catch (error) {
+    console.error('微信登录失败:', error);
+    res.status(400).json({
+      success: false,
+      code: 400,
+      message: error.message || '微信登录失败'
+    });
+  }
+};
+
+// 绑定/更新手机号
+exports.bindPhone = async (req, res) => {
+  try {
+    const { encryptedData, iv } = req.body;
+    const userId = req.user.id;
+
+    if (!encryptedData || !iv) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '缺少必要参数'
+      });
+    }
+
+    // 获取用户的 session_key
+    const user = await User.findById(userId);
+    if (!user || !user.session_key) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '用户信息异常，请重新登录'
+      });
+    }
+
+    // 解密手机号
+    const phoneData = wechatService.decryptPhoneNumber(
+      encryptedData,
+      iv,
+      user.session_key
+    );
+
+    // 更新用户手机号
+    await User.updateWechatInfo(userId, {
+      phone: phoneData.purePhoneNumber
+    });
+
+    res.json({
+      success: true,
+      code: 0,
+      data: {
+        phone: phoneData.purePhoneNumber
+      },
+      message: '手机号绑定成功'
+    });
+  } catch (error) {
+    console.error('绑定手机号失败:', error);
+    res.status(400).json({
+      success: false,
+      code: 400,
+      message: error.message || '绑定手机号失败'
     });
   }
 };

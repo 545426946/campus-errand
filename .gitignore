@@ -34,3 +34,6 @@ out/
 # Temporary files
 tmp/
 temp/
+
+# Config files with sensitive information
+errand-front/utils/config.js

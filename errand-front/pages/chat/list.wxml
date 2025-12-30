@@ -1,0 +1,38 @@
+<view class="chat-list-container">
+  <view class="chat-list" wx:if="{{chatList.length > 0}}">
+    <view 
+      class="chat-item" 
+      wx:for="{{chatList}}" 
+      wx:key="order_id"
+      bindtap="onChatTap"
+      data-order-id="{{item.order_id}}"
+    >
+      <image class="avatar" src="{{item.other_user_avatar || '/images/user.png'}}" mode="aspectFill"></image>
+      
+      <view class="chat-content">
+        <view class="chat-header">
+          <text class="user-name">{{item.other_user_name || '用户'}}</text>
+          <text class="time">{{item.time_ago}}</text>
+        </view>
+        
+        <view class="chat-info">
+          <text class="last-message">{{item.last_message}}</text>
+          <view class="unread-badge" wx:if="{{item.unread_count > 0}}">
+            {{item.unread_count}}
+          </view>
+        </view>
+        
+        <text class="order-title">订单: {{item.order_title}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{!loading && chatList.length === 0}}">
+    <text class="empty-icon">💬</text>
+    <text class="empty-text">暂无聊天记录</text>
+  </view>
+
+  <view class="loading-state" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>

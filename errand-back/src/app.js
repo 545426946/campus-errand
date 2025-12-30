@@ -26,6 +26,8 @@ app.use('/api/notifications', require('./routes/notification.routes')); // 通�
 app.use('/api/system', require('./routes/system.routes')); // 系统路由
 app.use('/api/upload', require('./routes/upload.routes')); // 上传路由
 app.use('/api/ai', require('./routes/ai.routes'));
+app.use('/api/messages', require('./routes/message.routes')); // 消息路由
+app.use('/api', require('./routes/cancelRequest.routes')); // 取消请求路由
 
 // 健康检查
 app.get('/health', (req, res) => {

@@ -435,3 +435,88 @@
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.6; transform: scale(0.95); }
 }
+
+/* 取消请求卡片 */
+.cancel-request-card {
+  background: var(--gray-8);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-lg);
+  border-left: 6rpx solid var(--warning);
+  box-shadow: var(--shadow-sm);
+}
+
+.cancel-request-content {
+  margin-top: var(--space-md);
+}
+
+.cancel-request-info {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: var(--space-lg);
+}
+
+.cancel-request-icon {
+  font-size: 60rpx;
+  margin-right: var(--space-md);
+  flex-shrink: 0;
+}
+
+.cancel-request-text {
+  flex: 1;
+}
+
+.cancel-request-title {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--gray-1);
+  margin-bottom: var(--space-sm);
+}
+
+.cancel-request-reason {
+  font-size: var(--font-md);
+  color: var(--gray-3);
+  line-height: 1.6;
+}
+
+.cancel-request-actions {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.cancel-request-btn {
+  flex: 1;
+  height: 80rpx;
+  border-radius: var(--radius-md);
+  font-size: var(--font-md);
+  font-weight: 600;
+  border: none;
+}
+
+.cancel-request-btn.agree {
+  background: var(--success);
+  color: var(--gray-8);
+}
+
+.cancel-request-btn.reject {
+  background: var(--gray-6);
+  color: var(--gray-2);
+}
+
+.cancel-request-waiting {
+  text-align: center;
+  padding: var(--space-lg);
+  color: var(--gray-4);
+  font-size: var(--font-md);
+}
+
+/* 聊天按钮样式 */
+.action-btn.chat {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: var(--gray-8);
+}
+
+.action-btn.warning {
+  background: var(--warning);
+  color: var(--gray-8);
+}

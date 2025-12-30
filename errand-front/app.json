@@ -11,7 +11,10 @@
     "pages/wallet/wallet",
     "pages/favorite/favorite",
     "pages/history/history",
-
+    "pages/message/center",
+    "pages/chat/chat",
+    "pages/chat/list",
+    "pages/order/cancel-request",
     "pages/help/help",
     "pages/about/about",
     "pages/feedback/feedback",
@@ -35,8 +38,12 @@
         "text": "首页"
       },
       {
+        "pagePath": "pages/message/center",
+        "text": "消息"
+      },
+      {
         "pagePath": "pages/order/order",
-        "text": "我的订单"
+        "text": "订单"
       },
       {
         "pagePath": "pages/user/user",

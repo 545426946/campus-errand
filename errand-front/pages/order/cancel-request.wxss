@@ -1,0 +1,60 @@
+.cancel-request-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 30rpx;
+}
+
+.form-section {
+  background-color: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.reason-input {
+  width: 100%;
+  min-height: 300rpx;
+  padding: 20rpx;
+  background-color: #f8f8f8;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+.tips {
+  background-color: #fff3cd;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  margin-bottom: 30rpx;
+}
+
+.tips-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #856404;
+  margin-bottom: 12rpx;
+}
+
+.tips-text {
+  font-size: 24rpx;
+  color: #856404;
+  line-height: 1.6;
+}
+
+.submit-btn {
+  width: 100%;
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 28rpx;
+  border-radius: 8rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+}

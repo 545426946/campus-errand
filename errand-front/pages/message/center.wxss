@@ -1,0 +1,199 @@
+/* 消息中心页面样式 */
+.message-center {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* 会话列表 */
+.message-list {
+  padding: 0;
+}
+
+.conversation-item {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  padding: 24rpx 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.conversation-item:active {
+  background-color: #f8f8f8;
+}
+
+/* 头像区域 */
+.avatar-wrapper {
+  position: relative;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  border: 2rpx solid #f0f0f0;
+}
+
+.unread-badge {
+  position: absolute;
+  top: -6rpx;
+  right: -6rpx;
+  min-width: 36rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  padding: 0 10rpx;
+  background-color: #ff4444;
+  color: white;
+  font-size: 20rpx;
+  font-weight: bold;
+  border-radius: 18rpx;
+  text-align: center;
+  border: 3rpx solid white;
+  box-shadow: 0 2rpx 8rpx rgba(255, 68, 68, 0.3);
+}
+
+/* 会话内容 */
+.conversation-content {
+  flex: 1;
+  min-width: 0;
+  margin-right: 20rpx;
+}
+
+.conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.other-user-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  max-width: 400rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-time {
+  font-size: 22rpx;
+  color: #999;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+/* 最后一条消息 */
+.last-message {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+.message-text {
+  color: #666;
+}
+
+/* 订单信息 */
+.order-info {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  flex-wrap: wrap;
+}
+
+.order-label {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.order-title {
+  font-size: 24rpx;
+  color: #666;
+  max-width: 300rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-status {
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  color: white;
+  flex-shrink: 0;
+}
+
+.order-status.pending {
+  background-color: #ffa726;
+}
+
+.order-status.accepted {
+  background-color: #66bb6a;
+}
+
+.order-status.completed {
+  background-color: #42a5f5;
+}
+
+.order-status.cancelled {
+  background-color: #bdbdbd;
+}
+
+/* 右侧箭头 */
+.arrow-icon {
+  font-size: 48rpx;
+  color: #d0d0d0;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 160rpx 60rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 140rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.empty-hint {
+  font-size: 26rpx;
+  color: #999;
+  line-height: 1.6;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 80rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}

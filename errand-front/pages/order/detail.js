@@ -1,5 +1,6 @@
 // 订单详情页面（完整后端交互版本）
 const orderAPI = require('../../api/order.js');
+const cancelRequestAPI = require('../../api/cancelRequest.js');
 const { formatTime } = require('../../utils/util.js');
 const config = require('../../utils/config.js');
 const authUtil = require('../../utils/auth.js');
@@ -9,13 +10,16 @@ Page({
     orderId: null,
     orderDetail: null,
     currentUserId: null,
+    cancelRequest: null,
     
     // 权限判断
     isPublisher: false,  // 是否是发布者
     isAcceptor: false,   // 是否是接单者
     canAccept: false,    // 是否可以接单
-    canCancel: false,    // 是否可以取消
+    canCancel: false,    // 是否可以取消（直接取消，仅pending状态）
+    canRequestCancel: false, // 是否可以请求取消（协商取消，accepted状态）
     canComplete: false,  // 是否可以完成
+    canChat: false,      // 是否可以聊天
     
     // 配置
     statusMap: config.orderStatusMap,
@@ -73,19 +77,36 @@ Page({
       const isPublisher = order.user_id === this.data.currentUserId;
       const isAcceptor = order.acceptor_id === this.data.currentUserId;
       const canAccept = isLoggedIn && order.status === 'pending' && !isPublisher;
-      const canCancel = isLoggedIn && (isPublisher || isAcceptor) && 
-                       (order.status === 'pending' || order.status === 'accepted');
+      const canCancel = isLoggedIn && (isPublisher || isAcceptor) && order.status === 'pending';
+      const canRequestCancel = isLoggedIn && isAcceptor && order.status === 'accepted';
       const canComplete = isLoggedIn && isAcceptor && order.status === 'accepted';
+      const canChat = isLoggedIn && order.status === 'accepted' && (isPublisher || isAcceptor);
+      
+      // 加载取消请求（如果有）
+      let cancelRequest = null;
+      if (order.status === 'accepted' && (isPublisher || isAcceptor)) {
+        try {
+          const cancelResult = await cancelRequestAPI.getCancelRequest(this.data.orderId);
+          if (cancelResult.code === 0 && cancelResult.data) {
+            cancelRequest = cancelResult.data;
+          }
+        } catch (error) {
+          console.log('没有取消请求或加载失败:', error);
+        }
+      }
       
       wx.hideLoading();
       
       this.setData({
         orderDetail: order,
+        cancelRequest,
         isPublisher,
         isAcceptor,
         canAccept,
         canCancel,
-        canComplete
+        canRequestCancel,
+        canComplete,
+        canChat
       });
       
       console.log('=== 订单详情调试信息 ===');
@@ -95,6 +116,7 @@ Page({
         acceptor_name: order.acceptor_name,
         acceptor_username: order.acceptor_username
       });
+      console.log('取消请求:', cancelRequest);
       console.log('=== 调试信息结束 ===');
       
     } catch (error) {
@@ -247,6 +269,106 @@ Page({
         icon: 'none'
       });
     }
+  },
+
+  // 请求取消订单（协商取消）
+  async onRequestCancel() {
+    if (!authUtil.isLoggedIn()) {
+      await authUtil.requireLogin({
+        content: '请求取消需要登录后使用'
+      }).catch(() => {});
+      return;
+    }
+    
+    try {
+      const res = await wx.showModal({
+        title: '请求取消订单',
+        content: '请输入取消原因，发布者将收到您的请求',
+        editable: true,
+        placeholderText: '请输入取消原因'
+      });
+      
+      if (!res.confirm) return;
+      
+      const reason = res.content || '接单者请求取消';
+      
+      wx.showLoading({ title: '发送请求中...' });
+      
+      await cancelRequestAPI.createCancelRequest(this.data.orderId, reason);
+      
+      wx.hideLoading();
+      
+      wx.showToast({
+        title: '取消请求已发送',
+        icon: 'success'
+      });
+      
+      setTimeout(() => {
+        this.loadOrderDetail();
+      }, 1500);
+      
+    } catch (error) {
+      wx.hideLoading();
+      console.error('发送取消请求失败:', error);
+      
+      wx.showToast({
+        title: error.message || '发送失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 处理取消请求（发布者同意或拒绝）
+  async onHandleCancelRequest(e) {
+    const { action } = e.currentTarget.dataset;
+    
+    try {
+      const actionText = action === 'agree' ? '同意' : '拒绝';
+      const res = await wx.showModal({
+        title: `${actionText}取消请求`,
+        content: `确定要${actionText}接单者的取消请求吗？`
+      });
+      
+      if (!res.confirm) return;
+      
+      wx.showLoading({ title: '处理中...' });
+      
+      await cancelRequestAPI.handleCancelRequest(this.data.orderId, action);
+      
+      wx.hideLoading();
+      
+      wx.showToast({
+        title: `已${actionText}`,
+        icon: 'success'
+      });
+      
+      setTimeout(() => {
+        this.loadOrderDetail();
+      }, 1500);
+      
+    } catch (error) {
+      wx.hideLoading();
+      console.error('处理取消请求失败:', error);
+      
+      wx.showToast({
+        title: error.message || '处理失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 进入聊天
+  onChat() {
+    if (!authUtil.isLoggedIn()) {
+      authUtil.requireLogin({
+        content: '聊天功能需要登录'
+      }).catch(() => {});
+      return;
+    }
+    
+    wx.navigateTo({
+      url: `/pages/chat/chat?orderId=${this.data.orderId}`
+    });
   },
 
   // 拨打电话

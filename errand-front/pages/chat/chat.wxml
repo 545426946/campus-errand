@@ -1,0 +1,72 @@
+<view class="chat-container">
+  <!-- 订单信息栏 -->
+  <view class="order-info-bar" wx:if="{{order}}" bindtap="viewOrderDetail">
+    <view class="order-info-content">
+      <text class="order-title">{{order.title}}</text>
+      <text class="order-price">¥{{order.price}}</text>
+    </view>
+    <view class="order-status">
+      <text class="status-text">{{order.status === 'accepted' ? '进行中' : order.status === 'completed' ? '已完成' : '已取消'}}</text>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 消息列表 -->
+  <scroll-view 
+    class="message-list" 
+    scroll-y 
+    scroll-into-view="{{scrollIntoView}}"
+    scroll-with-animation
+  >
+    <view class="message-item {{item.isMine ? 'mine' : 'other'}}" 
+      wx:for="{{messages}}" 
+      wx:key="id"
+      id="msg-{{index}}"
+    >
+      <!-- 对方的消息 -->
+      <view class="message-wrapper" wx:if="{{!item.isMine}}">
+        <image class="avatar" src="{{item.sender_avatar || '/images/user.png'}}" mode="aspectFill"></image>
+        <view class="message-content">
+          <view class="sender-name">{{item.sender_name || '用户'}}</view>
+          <view class="message-bubble">
+            <text class="message-text">{{item.content}}</text>
+          </view>
+          <view class="message-time">{{item.created_at}}</view>
+        </view>
+      </view>
+
+      <!-- 我的消息 -->
+      <view class="message-wrapper" wx:if="{{item.isMine}}">
+        <view class="message-content">
+          <view class="sender-name">{{item.sender_name || '我'}}</view>
+          <view class="message-bubble">
+            <text class="message-text">{{item.content}}</text>
+          </view>
+          <view class="message-time">{{item.created_at}}</view>
+        </view>
+        <image class="avatar" src="{{item.sender_avatar || '/images/user.png'}}" mode="aspectFill"></image>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 输入框 -->
+  <view class="input-bar">
+    <button 
+      wx:if="{{showCancelRequest}}" 
+      class="cancel-btn" 
+      bindtap="requestCancel"
+      size="mini"
+    >
+      申请取消
+    </button>
+    <input 
+      class="message-input" 
+      placeholder="说点什么..." 
+      value="{{inputMessage}}"
+      bindinput="onInputChange"
+      confirm-type="send"
+      bindconfirm="sendMessage"
+    />
+    <button class="send-btn" bindtap="sendMessage">发送</button>
+  </view>
+</view>

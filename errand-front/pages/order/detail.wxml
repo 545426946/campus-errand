@@ -110,6 +110,33 @@
       </view>
     </view>
 
+    <!-- 取消请求信息 -->
+    <view wx:if="{{cancelRequest && cancelRequest.status === 'pending'}}" class="cancel-request-card">
+      <view class="card-title">取消请求</view>
+      <view class="cancel-request-content">
+        <view class="cancel-request-info">
+          <text class="cancel-request-icon">⚠️</text>
+          <view class="cancel-request-text">
+            <view class="cancel-request-title">
+              {{isPublisher ? '接单者请求取消订单' : '您已发起取消请求'}}
+            </view>
+            <view class="cancel-request-reason">原因：{{cancelRequest.reason}}</view>
+          </view>
+        </view>
+        <view wx:if="{{isPublisher}}" class="cancel-request-actions">
+          <button class="cancel-request-btn agree" bindtap="onHandleCancelRequest" data-action="agree">
+            同意取消
+          </button>
+          <button class="cancel-request-btn reject" bindtap="onHandleCancelRequest" data-action="reject">
+            拒绝
+          </button>
+        </view>
+        <view wx:else class="cancel-request-waiting">
+          等待发布者处理...
+        </view>
+      </view>
+    </view>
+
     <!-- 时间信息 -->
     <view class="time-card">
       <view class="card-title">时间信息</view>
@@ -142,13 +169,19 @@
     <button wx:if="{{canAccept}}" class="action-btn primary" bindtap="onAcceptOrder">
       接单
     </button>
+    <button wx:if="{{canChat}}" class="action-btn chat" bindtap="onChat">
+      💬 聊天协商
+    </button>
     <button wx:if="{{canComplete}}" class="action-btn success" bindtap="onCompleteOrder">
       完成订单
+    </button>
+    <button wx:if="{{canRequestCancel && !cancelRequest}}" class="action-btn warning" bindtap="onRequestCancel">
+      请求取消
     </button>
     <button wx:if="{{canCancel}}" class="action-btn cancel" bindtap="onCancelOrder">
       取消订单
     </button>
-    <button wx:if="{{!canAccept && !canComplete && !canCancel}}" class="action-btn" bindtap="onBack">
+    <button wx:if="{{!canAccept && !canComplete && !canCancel && !canRequestCancel && !canChat}}" class="action-btn" bindtap="onBack">
       返回
     </button>
   </view>

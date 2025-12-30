@@ -9,18 +9,44 @@
   padding: 0;
 }
 
+/* 会话包装器（用于滑动删除） */
+.conversation-wrapper {
+  position: relative;
+  overflow: hidden;
+  background-color: white;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
 .conversation-item {
   display: flex;
   align-items: center;
   background-color: white;
   padding: 24rpx 30rpx;
-  border-bottom: 1rpx solid #f0f0f0;
   position: relative;
-  transition: background-color 0.2s;
+  z-index: 2;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .conversation-item:active {
   background-color: #f8f8f8;
+}
+
+/* 删除按钮 */
+.delete-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 120rpx;
+  background-color: #ff4444;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 500;
+  z-index: 1;
 }
 
 /* 头像区域 */

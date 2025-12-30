@@ -110,8 +110,7 @@ const config = {
     TOKEN: 'token',
     USER_INFO: 'userInfo',
     LOCATION_INFO: 'locationInfo',
-    SEARCH_HISTORY: 'searchHistory',
-    FAVORITE_ORDERS: 'favoriteOrders'
+    SEARCH_HISTORY: 'searchHistory'
   },
 
   // 地图配置

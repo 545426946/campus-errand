@@ -181,3 +181,51 @@ exports.getUnreadCount = async (req, res) => {
     });
   }
 };
+
+// 删除对话
+exports.deleteConversation = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.user.id;
+
+    console.log('删除对话:', { orderId, userId });
+
+    // 验证订单存在
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        code: 1,
+        message: '订单不存在'
+      });
+    }
+
+    // 验证用户是订单的参与者
+    const isPublisher = parseInt(order.user_id) === parseInt(userId);
+    const isAcceptor = parseInt(order.acceptor_id) === parseInt(userId);
+    
+    if (!isPublisher && !isAcceptor) {
+      return res.status(403).json({
+        code: 1,
+        message: '您不是该订单的参与者'
+      });
+    }
+
+    // 删除对话
+    const affectedRows = await Message.deleteConversation(orderId, userId);
+
+    console.log(`删除了 ${affectedRows} 条消息`);
+
+    res.json({
+      code: 0,
+      message: '删除成功',
+      data: { deletedCount: affectedRows }
+    });
+  } catch (error) {
+    console.error('删除对话失败:', error);
+    res.status(500).json({
+      code: 1,
+      message: '删除对话失败',
+      error: error.message
+    });
+  }
+};

@@ -2,46 +2,67 @@
   <!-- 消息列表（按订单分组） -->
   <view class="message-list" wx:if="{{messageList.length > 0}}">
     <view 
-      class="conversation-item" 
+      class="conversation-wrapper" 
       wx:for="{{messageList}}" 
       wx:key="order_id"
-      bindtap="onMessageTap"
-      data-order-id="{{item.order_id}}"
+      data-index="{{index}}"
     >
-      <!-- 对方用户头像 -->
-      <view class="avatar-wrapper">
-        <image 
-          class="avatar" 
-          src="{{item.other_user_avatar || '/images/user.png'}}" 
-          mode="aspectFill"
-        ></image>
-        <view class="unread-badge" wx:if="{{item.unread_count > 0}}">
-          {{item.unread_count > 99 ? '99+' : item.unread_count}}
-        </view>
-      </view>
-
-      <!-- 会话内容 -->
-      <view class="conversation-content">
-        <view class="conversation-header">
-          <text class="other-user-name">{{item.other_user_name || '用户'}}</text>
-          <text class="message-time">{{item.time_ago}}</text>
-        </view>
-        
-        <view class="last-message">
-          <text class="message-text">{{item.last_message}}</text>
-        </view>
-        
-        <view class="order-info">
-          <text class="order-label">订单:</text>
-          <text class="order-title">{{item.order_title}}</text>
-          <view class="order-status {{item.order_status}}">
-            {{item.order_status_text}}
+      <!-- 可滑动的会话项 -->
+      <view 
+        class="conversation-item"
+        style="transform: translateX({{item.translateX}}rpx); transition: transform 0.3s;"
+        bindtap="onMessageTap"
+        data-order-id="{{item.order_id}}"
+        bindtouchstart="onTouchStart"
+        bindtouchmove="onTouchMove"
+        bindtouchend="onTouchEnd"
+        data-index="{{index}}"
+      >
+        <!-- 对方用户头像 -->
+        <view class="avatar-wrapper">
+          <image 
+            class="avatar" 
+            src="{{item.other_user_avatar || '/images/user.png'}}" 
+            mode="aspectFill"
+          ></image>
+          <view class="unread-badge" wx:if="{{item.unread_count > 0}}">
+            {{item.unread_count > 99 ? '99+' : item.unread_count}}
           </view>
         </view>
+
+        <!-- 会话内容 -->
+        <view class="conversation-content">
+          <view class="conversation-header">
+            <text class="other-user-name">{{item.other_user_name || '用户'}}</text>
+            <text class="message-time">{{item.time_ago}}</text>
+          </view>
+          
+          <view class="last-message">
+            <text class="message-text">{{item.last_message}}</text>
+          </view>
+          
+          <view class="order-info">
+            <text class="order-label">订单:</text>
+            <text class="order-title">{{item.order_title}}</text>
+            <view class="order-status {{item.order_status}}">
+              {{item.order_status_text}}
+            </view>
+          </view>
+        </view>
+
+        <!-- 右侧箭头 -->
+        <view class="arrow-icon">›</view>
       </view>
 
-      <!-- 右侧箭头 -->
-      <view class="arrow-icon">›</view>
+      <!-- 删除按钮 -->
+      <view 
+        class="delete-button"
+        catchtap="onDeleteConversation"
+        data-order-id="{{item.order_id}}"
+        data-index="{{index}}"
+      >
+        删除
+      </view>
     </view>
   </view>
 

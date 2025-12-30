@@ -1,10 +1,13 @@
 // 消息中心页面
-const { getChatList } = require('../../api/message.js');
+const { getChatList, deleteConversation } = require('../../api/message.js');
 
 Page({
   data: {
     messageList: [],
-    loading: false
+    loading: false,
+    touchStartX: 0,
+    touchMoveX: 0,
+    deleteButtonWidth: 120 // 删除按钮宽度
   },
 
   onLoad: function (options) {
@@ -45,7 +48,9 @@ Page({
           // 判断最后一条消息是否是我发送的
           is_my_last_message: this.isMyLastMessage(conv.last_message, userId),
           // 订单状态文本
-          order_status_text: this.getOrderStatusText(conv.order_status)
+          order_status_text: this.getOrderStatusText(conv.order_status),
+          // 滑动相关
+          translateX: 0
         }));
 
         this.setData({
@@ -120,5 +125,94 @@ Page({
     const month = date.getMonth() + 1;
     const day = date.getDate();
     return `${month}月${day}日`;
+  },
+
+  // 触摸开始
+  onTouchStart(e) {
+    const { clientX } = e.touches[0];
+    this.setData({
+      touchStartX: clientX
+    });
+  },
+
+  // 触摸移动
+  onTouchMove(e) {
+    const { clientX } = e.touches[0];
+    const { touchStartX, deleteButtonWidth } = this.data;
+    const moveX = clientX - touchStartX;
+    
+    // 只允许向左滑动
+    if (moveX < 0 && moveX > -deleteButtonWidth) {
+      const index = e.currentTarget.dataset.index;
+      const messageList = this.data.messageList;
+      messageList[index].translateX = moveX;
+      this.setData({ messageList });
+    }
+  },
+
+  // 触摸结束
+  onTouchEnd(e) {
+    const index = e.currentTarget.dataset.index;
+    const { deleteButtonWidth } = this.data;
+    const messageList = this.data.messageList;
+    const translateX = messageList[index].translateX;
+
+    // 如果滑动距离超过按钮宽度的一半，则显示删除按钮
+    if (translateX < -deleteButtonWidth / 2) {
+      messageList[index].translateX = -deleteButtonWidth;
+    } else {
+      messageList[index].translateX = 0;
+    }
+    
+    this.setData({ messageList });
+  },
+
+  // 删除对话
+  async onDeleteConversation(e) {
+    const orderId = e.currentTarget.dataset.orderId;
+    const index = e.currentTarget.dataset.index;
+
+    const result = await new Promise((resolve) => {
+      wx.showModal({
+        title: '确认删除',
+        content: '删除后将清空该订单的所有聊天记录，是否继续？',
+        confirmText: '删除',
+        confirmColor: '#ff4444',
+        success: (res) => resolve(res.confirm)
+      });
+    });
+
+    if (!result) return;
+
+    wx.showLoading({ title: '删除中...' });
+
+    try {
+      const res = await deleteConversation(orderId);
+      
+      if (res.code === 0) {
+        // 从列表中移除
+        const messageList = this.data.messageList;
+        messageList.splice(index, 1);
+        this.setData({ messageList });
+
+        wx.showToast({
+          title: '删除成功',
+          icon: 'success'
+        });
+      } else {
+        wx.showToast({
+          title: res.message || '删除失败',
+          icon: 'none'
+        });
+      }
+    } catch (error) {
+      console.error('删除对话失败:', error);
+      wx.showToast({
+        title: '删除失败，请重试',
+        icon: 'none'
+      });
+    } finally {
+      wx.hideLoading();
+    }
   }
 });

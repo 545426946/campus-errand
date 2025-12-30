@@ -148,24 +148,6 @@ const userAPI = {
     return request.get('/user/stats')
   },
 
-  // 获取收藏列表
-  getFavoriteList(params = {}) {
-    return request.get('/user/favorites', {
-      page: params.page || 1,
-      pageSize: params.pageSize || 20
-    })
-  },
-
-  // 添加收藏
-  addToFavorite(orderId) {
-    return request.post('/user/favorites', { orderId })
-  },
-
-  // 取消收藏
-  removeFromFavorite(orderId) {
-    return request.delete(`/user/favorites/${orderId}`)
-  },
-
   // 获取历史记录
   getHistory(params = {}) {
     return request.get('/user/history', {

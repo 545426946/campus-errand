@@ -9,9 +9,6 @@ const {
   getWalletDetails,
   withdraw,
   recharge,
-  getFavorites,
-  addFavorite,
-  removeFavorite,
   getHistory,
   deleteHistory,
   submitCertification,
@@ -45,11 +42,6 @@ router.get('/wallet', getWalletInfo);
 router.get('/wallet/details', getWalletDetails);
 router.post('/wallet/withdraw', withdraw);
 router.post('/wallet/recharge', recharge);
-
-// 收藏
-router.get('/favorites', getFavorites);
-router.post('/favorites', addFavorite);
-router.delete('/favorites/:id', removeFavorite);
 
 // 历史记录
 router.get('/history', getHistory);

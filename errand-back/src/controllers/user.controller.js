@@ -380,66 +380,6 @@ exports.recharge = async (req, res, next) => {
   }
 };
 
-// 获取收藏列表
-exports.getFavorites = async (req, res, next) => {
-  try {
-    const { page = 1, pageSize = 20 } = req.query;
-    
-    // 简化版：返回空列表
-    res.json({
-      success: true,
-      code: 0,
-      data: {
-        list: [],
-        total: 0,
-        page: parseInt(page),
-        pageSize: parseInt(pageSize)
-      },
-      message: '获取收藏列表成功'
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// 添加收藏
-exports.addFavorite = async (req, res, next) => {
-  try {
-    const { orderId } = req.body;
-    
-    if (!orderId) {
-      return res.status(400).json({
-        success: false,
-        code: 400,
-        message: '请提供订单ID'
-      });
-    }
-    
-    res.json({
-      success: true,
-      code: 0,
-      message: '收藏成功'
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// 取消收藏
-exports.removeFavorite = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    
-    res.json({
-      success: true,
-      code: 0,
-      message: '取消收藏成功'
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // 获取历史记录
 exports.getHistory = async (req, res, next) => {
   try {

@@ -20,9 +20,15 @@ function getUnreadCount() {
   return request.get('/messages/unread-count');
 }
 
+// 删除对话
+function deleteConversation(orderId) {
+  return request.delete(`/messages/conversation/${orderId}`);
+}
+
 module.exports = {
   sendMessage,
   getOrderMessages,
   getChatList,
-  getUnreadCount
+  getUnreadCount,
+  deleteConversation
 };

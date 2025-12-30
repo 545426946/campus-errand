@@ -14,8 +14,9 @@ exports.createCancelRequest = async (req, res, next) => {
       return res.status(404).json({ success: false, code: 404, message: '订单不存在' });
     }
 
-    if (order.acceptor_id !== requesterId) {
-      return res.status(403).json({ success: false, code: 403, message: '只有接单者可以发起取消请求' });
+    // 验证权限：发布者或接单者都可以发起取消请求
+    if (order.user_id !== requesterId && order.acceptor_id !== requesterId) {
+      return res.status(403).json({ success: false, code: 403, message: '权限不足' });
     }
 
     if (order.status !== 'accepted') {
@@ -27,12 +28,18 @@ exports.createCancelRequest = async (req, res, next) => {
       return res.status(400).json({ success: false, code: 400, message: '已有待处理的取消请求' });
     }
 
-    const requestId = await CancelRequest.create({ order_id: orderId, requester_id: requesterId, reason: reason || '接单者请求取消订单' });
+    // 确定请求者身份和接收者
+    const isPublisher = order.user_id === requesterId;
+    const receiverId = isPublisher ? order.acceptor_id : order.user_id;
+    const requesterRole = isPublisher ? '发布者' : '接单者';
+    const defaultReason = `${requesterRole}请求取消订单`;
 
-    await Message.create({ order_id: orderId, sender_id: requesterId, receiver_id: order.user_id, content: `[取消请求] ${reason || '接单者请求取消订单，请在订单详情中处理'}`, type: 'system' });
+    const requestId = await CancelRequest.create({ order_id: orderId, requester_id: requesterId, reason: reason || defaultReason });
+
+    await Message.create({ order_id: orderId, sender_id: requesterId, receiver_id: receiverId, content: `[取消请求] ${reason || defaultReason + '，请在订单详情中处理'}`, type: 'system' });
 
     try {
-      await Notification.createOrderNotification(orderId, order.user_id, 'cancel_request', '收到取消请求', `接单者请求取消订单"${order.title}"，原因：${reason || '无'}`);
+      await Notification.createOrderNotification(orderId, receiverId, 'cancel_request', '收到取消请求', `${requesterRole}请求取消订单"${order.title}"，原因：${reason || '无'}`);
     } catch (error) {
       console.error('创建通知失败:', error);
     }
@@ -79,18 +86,29 @@ exports.handleCancelRequest = async (req, res, next) => {
       return res.status(404).json({ success: false, code: 404, message: '订单不存在' });
     }
 
-    if (order.user_id !== userId) {
-      return res.status(403).json({ success: false, code: 403, message: '只有发布者可以处理取消请求' });
-    }
-
     const cancelRequest = await CancelRequest.findByOrderId(orderId);
     if (!cancelRequest) {
       return res.status(404).json({ success: false, code: 404, message: '取消请求不存在' });
     }
 
+    // 验证权限：只有非请求方可以处理取消请求
+    if (cancelRequest.requester_id === userId) {
+      return res.status(403).json({ success: false, code: 403, message: '不能处理自己发起的取消请求' });
+    }
+
+    // 确保当前用户是订单相关方
+    if (order.user_id !== userId && order.acceptor_id !== userId) {
+      return res.status(403).json({ success: false, code: 403, message: '权限不足' });
+    }
+
     if (cancelRequest.status !== 'pending') {
       return res.status(400).json({ success: false, code: 400, message: '该取消请求已被处理' });
     }
+
+    // 确定处理者身份
+    const isPublisher = order.user_id === userId;
+    const handlerRole = isPublisher ? '发布者' : '接单者';
+    const receiverId = cancelRequest.requester_id;
 
     let success = false;
     let message = '';
@@ -100,9 +118,9 @@ exports.handleCancelRequest = async (req, res, next) => {
       if (success) {
         await Order.cancel(orderId, cancelRequest.reason);
         message = '已同意取消请求，订单已取消';
-        await Message.create({ order_id: orderId, sender_id: userId, receiver_id: order.acceptor_id, content: '[取消请求已同意] 发布者已同意取消订单', type: 'system' });
+        await Message.create({ order_id: orderId, sender_id: userId, receiver_id: receiverId, content: `[取消请求已同意] ${handlerRole}已同意取消订单`, type: 'system' });
         try {
-          await Notification.createOrderNotification(orderId, order.acceptor_id, 'cancel_agreed', '取消请求已同意', `发布者已同意取消订单"${order.title}"`);
+          await Notification.createOrderNotification(orderId, receiverId, 'cancel_agreed', '取消请求已同意', `${handlerRole}已同意取消订单"${order.title}"`);
         } catch (error) {
           console.error('创建通知失败:', error);
         }
@@ -111,9 +129,9 @@ exports.handleCancelRequest = async (req, res, next) => {
       success = await CancelRequest.reject(cancelRequest.id);
       if (success) {
         message = '已拒绝取消请求';
-        await Message.create({ order_id: orderId, sender_id: userId, receiver_id: order.acceptor_id, content: '[取消请求已拒绝] 发布者已拒绝取消订单，请继续完成订单', type: 'system' });
+        await Message.create({ order_id: orderId, sender_id: userId, receiver_id: receiverId, content: `[取消请求已拒绝] ${handlerRole}已拒绝取消订单，请继续完成订单`, type: 'system' });
         try {
-          await Notification.createOrderNotification(orderId, order.acceptor_id, 'cancel_rejected', '取消请求已拒绝', `发布者已拒绝取消订单"${order.title}"，请继续完成订单`);
+          await Notification.createOrderNotification(orderId, receiverId, 'cancel_rejected', '取消请求已拒绝', `${handlerRole}已拒绝取消订单"${order.title}"，请继续完成订单`);
         } catch (error) {
           console.error('创建通知失败:', error);
         }

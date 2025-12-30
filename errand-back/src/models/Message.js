@@ -110,6 +110,17 @@ class Message {
     const query = 'DELETE FROM messages WHERE order_id = ?';
     await db.execute(query, [orderId]);
   }
+
+  // 删除用户在某个订单的所有消息（用于删除对话）
+  static async deleteConversation(orderId, userId) {
+    const query = `
+      DELETE FROM messages 
+      WHERE order_id = ? 
+      AND (sender_id = ? OR receiver_id = ?)
+    `;
+    const [result] = await db.execute(query, [orderId, userId, userId]);
+    return result.affectedRows;
+  }
 }
 
 module.exports = Message;

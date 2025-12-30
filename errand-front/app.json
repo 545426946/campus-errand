@@ -9,7 +9,6 @@
     "pages/notification/notification",
     "pages/profile/profile",
     "pages/wallet/wallet",
-    "pages/favorite/favorite",
     "pages/history/history",
     "pages/message/center",
     "pages/chat/chat",

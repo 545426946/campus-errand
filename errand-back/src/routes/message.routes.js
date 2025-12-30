@@ -18,4 +18,7 @@ router.get('/chats', messageController.getChatList);
 // 获取未读消息数
 router.get('/unread-count', messageController.getUnreadCount);
 
+// 删除对话
+router.delete('/conversation/:orderId', messageController.deleteConversation);
+
 module.exports = router;

@@ -221,7 +221,31 @@ class Order {
     return result.affectedRows > 0;
   }
 
-  // 完成订单
+  // 接单者标记完成（进入待确认状态）
+  static async markCompleting(orderId) {
+    const query = `
+      UPDATE orders 
+      SET status = 'completing', updated_at = NOW()
+      WHERE id = ? AND status = 'accepted'
+    `;
+
+    const [result] = await db.execute(query, [orderId]);
+    return result.affectedRows > 0;
+  }
+
+  // 发布者确认完成
+  static async confirmComplete(orderId) {
+    const query = `
+      UPDATE orders 
+      SET status = 'completed', completed_at = NOW(), updated_at = NOW()
+      WHERE id = ? AND status = 'completing'
+    `;
+
+    const [result] = await db.execute(query, [orderId]);
+    return result.affectedRows > 0;
+  }
+
+  // 完成订单（保留旧方法兼容性）
   static async complete(orderId) {
     const query = `
       UPDATE orders 

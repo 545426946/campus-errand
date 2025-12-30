@@ -73,7 +73,7 @@
 }
 
 .form-group {
-  padding: 30rpx 0;
+  padding: 20rpx 0;
   border-bottom: 1rpx solid #f0f0f0;
 }
 
@@ -81,7 +81,12 @@
   border-bottom: none;
 }
 
-.form-label {
+/* 性别选择需要保留标签 */
+.gender-group {
+  padding: 30rpx 0;
+}
+
+.gender-group .form-label {
   display: block;
   color: #333;
   font-size: 28rpx;
@@ -98,6 +103,11 @@
   font-size: 28rpx;
   background-color: #fafafa;
   box-sizing: border-box;
+}
+
+.form-input::placeholder {
+  color: #999;
+  font-size: 26rpx;
 }
 
 .form-input:focus {
@@ -120,6 +130,11 @@
   background-color: #fafafa;
   box-sizing: border-box;
   resize: none;
+}
+
+.form-textarea::placeholder {
+  color: #999;
+  font-size: 26rpx;
 }
 
 .form-textarea:focus {

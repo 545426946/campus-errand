@@ -4,7 +4,7 @@
     <view class="search-bar">
       <input 
         class="search-input" 
-        placeholder="搜索服务类型..." 
+        placeholder="搜索..." 
         bindinput="onSearchInput"
         value="{{searchKeyword}}"
       />

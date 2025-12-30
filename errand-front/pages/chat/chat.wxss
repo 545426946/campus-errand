@@ -55,20 +55,19 @@
 }
 
 .message-item {
-  margin-bottom: 40rpx;
+  margin-bottom: 32rpx;
+  width: 100%;
 }
 
 .message-wrapper {
   display: flex;
   align-items: flex-start;
-  gap: 20rpx;
+  gap: 16rpx;
+  width: 100%;
+  flex-direction: row;  /* 所有消息都左对齐 */
 }
 
-/* 对方的消息 */
-.message-item.other .message-wrapper {
-  flex-direction: row;
-}
-
+/* 对方的消息 - 白色气泡 */
 .message-item.other .message-content {
   align-items: flex-start;
 }
@@ -86,26 +85,23 @@
   text-align: left;
 }
 
-/* 我的消息 */
-.message-item.mine .message-wrapper {
-  flex-direction: row-reverse;
-}
-
+/* 我的消息 - 蓝色气泡 */
 .message-item.mine .message-content {
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .message-item.mine .message-bubble {
-  background-color: #95ec69;
+  background-color: #e3f2fd;  /* 浅蓝色 */
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
 }
 
 .message-item.mine .sender-name {
-  text-align: right;
+  text-align: left;
+  color: #1976d2;  /* 深蓝色 */
 }
 
 .message-item.mine .message-time {
-  text-align: right;
+  text-align: left;
 }
 
 .avatar {
@@ -115,13 +111,15 @@
   flex-shrink: 0;
   background-color: #f0f0f0;
   border: 2rpx solid #e0e0e0;
+  object-fit: cover;
 }
 
 .message-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 550rpx;
+  max-width: calc(100% - 100rpx);
+  min-width: 0;
 }
 
 .sender-name {
@@ -129,27 +127,34 @@
   color: #999;
   margin-bottom: 8rpx;
   padding: 0 8rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .message-bubble {
+  display: inline-block;
   max-width: 100%;
-  padding: 24rpx;
-  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 16rpx;
   word-wrap: break-word;
   word-break: break-word;
+  position: relative;
 }
 
 .message-text {
-  font-size: 28rpx;
+  font-size: 30rpx;
   line-height: 1.6;
   color: #333;
+  white-space: pre-wrap;
 }
 
 .message-time {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #bbb;
   margin-top: 8rpx;
   padding: 0 8rpx;
+  white-space: nowrap;
 }
 
 /* 输入框 */
@@ -160,21 +165,38 @@
   display: flex;
   align-items: center;
   gap: 20rpx;
+  box-shadow: 0 -2rpx 8rpx rgba(0, 0, 0, 0.05);
 }
 
 .cancel-btn {
   background-color: #ff6b6b;
   color: white;
   border: none;
-  padding: 10rpx 20rpx;
+  padding: 12rpx 24rpx;
   font-size: 24rpx;
+  border-radius: 8rpx;
+  flex-shrink: 0;
 }
 
 .message-input {
   flex: 1;
   background-color: #f5f5f5;
-  border-radius: 8rpx;
-  padding: 20rpx;
+  border-radius: 40rpx;
+  padding: 24rpx 32rpx;
+  font-size: 30rpx;
+  line-height: 1.5;
+  min-height: 80rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.3s;
+}
+
+.message-input:focus {
+  background-color: white;
+  border-color: #07c160;
+}
+
+.message-input::placeholder {
+  color: #999;
   font-size: 28rpx;
 }
 
@@ -182,7 +204,16 @@
   background-color: #07c160;
   color: white;
   border: none;
-  padding: 20rpx 40rpx;
-  border-radius: 8rpx;
-  font-size: 28rpx;
+  padding: 24rpx 48rpx;
+  border-radius: 40rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  flex-shrink: 0;
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.3);
+  transition: all 0.3s;
+}
+
+.send-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 2rpx 8rpx rgba(7, 193, 96, 0.2);
 }

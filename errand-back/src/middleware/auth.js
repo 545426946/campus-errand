@@ -57,6 +57,44 @@ exports.protect = async (req, res, next) => {
 // 别名，为了兼容性
 exports.authenticate = exports.protect;
 
+// 可选认证中间件 - 如果有token就验证，没有token也继续
+exports.optionalAuth = async (req, res, next) => {
+  try {
+    let token;
+    
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    // 如果没有token，直接继续，不报错
+    if (!token) {
+      req.user = null;
+      return next();
+    }
+
+    // 验证 token
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id);
+      
+      if (user) {
+        req.user = user;
+      } else {
+        req.user = null;
+      }
+    } catch (jwtError) {
+      console.error('JWT验证失败（可选认证）:', jwtError.message);
+      req.user = null;
+    }
+
+    next();
+  } catch (error) {
+    console.error('可选认证错误:', error);
+    req.user = null;
+    next();
+  }
+};
+
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {

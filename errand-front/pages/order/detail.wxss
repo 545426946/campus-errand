@@ -520,3 +520,51 @@
   background: var(--warning);
   color: var(--gray-8);
 }
+
+/* 待确认完成卡片 */
+.completing-card {
+  background: var(--gray-8);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-lg);
+  border-left: 6rpx solid var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.completing-content {
+  margin-top: var(--space-md);
+}
+
+.completing-info {
+  display: flex;
+  align-items: flex-start;
+}
+
+.completing-icon {
+  font-size: 60rpx;
+  margin-right: var(--space-md);
+  flex-shrink: 0;
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.completing-text {
+  flex: 1;
+}
+
+.completing-title {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--gray-1);
+  margin-bottom: var(--space-sm);
+}
+
+.completing-desc {
+  font-size: var(--font-md);
+  color: var(--gray-3);
+  line-height: 1.6;
+}

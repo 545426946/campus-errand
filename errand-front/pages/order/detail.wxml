@@ -8,11 +8,12 @@
       <view class="status-icon status-{{orderDetail.status}}">
         <text wx:if="{{orderDetail.status === 'pending'}}">⏰</text>
         <text wx:if="{{orderDetail.status === 'accepted'}}">🚀</text>
+        <text wx:if="{{orderDetail.status === 'completing'}}">⏳</text>
         <text wx:if="{{orderDetail.status === 'completed'}}">✅</text>
         <text wx:if="{{orderDetail.status === 'cancelled'}}">❌</text>
       </view>
       <view class="status-text">{{orderDetail.statusText}}</view>
-      <view class="status-desc">{{orderDetail.status === 'pending' ? '等待接单中' : orderDetail.status === 'accepted' ? '订单进行中' : orderDetail.status === 'completed' ? '订单已完成' : '订单已取消'}}</view>
+      <view class="status-desc">{{orderDetail.status === 'pending' ? '等待接单中' : orderDetail.status === 'accepted' ? '订单进行中' : orderDetail.status === 'completing' ? '等待发布者确认' : orderDetail.status === 'completed' ? '订单已完成' : '订单已取消'}}</view>
       <view class="status-time">{{orderDetail.createdTime}}</view>
     </view>
 
@@ -37,19 +38,23 @@
       
       <view class="info-row">
         <view class="info-label">取货地点</view>
-        <view class="info-value">{{orderDetail.pickup_location}}</view>
+        <view class="info-value">
+          {{(isPublisher || isAcceptor) ? orderDetail.pickup_location : '接单后可见'}}
+        </view>
       </view>
       
       <view class="info-row">
         <view class="info-label">送货地点</view>
-        <view class="info-value">{{orderDetail.delivery_location}}</view>
+        <view class="info-value">
+          {{(isPublisher || isAcceptor) ? orderDetail.delivery_location : '接单后可见'}}
+        </view>
       </view>
       
       <view class="info-row">
         <view class="info-label">联系电话</view>
-        <view class="info-value phone" bindtap="onCallPhone">
-          {{orderDetail.contact_phone}}
-          <text class="call-icon">📞</text>
+        <view class="info-value {{(isPublisher || isAcceptor) ? 'phone' : ''}}" bindtap="{{(isPublisher || isAcceptor) ? 'onCallPhone' : ''}}">
+          {{(isPublisher || isAcceptor) ? orderDetail.contact_phone : '接单后可见'}}
+          <text wx:if="{{isPublisher || isAcceptor}}" class="call-icon">📞</text>
         </view>
       </view>
       
@@ -137,6 +142,24 @@
       </view>
     </view>
 
+    <!-- 待确认完成提示 -->
+    <view wx:if="{{orderDetail.status === 'completing'}}" class="completing-card">
+      <view class="card-title">待确认完成</view>
+      <view class="completing-content">
+        <view class="completing-info">
+          <text class="completing-icon">⏳</text>
+          <view class="completing-text">
+            <view class="completing-title">
+              {{isPublisher ? '接单者已完成订单，请确认' : '您已标记完成，等待发布者确认'}}
+            </view>
+            <view class="completing-desc">
+              {{isPublisher ? '请确认订单是否已完成，确认后订单将结束' : '发布者确认后订单将完成'}}
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <!-- 时间信息 -->
     <view class="time-card">
       <view class="card-title">时间信息</view>
@@ -175,13 +198,16 @@
     <button wx:if="{{canComplete}}" class="action-btn success" bindtap="onCompleteOrder">
       完成订单
     </button>
+    <button wx:if="{{canConfirmComplete}}" class="action-btn success" bindtap="onConfirmComplete">
+      ✅ 确认完成
+    </button>
     <button wx:if="{{canRequestCancel && !cancelRequest}}" class="action-btn warning" bindtap="onRequestCancel">
       请求取消
     </button>
     <button wx:if="{{canCancel}}" class="action-btn cancel" bindtap="onCancelOrder">
       取消订单
     </button>
-    <button wx:if="{{!canAccept && !canComplete && !canCancel && !canRequestCancel && !canChat}}" class="action-btn" bindtap="onBack">
+    <button wx:if="{{!canAccept && !canComplete && !canConfirmComplete && !canCancel && !canRequestCancel && !canChat}}" class="action-btn" bindtap="onBack">
       返回
     </button>
   </view>

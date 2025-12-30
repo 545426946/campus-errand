@@ -1,4 +1,4 @@
-const { requestCancelOrder } = require('../../api/message.js');
+const orderAPI = require('../../api/order.js');
 
 Page({
   data: {
@@ -30,7 +30,7 @@ Page({
     try {
       wx.showLoading({ title: '提交中...' });
       
-      const res = await requestCancelOrder(orderId, reason.trim());
+      const res = await orderAPI.requestCancelOrder(orderId, reason.trim());
       
       wx.hideLoading();
 

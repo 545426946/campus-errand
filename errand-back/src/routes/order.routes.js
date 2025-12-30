@@ -7,13 +7,14 @@ const {
   acceptOrder,
   cancelOrder,
   completeOrder,
+  confirmCompleteOrder,
   confirmOrder,
   deleteOrder,
   getMyPublishOrders,
   getMyAcceptedOrders,
   getOrderStats
 } = require('../controllers/order.controller');
-const { protect } = require('../middleware/auth');
+const { protect, optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -31,8 +32,8 @@ router.get('/my-publish', protect, getMyPublishOrders);
 router.get('/my-accepted', protect, getMyAcceptedOrders);
 router.get('/stats', protect, getOrderStats);
 
-// 订单详情 - 不需要认证（未登录用户可以查看）
-router.get('/:id', getOrderDetail);
+// 订单详情 - 可选认证（登录用户可以看到更多信息）
+router.get('/:id', optionalAuth, getOrderDetail);
 router.get('/:id/evaluations', getEvaluations);  // 查看评价
 
 // 需要认证的接口
@@ -43,7 +44,8 @@ router.delete('/:id', protect, deleteOrder);  // 删除订单
 // 订单状态操作 - 需要认证
 router.post('/:id/accept', protect, acceptOrder);
 router.post('/:id/cancel', protect, cancelOrder);
-router.post('/:id/complete', protect, completeOrder);
+router.post('/:id/complete', protect, completeOrder);  // 接单者标记完成
+router.post('/:id/confirm-complete', protect, confirmCompleteOrder);  // 发布者确认完成
 router.post('/:id/confirm', protect, confirmOrder);
 
 // 订单评价、举报、分享 - 需要认证

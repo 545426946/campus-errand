@@ -18,7 +18,8 @@ Page({
     canAccept: false,    // 是否可以接单
     canCancel: false,    // 是否可以取消（直接取消，仅pending状态）
     canRequestCancel: false, // 是否可以请求取消（协商取消，accepted状态）
-    canComplete: false,  // 是否可以完成
+    canComplete: false,  // 是否可以完成（接单者标记完成）
+    canConfirmComplete: false,  // 是否可以确认完成（发布者确认）
     canChat: false,      // 是否可以聊天
     
     // 配置
@@ -80,7 +81,8 @@ Page({
       const canCancel = isLoggedIn && (isPublisher || isAcceptor) && order.status === 'pending';
       const canRequestCancel = isLoggedIn && isAcceptor && order.status === 'accepted';
       const canComplete = isLoggedIn && isAcceptor && order.status === 'accepted';
-      const canChat = isLoggedIn && order.status === 'accepted' && (isPublisher || isAcceptor);
+      const canConfirmComplete = isLoggedIn && isPublisher && order.status === 'completing';
+      const canChat = isLoggedIn && (order.status === 'accepted' || order.status === 'completing') && (isPublisher || isAcceptor);
       
       // 加载取消请求（如果有）
       let cancelRequest = null;
@@ -106,6 +108,7 @@ Page({
         canCancel,
         canRequestCancel,
         canComplete,
+        canConfirmComplete,
         canChat
       });
       
@@ -115,6 +118,20 @@ Page({
         acceptor_id: order.acceptor_id,
         acceptor_name: order.acceptor_name,
         acceptor_username: order.acceptor_username
+      });
+      console.log('当前用户ID:', this.data.currentUserId, '类型:', typeof this.data.currentUserId);
+      console.log('接单者ID:', order.acceptor_id, '类型:', typeof order.acceptor_id);
+      console.log('订单状态:', order.status);
+      console.log('权限判断:', {
+        isLoggedIn,
+        isPublisher,
+        isAcceptor,
+        canAccept,
+        canCancel,
+        canRequestCancel,
+        canComplete,
+        canConfirmComplete,
+        canChat
       });
       console.log('取消请求:', cancelRequest);
       console.log('=== 调试信息结束 ===');
@@ -179,7 +196,7 @@ Page({
     }
   },
 
-  // 完成订单
+  // 完成订单（接单者标记完成）
   async onCompleteOrder() {
     // 检查登录 - 完成订单需要登录
     if (!authUtil.isLoggedIn()) {
@@ -191,8 +208,8 @@ Page({
     
     try {
       const res = await wx.showModal({
-        title: '确认完成',
-        content: '确认已完成此订单？完成后将无法撤销。'
+        title: '标记完成',
+        content: '确认已完成此订单？完成后需要发布者确认。'
       });
       
       if (!res.confirm) return;
@@ -200,6 +217,50 @@ Page({
       wx.showLoading({ title: '提交中...' });
       
       await orderAPI.completeOrder(this.data.orderId);
+      
+      wx.hideLoading();
+      
+      wx.showToast({
+        title: '已标记完成，等待确认',
+        icon: 'success'
+      });
+      
+      setTimeout(() => {
+        this.loadOrderDetail();
+      }, 1500);
+      
+    } catch (error) {
+      wx.hideLoading();
+      console.error('标记完成失败:', error);
+      
+      wx.showToast({
+        title: error.message || '操作失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 确认完成订单（发布者确认）
+  async onConfirmComplete() {
+    // 检查登录
+    if (!authUtil.isLoggedIn()) {
+      await authUtil.requireLogin({
+        content: '确认完成需要登录后使用'
+      }).catch(() => {});
+      return;
+    }
+    
+    try {
+      const res = await wx.showModal({
+        title: '确认完成',
+        content: '确认接单者已完成此订单？确认后订单将完成。'
+      });
+      
+      if (!res.confirm) return;
+      
+      wx.showLoading({ title: '确认中...' });
+      
+      await orderAPI.confirmCompleteOrder(this.data.orderId);
       
       wx.hideLoading();
       
@@ -214,7 +275,7 @@ Page({
       
     } catch (error) {
       wx.hideLoading();
-      console.error('完成订单失败:', error);
+      console.error('确认完成失败:', error);
       
       wx.showToast({
         title: error.message || '操作失败',
@@ -239,7 +300,7 @@ Page({
         title: '取消订单',
         content: '确定要取消这个订单吗？',
         editable: true,
-        placeholderText: '请输入取消原因（可选）'
+        placeholderText: '可输入取消原因（可选）'
       });
       
       if (!res.confirm) return;
@@ -283,9 +344,8 @@ Page({
     try {
       const res = await wx.showModal({
         title: '请求取消订单',
-        content: '请输入取消原因，发布者将收到您的请求',
         editable: true,
-        placeholderText: '请输入取消原因'
+        placeholderText: '请输入取消原因，发布者将收到您的请求'
       });
       
       if (!res.confirm) return;

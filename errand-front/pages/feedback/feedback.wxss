@@ -93,6 +93,11 @@ page {
   background: #fafafa;
 }
 
+.form-input::placeholder {
+  color: #999;
+  font-size: 26rpx;
+}
+
 .form-input.error {
   border-color: #ff4757;
   background: #fff5f5;
@@ -107,6 +112,11 @@ page {
   font-size: 28rpx;
   background: #fafafa;
   line-height: 1.6;
+}
+
+.form-textarea::placeholder {
+  color: #999;
+  font-size: 26rpx;
 }
 
 .form-textarea.error {

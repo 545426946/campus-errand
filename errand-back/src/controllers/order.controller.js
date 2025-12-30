@@ -32,6 +32,7 @@ exports.getOrders = async (req, res, next) => {
 exports.getOrderDetail = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const userId = req.user ? req.user.id : null; // 支持未登录查看
 
     const order = await Order.findById(id);
 
@@ -41,6 +42,20 @@ exports.getOrderDetail = async (req, res, next) => {
         code: 404,
         message: '订单不存在'
       });
+    }
+
+    // 隐私保护：只有发布者和接单者可以看到详细信息
+    const isPublisher = userId && order.user_id === userId;
+    const isAcceptor = userId && order.acceptor_id === userId;
+    const canViewDetails = isPublisher || isAcceptor;
+
+    // 如果不是发布者或接单者，隐藏敏感信息
+    if (!canViewDetails) {
+      order.pickup_location = '接单后可见';
+      order.delivery_location = '接单后可见';
+      order.contact_phone = '接单后可见';
+      order.publisher_phone = null;
+      order.acceptor_phone = null;
     }
 
     res.json({
@@ -264,7 +279,7 @@ exports.cancelOrder = async (req, res, next) => {
   }
 };
 
-// 完成订单
+// 接单者标记完成订单（进入待确认状态）
 exports.completeOrder = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -289,13 +304,13 @@ exports.completeOrder = async (req, res, next) => {
       });
     }
 
-    const completed = await Order.complete(id);
+    const completed = await Order.markCompleting(id);
 
     if (!completed) {
       return res.status(400).json({
         success: false,
         code: 400,
-        message: '完成订单失败'
+        message: '标记完成失败'
       });
     }
 
@@ -304,9 +319,9 @@ exports.completeOrder = async (req, res, next) => {
       await Notification.createOrderNotification(
         id,
         order.user_id,
-        'order_completed',
-        '订单已完成',
-        `您的订单"${order.title}"已完成`
+        'order_completing',
+        '订单待确认',
+        `接单者已完成订单"${order.title}"，请确认`
       );
     } catch (error) {
       console.error('创建通知失败:', error);
@@ -315,7 +330,74 @@ exports.completeOrder = async (req, res, next) => {
     res.json({
       success: true,
       code: 0,
-      message: '订单已完成'
+      message: '已标记完成，等待发布者确认'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 发布者确认完成订单
+exports.confirmCompleteOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        code: 404,
+        message: '订单不存在'
+      });
+    }
+
+    // 只有发布者可以确认完成
+    if (order.user_id !== userId) {
+      return res.status(403).json({
+        success: false,
+        code: 403,
+        message: '无权限确认此订单'
+      });
+    }
+
+    // 订单必须是待确认状态
+    if (order.status !== 'completing') {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '订单状态不允许确认'
+      });
+    }
+
+    const confirmed = await Order.confirmComplete(id);
+
+    if (!confirmed) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '确认完成失败'
+      });
+    }
+
+    // 创建通知给接单者
+    try {
+      await Notification.createOrderNotification(
+        id,
+        order.acceptor_id,
+        'order_confirmed',
+        '订单已确认完成',
+        `发布者已确认订单"${order.title}"完成`
+      );
+    } catch (error) {
+      console.error('创建通知失败:', error);
+    }
+
+    res.json({
+      success: true,
+      code: 0,
+      message: '订单已确认完成'
     });
   } catch (error) {
     next(error);

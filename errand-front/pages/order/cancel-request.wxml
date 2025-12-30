@@ -7,10 +7,9 @@
   </view>
 
   <view class="form-section">
-    <text class="section-title">取消原因</text>
     <textarea 
       class="reason-input"
-      placeholder="请详细说明取消订单的原因..."
+      placeholder="取消原因：请详细说明取消订单的原因..."
       value="{{reason}}"
       bindinput="onReasonInput"
       maxlength="200"

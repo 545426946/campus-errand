@@ -17,9 +17,8 @@
   <!-- 反馈表单 -->
   <view class="form-section">
     <view class="form-item">
-      <text class="form-label">反馈标题 *</text>
       <input class="form-input {{errors.title ? 'error' : ''}}"
-             placeholder="请简要描述您的问题或建议"
+             placeholder="* 反馈标题：请简要描述您的问题或建议"
              value="{{formData.title}}"
              bindinput="onInputChange"
              data-field="title"
@@ -29,9 +28,8 @@
     </view>
 
     <view class="form-item">
-      <text class="form-label">详细描述 *</text>
       <textarea class="form-textarea {{errors.content ? 'error' : ''}}"
-                placeholder="请详细描述您遇到的问题或建议，以便我们更好地为您服务"
+                placeholder="* 详细描述：请详细描述您遇到的问题或建议，以便我们更好地为您服务"
                 value="{{formData.content}}"
                 bindinput="onInputChange"
                 data-field="content"
@@ -42,9 +40,8 @@
     </view>
 
     <view class="form-item">
-      <text class="form-label">联系方式</text>
       <input class="form-input {{errors.contact ? 'error' : ''}}"
-             placeholder="手机号或邮箱，方便我们联系您（选填）"
+             placeholder="联系方式：手机号或邮箱，方便我们联系您（选填）"
              value="{{formData.contact}}"
              bindinput="onInputChange"
              data-field="contact" />
@@ -53,7 +50,7 @@
 
     <!-- 图片上传 -->
     <view class="form-item">
-      <text class="form-label">相关图片</text>
+      <text class="form-label">相关图片（选填）</text>
       <view class="image-upload">
         <view class="image-list">
           <view class="image-item" 

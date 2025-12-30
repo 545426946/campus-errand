@@ -12,12 +12,11 @@
         <view class="section-title">基本信息</view>
         
         <view class="form-item">
-          <view class="label required">订单标题</view>
           <input 
             class="input" 
             name="title" 
             value="{{formData.title}}" 
-            placeholder="简短描述你的需求" 
+            placeholder="* 订单标题：简短描述你的需求" 
             placeholder-class="placeholder"
             maxlength="50" 
             bindinput="onInput"
@@ -43,12 +42,11 @@
         </view>
 
         <view class="form-item">
-          <view class="label required">订单描述</view>
           <textarea 
             class="textarea" 
             name="description" 
             value="{{formData.description}}" 
-            placeholder="详细描述订单内容、要求和注意事项" 
+            placeholder="* 订单描述：详细描述订单内容、要求和注意事项" 
             placeholder-class="placeholder"
             maxlength="500"
             show-confirm-bar="{{false}}"
@@ -64,15 +62,11 @@
         <view class="section-title">地点信息</view>
         
         <view class="form-item">
-          <view class="label required">
-            <text class="icon">📍</text>
-            <text>取货地点</text>
-          </view>
           <input 
             class="input" 
             name="pickupLocation" 
             value="{{formData.pickupLocation}}" 
-            placeholder="请输入详细地址" 
+            placeholder="📍 * 取货地点：请输入详细地址" 
             placeholder-class="placeholder"
             bindinput="onInput"
             data-field="pickupLocation"
@@ -80,15 +74,11 @@
         </view>
 
         <view class="form-item">
-          <view class="label required">
-            <text class="icon">📌</text>
-            <text>送达地点</text>
-          </view>
           <input 
             class="input" 
             name="deliveryLocation" 
             value="{{formData.deliveryLocation}}" 
-            placeholder="请输入详细地址" 
+            placeholder="📌 * 送达地点：请输入详细地址" 
             placeholder-class="placeholder"
             bindinput="onInput"
             data-field="deliveryLocation"
@@ -101,16 +91,12 @@
         <view class="section-title">联系方式</view>
         
         <view class="form-item">
-          <view class="label required">
-            <text class="icon">📱</text>
-            <text>联系电话</text>
-          </view>
           <input 
             class="input" 
             name="contactPhone" 
             type="number" 
             value="{{formData.contactPhone}}" 
-            placeholder="请输入11位手机号" 
+            placeholder="📱 * 联系电话：请输入11位手机号" 
             placeholder-class="placeholder"
             maxlength="11" 
             bindinput="onInput"
@@ -124,10 +110,6 @@
         <view class="section-title">金额设置</view>
         
         <view class="form-item price-item">
-          <view class="label required">
-            <text class="icon">💰</text>
-            <text>订单金额</text>
-          </view>
           <view class="price-input-wrapper">
             <text class="currency">¥</text>
             <input 
@@ -135,7 +117,7 @@
               name="price" 
               type="digit" 
               value="{{formData.price}}" 
-              placeholder="0.00" 
+              placeholder="* 订单金额" 
               placeholder-class="placeholder"
               bindinput="onInput"
               data-field="price"

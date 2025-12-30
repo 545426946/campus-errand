@@ -8,6 +8,9 @@ exports.sendMessage = async (req, res) => {
     const senderId = req.user.id;
 
     console.log('发送消息请求:', { orderId, senderId, receiverId, content, type });
+    console.log('类型检查 - senderId:', senderId, typeof senderId);
+    console.log('类型检查 - receiverId:', receiverId, typeof receiverId);
+    console.log('转换后比较:', parseInt(senderId), '===', parseInt(receiverId), '结果:', parseInt(senderId) === parseInt(receiverId));
 
     // 验证必填字段
     if (!orderId || !receiverId || !content) {
@@ -19,6 +22,7 @@ exports.sendMessage = async (req, res) => {
 
     // 验证发送者和接收者不能相同
     if (parseInt(senderId) === parseInt(receiverId)) {
+      console.error('发送者和接收者相同！senderId:', senderId, 'receiverId:', receiverId);
       return res.status(400).json({
         code: 1,
         message: '不能给自己发送消息'

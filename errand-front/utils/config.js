@@ -26,6 +26,7 @@ const config = {
   orderStatus: {
     PENDING: 'pending', // 待接单
     ACCEPTED: 'accepted', // 已接单
+    COMPLETING: 'completing', // 待确认完成
     COMPLETED: 'completed', // 已完成
     CANCELLED: 'cancelled' // 已取消
   },
@@ -34,6 +35,7 @@ const config = {
   orderStatusMap: {
     pending: '待接单',
     accepted: '进行中',
+    completing: '待确认',
     completed: '已完成',
     cancelled: '已取消'
   },

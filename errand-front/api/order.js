@@ -39,9 +39,14 @@ const orderAPI = {
     return request.post(`/orders/${orderId}/cancel`, { reason })
   },
 
-  // 完成订单
+  // 完成订单（接单者标记完成）
   completeOrder(orderId, data = {}) {
     return request.post(`/orders/${orderId}/complete`, data)
+  },
+
+  // 确认完成订单（发布者确认）
+  confirmCompleteOrder(orderId) {
+    return request.post(`/orders/${orderId}/confirm-complete`)
   },
 
   // 确认收货（订单发布者确认）
@@ -121,6 +126,21 @@ const orderAPI = {
   // 分享订单
   shareOrder(orderId) {
     return request.post(`/orders/${orderId}/share`)
+  },
+
+  // 请求取消订单（协商取消）
+  requestCancelOrder(orderId, reason) {
+    return request.post(`/orders/${orderId}/cancel-request`, { reason })
+  },
+
+  // 获取取消申请列表
+  getCancelRequests(orderId) {
+    return request.get(`/orders/${orderId}/cancel-requests`)
+  },
+
+  // 处理取消申请（同意/拒绝）
+  handleCancelRequest(requestId, action, reply = '') {
+    return request.post(`/cancel-requests/${requestId}/${action}`, { reply })
   }
 }
 

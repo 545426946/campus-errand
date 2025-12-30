@@ -37,6 +37,7 @@
 
       <!-- 我的消息 -->
       <view class="message-wrapper" wx:if="{{item.isMine}}">
+        <image class="avatar" src="{{item.sender_avatar || '/images/user.png'}}" mode="aspectFill"></image>
         <view class="message-content">
           <view class="sender-name">{{item.sender_name || '我'}}</view>
           <view class="message-bubble">
@@ -44,7 +45,6 @@
           </view>
           <view class="message-time">{{item.created_at}}</view>
         </view>
-        <image class="avatar" src="{{item.sender_avatar || '/images/user.png'}}" mode="aspectFill"></image>
       </view>
     </view>
   </scroll-view>

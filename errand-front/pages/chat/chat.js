@@ -15,7 +15,15 @@ Page({
   },
 
   onLoad(options) {
-    const userId = wx.getStorageSync('userId');
+    // 从 userInfo 中获取用户ID
+    const userInfo = wx.getStorageSync('userInfo');
+    const userId = userInfo ? parseInt(userInfo.id) : null;
+    
+    console.log('=== Chat 页面初始化 ===');
+    console.log('userInfo:', userInfo);
+    console.log('userId:', userId);
+    console.log('=====================');
+    
     this.setData({ userId });
     
     if (options.orderId) {
@@ -59,8 +67,12 @@ Page({
       
       if (res.code === 0) {
         const order = res.data;
-        const currentUserId = parseInt(wx.getStorageSync('userId'));
+        // 从 userInfo 中获取当前用户ID
+        const userInfo = wx.getStorageSync('userInfo');
+        const currentUserId = userInfo ? parseInt(userInfo.id) : null;
         
+        console.log('=== 订单详情调试 ===');
+        console.log('userInfo:', userInfo);
         console.log('当前用户ID:', currentUserId, typeof currentUserId);
         console.log('订单发布者ID:', order.user_id, typeof order.user_id);
         console.log('订单接单者ID:', order.acceptor_id, typeof order.acceptor_id);
@@ -69,23 +81,28 @@ Page({
         let otherUserId, otherUserName;
         if (parseInt(order.user_id) === currentUserId) {
           // 当前用户是发布者，对方是接单者
-          otherUserId = order.acceptor_id;
+          otherUserId = parseInt(order.acceptor_id);
           otherUserName = order.acceptor_name || order.acceptor_nickname || order.acceptor_username || '接单者';
-          console.log('当前用户是发布者');
-        } else {
+          console.log('✓ 当前用户是发布者，对方是接单者');
+        } else if (parseInt(order.acceptor_id) === currentUserId) {
           // 当前用户是接单者，对方是发布者
-          otherUserId = order.user_id;
+          otherUserId = parseInt(order.user_id);
           otherUserName = order.publisher_name || order.publisher_nickname || order.publisher_username || '发布者';
-          console.log('当前用户是接单者');
+          console.log('✓ 当前用户是接单者，对方是发布者');
+        } else {
+          console.error('✗ 当前用户既不是发布者也不是接单者！');
         }
 
         console.log('对方用户ID:', otherUserId, typeof otherUserId);
         console.log('对方用户名:', otherUserName);
+        console.log('验证: currentUserId !== otherUserId:', currentUserId !== otherUserId);
+        console.log('===================');
 
         this.setData({
           order,
           otherUserId,
           otherUserName,
+          userId: currentUserId,
           showCancelRequest: order.status === 'accepted' && order.cancel_request_status !== 'pending'
         });
       } else {
@@ -150,7 +167,9 @@ Page({
       console.log('加载消息响应:', res);
       
       if (res.code === 0) {
-        const currentUserId = parseInt(wx.getStorageSync('userId'));
+        // 从 userInfo 中获取当前用户ID
+        const userInfo = wx.getStorageSync('userInfo');
+        const currentUserId = userInfo ? parseInt(userInfo.id) : null;
         console.log('当前用户ID (loadMessages):', currentUserId);
         
         const messages = res.data.map((msg, index) => {
@@ -202,13 +221,15 @@ Page({
   },
 
   async sendMessage() {
-    const { inputMessage, orderId, otherUserId } = this.data;
+    const { inputMessage, orderId, otherUserId, userId } = this.data;
     
-    console.log('准备发送消息:', {
-      orderId,
-      otherUserId,
-      content: inputMessage
-    });
+    console.log('=== 发送消息调试信息 ===');
+    console.log('当前用户ID (userId):', userId, typeof userId);
+    console.log('对方用户ID (otherUserId):', otherUserId, typeof otherUserId);
+    console.log('订单ID:', orderId);
+    console.log('消息内容:', inputMessage);
+    console.log('两个ID是否相同:', userId === otherUserId);
+    console.log('========================');
     
     if (!inputMessage || !inputMessage.trim()) {
       wx.showToast({
@@ -227,13 +248,27 @@ Page({
       return;
     }
 
+    // 验证不能给自己发消息
+    if (parseInt(userId) === parseInt(otherUserId)) {
+      wx.showToast({
+        title: '不能给自己发送消息',
+        icon: 'none'
+      });
+      console.error('发送者和接收者相同！');
+      return;
+    }
+
     try {
-      const res = await sendMessage({
-        orderId,
-        receiverId: otherUserId,
+      const messageData = {
+        orderId: parseInt(orderId),
+        receiverId: parseInt(otherUserId),
         content: inputMessage.trim(),
         type: 'text'
-      });
+      };
+      
+      console.log('发送消息数据:', messageData);
+      
+      const res = await sendMessage(messageData);
 
       console.log('发送消息响应:', res);
 

@@ -358,10 +358,12 @@ async function deleteOrder(id) {
 // 加载认证列表
 async function loadCertifications(page = 1) {
   currentPage = page;
+  const keyword = document.getElementById('certSearch')?.value || '';
+  const type = document.getElementById('certTypeFilter')?.value || '';
   const status = document.getElementById('certStatusFilter')?.value || '';
   
   try {
-    const params = new URLSearchParams({ page, pageSize, status });
+    const params = new URLSearchParams({ page, pageSize, keyword, type, status });
     const response = await apiRequest(`${API_BASE_URL}/admin/certifications?${params}`);
     const data = await response.json();
     
@@ -387,7 +389,8 @@ function renderCertificationsTable(data) {
   
   const typeMap = {
     'student': '学生认证',
-    'teacher': '教师认证'
+    'teacher': '教师认证',
+    'staff': '职工认证'
   };
   
   let html = `
@@ -447,6 +450,13 @@ function searchCertifications() {
   loadCertifications(1);
 }
 
+function resetCertFilters() {
+  document.getElementById('certSearch').value = '';
+  document.getElementById('certTypeFilter').value = '';
+  document.getElementById('certStatusFilter').value = '';
+  loadCertifications(1);
+}
+
 async function viewCertification(id) {
   try {
     const response = await apiRequest(`${API_BASE_URL}/admin/certifications?page=1&pageSize=100`);
@@ -468,7 +478,8 @@ async function viewCertification(id) {
 function showCertificationDetail(cert) {
   const typeMap = {
     'student': '学生认证',
-    'teacher': '教师认证'
+    'teacher': '教师认证',
+    'staff': '职工认证'
   };
   
   let html = `

@@ -470,6 +470,13 @@
         <div class="content-section" id="certifications">
           <h2 class="section-title">认证审核</h2>
           <div class="search-bar">
+            <input type="text" id="certSearch" placeholder="搜索姓名、学号、学校...">
+            <select id="certTypeFilter">
+              <option value="">全部类型</option>
+              <option value="student">学生认证</option>
+              <option value="teacher">教师认证</option>
+              <option value="staff">职工认证</option>
+            </select>
             <select id="certStatusFilter">
               <option value="">全部状态</option>
               <option value="pending">待审核</option>
@@ -477,6 +484,7 @@
               <option value="rejected">已拒绝</option>
             </select>
             <button class="btn btn-primary" onclick="searchCertifications()">搜索</button>
+            <button class="btn btn-warning" onclick="resetCertFilters()">重置</button>
           </div>
           <div id="certificationsTable"></div>
         </div>

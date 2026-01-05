@@ -449,7 +449,7 @@ class AdminController {
   // 获取认证申请列表
   static async getCertifications(req, res) {
     try {
-      const { page = 1, pageSize = 20, status } = req.query;
+      const { page = 1, pageSize = 20, status, type, keyword } = req.query;
       const pageNum = parseInt(page) || 1;
       const pageSizeNum = parseInt(pageSize) || 20;
       const offset = (pageNum - 1) * pageSizeNum;
@@ -463,6 +463,17 @@ class AdminController {
         params.push(status);
       }
 
+      if (type && type.trim() !== '') {
+        whereClause += ' AND c.type = ?';
+        params.push(type);
+      }
+
+      if (keyword && keyword.trim() !== '') {
+        whereClause += ' AND (c.real_name LIKE ? OR c.student_id LIKE ? OR c.school LIKE ? OR u.username LIKE ? OR u.nickname LIKE ?)';
+        const searchTerm = `%${keyword}%`;
+        params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
+      }
+
       const sql = `SELECT c.*, u.username, u.nickname, u.avatar 
          FROM certifications c
          LEFT JOIN users u ON c.user_id = u.id
@@ -473,7 +484,7 @@ class AdminController {
       const [certifications] = await db.execute(sql, params);
 
       const [countResult] = await db.execute(
-        `SELECT COUNT(*) as total FROM certifications c WHERE ${whereClause}`,
+        `SELECT COUNT(*) as total FROM certifications c LEFT JOIN users u ON c.user_id = u.id WHERE ${whereClause}`,
         params
       );
 

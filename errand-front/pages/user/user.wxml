@@ -58,7 +58,7 @@
           <text class="menu-title">身份认证</text>
         </view>
         <view class="menu-right">
-          <text class="menu-badge" wx:if="{{!isCertified}}">未认证</text>
+          <text class="menu-badge {{isCertified ? 'certified' : ''}}" wx:if="{{isLogin}}">{{isCertified ? '已认证' : '未认证'}}</text>
           <text class="menu-arrow">></text>
         </view>
       </view>

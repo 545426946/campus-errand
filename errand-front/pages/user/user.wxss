@@ -173,6 +173,11 @@
   font-weight: 500;
 }
 
+.menu-badge.certified {
+  background: var(--success-light);
+  color: var(--success-dark);
+}
+
 .cert-status {
   font-size: var(--font-sm);
   padding: 6rpx 12rpx;

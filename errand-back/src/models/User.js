@@ -16,7 +16,7 @@ class User {
 
   static async findById(id) {
     const [rows] = await db.execute(
-      'SELECT id, username, email, role, nickname, avatar, phone, student_id, major, grade, balance, frozen_balance, total_income, total_expense, certification_status, real_name, id_card, created_at FROM users WHERE id = ?',
+      'SELECT id, username, email, role, nickname, avatar, phone, student_id, major, grade, balance, frozen_balance, total_income, total_expense, certification_status, real_name, id_card, is_certified, certification_type, created_at FROM users WHERE id = ?',
       [id]
     );
     return rows[0];

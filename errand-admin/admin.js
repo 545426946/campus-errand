@@ -4,6 +4,25 @@ let token = localStorage.getItem('adminToken');
 let currentPage = 1;
 const pageSize = 20;
 
+// 通用API请求函数，自动处理401错误
+async function apiRequest(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  
+  if (response.status === 401) {
+    alert('登录已过期，请重新登录');
+    logout();
+    throw new Error('Unauthorized');
+  }
+  
+  return response;
+}
+
 // 登录
 document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -81,9 +100,7 @@ function switchMenu(menu) {
 // 加载统计数据
 async function loadDashboard() {
   try {
-    const response = await fetch(`${API_BASE_URL}/admin/statistics`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const response = await apiRequest(`${API_BASE_URL}/admin/statistics`);
     const data = await response.json();
     
     if (data.success) {
@@ -136,16 +153,16 @@ async function loadUsers(page = 1) {
   
   try {
     const params = new URLSearchParams({ page, pageSize, keyword, certification_status: certStatus });
-    const response = await fetch(`${API_BASE_URL}/admin/users?${params}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const response = await apiRequest(`${API_BASE_URL}/admin/users?${params}`);
     const data = await response.json();
     
     if (data.success) {
       renderUsersTable(data.data);
     }
   } catch (error) {
-    console.error('加载用户列表错误:', error);
+    if (error.message !== 'Unauthorized') {
+      console.error('加载用户列表错误:', error);
+    }
   }
 }
 
@@ -211,9 +228,8 @@ async function deleteUser(id) {
   if (!confirm('确定要删除该用户吗？')) return;
   
   try {
-    const response = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
+    const response = await apiRequest(`${API_BASE_URL}/admin/users/${id}`, {
+      method: 'DELETE'
     });
     const data = await response.json();
     
@@ -224,8 +240,10 @@ async function deleteUser(id) {
       alert(data.message || '删除失败');
     }
   } catch (error) {
-    alert('删除失败');
-    console.error('删除用户错误:', error);
+    if (error.message !== 'Unauthorized') {
+      alert('删除失败');
+      console.error('删除用户错误:', error);
+    }
   }
 }
 
@@ -237,16 +255,16 @@ async function loadOrders(page = 1) {
   
   try {
     const params = new URLSearchParams({ page, pageSize, keyword, status });
-    const response = await fetch(`${API_BASE_URL}/admin/orders?${params}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const response = await apiRequest(`${API_BASE_URL}/admin/orders?${params}`);
     const data = await response.json();
     
     if (data.success) {
       renderOrdersTable(data.data);
     }
   } catch (error) {
-    console.error('加载订单列表错误:', error);
+    if (error.message !== 'Unauthorized') {
+      console.error('加载订单列表错误:', error);
+    }
   }
 }
 
@@ -318,9 +336,8 @@ async function deleteOrder(id) {
   if (!confirm('确定要删除该订单吗？')) return;
   
   try {
-    const response = await fetch(`${API_BASE_URL}/admin/orders/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
+    const response = await apiRequest(`${API_BASE_URL}/admin/orders/${id}`, {
+      method: 'DELETE'
     });
     const data = await response.json();
     
@@ -331,8 +348,10 @@ async function deleteOrder(id) {
       alert(data.message || '删除失败');
     }
   } catch (error) {
-    alert('删除失败');
-    console.error('删除订单错误:', error);
+    if (error.message !== 'Unauthorized') {
+      alert('删除失败');
+      console.error('删除订单错误:', error);
+    }
   }
 }
 
@@ -343,16 +362,16 @@ async function loadCertifications(page = 1) {
   
   try {
     const params = new URLSearchParams({ page, pageSize, status });
-    const response = await fetch(`${API_BASE_URL}/admin/certifications?${params}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const response = await apiRequest(`${API_BASE_URL}/admin/certifications?${params}`);
     const data = await response.json();
     
     if (data.success) {
       renderCertificationsTable(data.data);
     }
   } catch (error) {
-    console.error('加载认证列表错误:', error);
+    if (error.message !== 'Unauthorized') {
+      console.error('加载认证列表错误:', error);
+    }
   }
 }
 
@@ -430,9 +449,7 @@ function searchCertifications() {
 
 async function viewCertification(id) {
   try {
-    const response = await fetch(`${API_BASE_URL}/admin/certifications?page=1&pageSize=100`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const response = await apiRequest(`${API_BASE_URL}/admin/certifications?page=1&pageSize=100`);
     const data = await response.json();
     
     if (data.success) {
@@ -442,7 +459,9 @@ async function viewCertification(id) {
       }
     }
   } catch (error) {
-    console.error('查看认证详情错误:', error);
+    if (error.message !== 'Unauthorized') {
+      console.error('查看认证详情错误:', error);
+    }
   }
 }
 
@@ -493,10 +512,9 @@ async function approveCertification(id) {
   if (!confirm('确定通过该认证申请吗？')) return;
   
   try {
-    const response = await fetch(`${API_BASE_URL}/admin/certifications/${id}/review`, {
+    const response = await apiRequest(`${API_BASE_URL}/admin/certifications/${id}/review`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ status: 'approved' })
@@ -510,8 +528,10 @@ async function approveCertification(id) {
       alert(data.message || '审核失败');
     }
   } catch (error) {
-    alert('审核失败');
-    console.error('审核认证错误:', error);
+    if (error.message !== 'Unauthorized') {
+      alert('审核失败');
+      console.error('审核认证错误:', error);
+    }
   }
 }
 
@@ -520,10 +540,9 @@ async function rejectCertification(id) {
   if (!reason) return;
   
   try {
-    const response = await fetch(`${API_BASE_URL}/admin/certifications/${id}/review`, {
+    const response = await apiRequest(`${API_BASE_URL}/admin/certifications/${id}/review`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ status: 'rejected', reject_reason: reason })
@@ -537,8 +556,10 @@ async function rejectCertification(id) {
       alert(data.message || '操作失败');
     }
   } catch (error) {
-    alert('操作失败');
-    console.error('审核认证错误:', error);
+    if (error.message !== 'Unauthorized') {
+      alert('操作失败');
+      console.error('审核认证错误:', error);
+    }
   }
 }
 

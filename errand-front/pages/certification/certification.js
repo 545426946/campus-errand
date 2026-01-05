@@ -57,6 +57,14 @@ Page({
           loading: false
         });
 
+        // 如果认证状态已通过，更新本地用户信息
+        if (res.data.isCertified) {
+          const userInfo = wx.getStorageSync('userInfo') || {};
+          userInfo.is_certified = 1;
+          userInfo.certification_type = res.data.certificationType;
+          wx.setStorageSync('userInfo', userInfo);
+        }
+
         // 如果有待审核或已通过的认证，加载详情
         if (res.data.status !== 'none') {
           this.loadCertificationDetail();

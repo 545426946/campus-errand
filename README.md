@@ -4,11 +4,15 @@
 
 ## 📋 项目文档
 
+### 📖 完整文档
+查看 [docs/README.md](./docs/README.md) 获取完整的文档目录
+
+### 🔗 快速链接
 - [项目结构说明](./docs/项目结构说明.md) - 完整的项目结构和开发指南
 - [后端 API 文档](./errand-back/API-DOCUMENTATION.md) - 后端 API 接口文档
-- [数据库文档](./errand-back/database/README.md) - 数据库结构和使用说明
-- [功能更新说明](./docs/功能更新说明.md) - 功能更新记录
-- [未登录用户体验优化](./docs/未登录用户体验优化.md) - 未登录用户体验优化说明
+- [管理员系统说明](./README-管理员系统.md) - 管理员后台使用指南
+- [取消协商功能说明](./README-取消协商功能.md) - 订单取消协商功能
+- [操作指南](./docs/操作指南.md) - 系统操作指南
 
 ## 🚀 快速开始
 
@@ -41,20 +45,35 @@ npm start
 ## ✨ 主要功能
 
 ### 用户系统
+- ✅ 微信登录授权
 - ✅ 用户注册（用户名+密码）
 - ✅ 用户登录（用户名/邮箱+密码）
 - ✅ JWT 身份认证
 - ✅ 密码加密存储（bcrypt）
 - ✅ 个人信息管理
+- ✅ 身份认证（学生证/教师证）
 
 ### 订单系统
 - ✅ 订单发布与管理
 - ✅ 订单接单与完成
 - ✅ 订单搜索与筛选
 - ✅ 订单状态跟踪
+- ✅ 取消协商功能
+
+### 聊天系统
+- ✅ 实时消息通知
+- ✅ 聊天列表
+- ✅ 一对一聊天
+- ✅ 消息中心
+
+### 管理员系统
+- ✅ 管理员登录
+- ✅ 用户管理
+- ✅ 订单管理
+- ✅ 认证审核
+- ✅ 数据统计
 
 ### 其他功能
-- ✅ 实时消息通知
 - ✅ 个人中心
 - ✅ 未登录用户浏览
 
@@ -75,10 +94,18 @@ npm start
 ```
 campus-errand/
 ├── docs/                           # 项目文档
+│   ├── README.md                  # 文档目录
 │   ├── 项目结构说明.md             # 项目结构和开发指南
-│   ├── 功能更新说明.md             # 功能更新记录
-│   ├── 未登录用户体验优化.md       # 用户体验优化说明
+│   ├── BACKEND_APIS.md            # 后端API说明
+│   ├── 管理员系统实现总结.md       # 管理员系统文档
+│   ├── 身份认证系统说明.md         # 认证系统文档
+│   ├── 微信登录功能实现总结.md     # 微信登录文档
 │   └── ...                        # 其他文档
+│
+├── errand-admin/                   # 管理员后台
+│   ├── index.html                 # 管理员界面
+│   ├── admin.js                   # 管理员逻辑
+│   └── README.md                  # 管理员系统说明
 │
 ├── errand-back/                    # 后端服务
 │   ├── src/                       # 源代码
@@ -86,14 +113,15 @@ campus-errand/
 │   │   ├── models/                # 数据模型
 │   │   ├── routes/                # 路由配置
 │   │   ├── middleware/            # 中间件
+│   │   ├── services/              # 业务服务
 │   │   └── config/                # 配置文件
 │   ├── database/                  # 数据库文件
-│   │   ├── migrations/            # 数据库迁移（表结构）
-│   │   ├── seeds/                 # 数据库种子（测试数据）
-│   │   └── README.md              # 数据库文档
+│   ├── uploads/                   # 上传文件
+│   ├── create-*.js                # 数据库初始化脚本
+│   ├── setup-*.bat                # 安装脚本
 │   ├── .env.example               # 环境变量示例
 │   ├── server.js                  # 服务器入口
-│   └── setup-database.bat         # 数据库初始化脚本
+│   └── API-DOCUMENTATION.md       # API文档
 │
 └── errand-front/                   # 前端小程序
     ├── pages/                     # 页面文件
@@ -101,15 +129,24 @@ campus-errand/
     │   ├── order/                 # 订单页
     │   ├── publish/               # 发布页
     │   ├── user/                  # 用户中心
-    │   └── login/                 # 登录页
+    │   ├── login/                 # 登录页
+    │   ├── chat/                  # 聊天页
+    │   ├── message/               # 消息中心
+    │   └── certification/         # 认证页
     ├── api/                       # API 接口封装
     ├── utils/                     # 工具函数
-    │   ├── auth.js                # 认证工具
-    │   └── config.js              # 配置文件
-    └── components/                # 自定义组件
+    ├── components/                # 自定义组件
+    └── images/                    # 图片资源
 ```
 
 ## 🔧 最近更新
+
+### 2025-01-05
+- ✅ **管理员系统** - 完整的管理员后台，支持用户、订单、认证管理
+- ✅ **身份认证系统** - 学生证和教师证认证功能
+- ✅ **认证历史记录** - 查看认证申请历史
+- ✅ **管理员系统样式优化** - 纯色设计，更简洁专业
+- ✅ **API错误修复** - 修复管理员系统的500错误
 
 ### 2024-12-17
 - ✅ **用户注册登录** - 完整的注册登录功能，数据保存到 MySQL 数据库
@@ -119,9 +156,7 @@ campus-errand/
 - ✅ **优化登录状态管理** - 添加统一的认证工具
 - ✅ **界面优化** - 优化色彩对比度和用户界面
 
-详细内容请查看：
-- [用户注册登录流程说明](./docs/用户注册登录流程说明.md)
-- [功能更新说明](./docs/功能更新说明.md)
+详细内容请查看 [docs/README.md](./docs/README.md)
 
 ## 📝 开发说明
 
@@ -133,21 +168,17 @@ campus-errand/
 ### 配置说明
 1. 复制 `errand-back/.env.example` 为 `.env`
 2. 修改数据库配置
-3. 运行数据库初始化脚本：`setup-database.bat`
+3. 运行数据库初始化脚本：
+   ```bash
+   cd errand-back
+   setup-database.bat  # 初始化数据库
+   setup-admin.bat     # 创建管理员账号
+   ```
 
-### 测试
-```bash
-cd errand-back
-
-# 测试所有API
-node test-all-apis.js
-
-# 测试接单接口
-node test-accept-order.js
-
-# 测试注册登录功能
-node test-register-login.js
-```
+### 管理员系统
+打开 `errand-admin/index.html` 访问管理员后台
+- 用户名：admin
+- 密码：admin123
 
 ## 🤝 贡献
 

@@ -55,7 +55,8 @@ Page({
     
     this.setData({
       isLogin: isLogin,
-      userInfo: localUserInfo || {}
+      userInfo: localUserInfo || {},
+      isCertified: localUserInfo?.is_certified === 1 || localUserInfo?.is_certified === true
     });
     
     // 如果已登录，从后端获取最新的用户信息
@@ -68,7 +69,8 @@ Page({
           // 更新本地存储和页面显示
           wx.setStorageSync('userInfo', result.data);
           this.setData({
-            userInfo: result.data
+            userInfo: result.data,
+            isCertified: result.data.is_certified === 1 || result.data.is_certified === true
           });
         }
       } catch (error) {
@@ -79,6 +81,7 @@ Page({
     
     console.log('页面状态 - isLogin:', this.data.isLogin);
     console.log('页面状态 - userInfo:', this.data.userInfo);
+    console.log('页面状态 - isCertified:', this.data.isCertified);
   },
 
   // 加载用户数据（从后端获取）

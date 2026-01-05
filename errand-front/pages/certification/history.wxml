@@ -1,0 +1,104 @@
+<view class="history-page">
+  <!-- 导航栏 -->
+  <view class="nav-bar">
+    <text class="nav-title">认证历史记录</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{!loading && historyList.length === 0}}">
+    <text class="empty-icon">📋</text>
+    <text class="empty-text">暂无历史记录</text>
+  </view>
+
+  <!-- 历史记录列表 -->
+  <view class="history-list" wx:if="{{!loading && historyList.length > 0}}">
+    <view class="history-item {{item.status}}" wx:for="{{historyList}}" wx:key="id">
+      <!-- 状态标签 -->
+      <view class="status-badge {{item.status}}">
+        <text wx:if="{{item.status === 'pending'}}">审核中</text>
+        <text wx:if="{{item.status === 'approved'}}">已通过</text>
+        <text wx:if="{{item.status === 'rejected'}}">已拒绝</text>
+      </view>
+
+      <!-- 基本信息 -->
+      <view class="item-header">
+        <view class="header-left">
+          <text class="cert-type">
+            {{item.type === 'student' ? '学生认证' : item.type === 'teacher' ? '教师认证' : '职工认证'}}
+          </text>
+          <text class="cert-name">{{item.real_name}}</text>
+        </view>
+        <view class="header-right">
+          <text class="cert-id">ID: {{item.id}}</text>
+        </view>
+      </view>
+
+      <!-- 详细信息 -->
+      <view class="item-content">
+        <view class="info-row">
+          <text class="info-label">学校：</text>
+          <text class="info-value">{{item.school}}</text>
+        </view>
+        
+        <view class="info-row" wx:if="{{item.student_id}}">
+          <text class="info-label">{{item.type === 'student' ? '学号' : '工号'}}：</text>
+          <text class="info-value">{{item.student_id}}</text>
+        </view>
+
+        <view class="info-row" wx:if="{{item.college}}">
+          <text class="info-label">学院：</text>
+          <text class="info-value">{{item.college}}</text>
+        </view>
+
+        <view class="info-row" wx:if="{{item.major}}">
+          <text class="info-label">专业：</text>
+          <text class="info-value">{{item.major}}</text>
+        </view>
+
+        <view class="info-row" wx:if="{{item.grade}}">
+          <text class="info-label">年级：</text>
+          <text class="info-value">{{item.grade}}</text>
+        </view>
+
+        <view class="info-row" wx:if="{{item.department}}">
+          <text class="info-label">部门：</text>
+          <text class="info-value">{{item.department}}</text>
+        </view>
+      </view>
+
+      <!-- 时间信息 -->
+      <view class="item-footer">
+        <view class="time-info">
+          <text class="time-label">提交时间：</text>
+          <text class="time-value">{{item.submitted_at}}</text>
+        </view>
+        
+        <view class="time-info" wx:if="{{item.reviewed_at}}">
+          <text class="time-label">审核时间：</text>
+          <text class="time-value">{{item.reviewed_at}}</text>
+        </view>
+
+        <!-- 拒绝原因 -->
+        <view class="reject-reason" wx:if="{{item.status === 'rejected' && item.reject_reason}}">
+          <text class="reason-label">拒绝原因：</text>
+          <text class="reason-value">{{item.reject_reason}}</text>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="item-actions">
+        <button class="action-btn detail-btn" bindtap="onViewDetail" data-item="{{item}}">
+          查看详情
+        </button>
+        <button class="action-btn reapply-btn" wx:if="{{item.status === 'rejected'}}" bindtap="onReapply">
+          重新认证
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,214 @@
+.history-page {
+  min-height: 100vh;
+  background-color: #f8f8f8;
+  padding-bottom: 40rpx;
+}
+
+/* 导航栏 */
+.nav-bar {
+  background: white;
+  padding: 30rpx;
+  text-align: center;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.nav-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 加载状态 */
+.loading {
+  padding: 200rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 空状态 */
+.empty {
+  padding: 200rpx 0;
+  text-align: center;
+}
+
+.empty-icon {
+  display: block;
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.3;
+}
+
+.empty-text {
+  display: block;
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 历史记录列表 */
+.history-list {
+  padding: 30rpx;
+}
+
+.history-item {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  position: relative;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+.history-item:last-child {
+  margin-bottom: 0;
+}
+
+/* 状态标签 */
+.status-badge {
+  position: absolute;
+  top: 30rpx;
+  right: 30rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+.status-badge.pending {
+  background: #fff3e0;
+  color: #ff9800;
+}
+
+.status-badge.approved {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+
+.status-badge.rejected {
+  background: #ffebee;
+  color: #f44336;
+}
+
+/* 头部信息 */
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24rpx;
+  padding-right: 120rpx;
+}
+
+.header-left {
+  flex: 1;
+}
+
+.cert-type {
+  display: block;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.cert-name {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+}
+
+.cert-id {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 详细信息 */
+.item-content {
+  padding: 24rpx 0;
+  border-top: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.info-row {
+  display: flex;
+  padding: 12rpx 0;
+  font-size: 28rpx;
+}
+
+.info-label {
+  color: #999;
+  width: 140rpx;
+  flex-shrink: 0;
+}
+
+.info-value {
+  flex: 1;
+  color: #333;
+}
+
+/* 底部时间信息 */
+.item-footer {
+  margin-top: 24rpx;
+}
+
+.time-info {
+  display: flex;
+  padding: 8rpx 0;
+  font-size: 24rpx;
+}
+
+.time-label {
+  color: #999;
+  margin-right: 12rpx;
+}
+
+.time-value {
+  color: #666;
+}
+
+.reject-reason {
+  margin-top: 16rpx;
+  padding: 20rpx;
+  background: #fff3e0;
+  border-radius: 8rpx;
+}
+
+.reason-label {
+  display: block;
+  font-size: 24rpx;
+  color: #ff9800;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+}
+
+.reason-value {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* 操作按钮 */
+.item-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 24rpx;
+}
+
+.action-btn {
+  flex: 1;
+  height: 72rpx;
+  line-height: 72rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  text-align: center;
+}
+
+.detail-btn {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.reapply-btn {
+  background: #007aff;
+  color: white;
+}

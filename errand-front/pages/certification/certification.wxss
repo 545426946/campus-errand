@@ -1,0 +1,287 @@
+.certification-page {
+  min-height: 100vh;
+  background-color: #f8f8f8;
+  padding-bottom: 40rpx;
+}
+
+/* 加载状态 */
+.loading {
+  padding: 200rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 历史记录按钮 */
+.history-btn-wrapper {
+  padding: 30rpx;
+  padding-bottom: 0;
+}
+
+.history-btn {
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  background: white;
+  border: 2rpx solid #007aff;
+  border-radius: 8rpx;
+  color: #007aff;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.history-icon {
+  margin-right: 12rpx;
+  font-size: 32rpx;
+}
+
+/* 认证状态卡片 */
+.cert-status {
+  margin: 30rpx;
+  padding: 40rpx;
+  background: white;
+  border-radius: 16rpx;
+  text-align: center;
+}
+
+.cert-status.approved {
+  border: 2rpx solid #4caf50;
+}
+
+.cert-status.pending {
+  border: 2rpx solid #ff9800;
+}
+
+.cert-status.rejected {
+  border: 2rpx solid #f44336;
+}
+
+.status-icon {
+  font-size: 100rpx;
+  margin-bottom: 20rpx;
+}
+
+.cert-status.approved .status-icon {
+  color: #4caf50;
+}
+
+.cert-status.pending .status-icon {
+  color: #ff9800;
+}
+
+.cert-status.rejected .status-icon {
+  color: #f44336;
+}
+
+.status-text {
+  margin-bottom: 30rpx;
+}
+
+.status-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.status-desc {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.cert-info {
+  margin-top: 30rpx;
+  padding-top: 30rpx;
+  border-top: 1rpx solid #f0f0f0;
+  text-align: left;
+}
+
+.info-item {
+  display: flex;
+  padding: 16rpx 0;
+  font-size: 28rpx;
+}
+
+.info-item .label {
+  color: #999;
+  width: 180rpx;
+}
+
+.info-item .value {
+  flex: 1;
+  color: #333;
+}
+
+.reapply-btn {
+  margin-top: 30rpx;
+  background: #007aff;
+  color: white;
+  border-radius: 8rpx;
+  font-size: 32rpx;
+  padding: 24rpx;
+}
+
+/* 表单 */
+.cert-form {
+  padding: 0 30rpx;
+}
+
+.form-section {
+  margin-top: 30rpx;
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.section-desc {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 30rpx;
+  line-height: 1.6;
+}
+
+.form-item {
+  margin-bottom: 30rpx;
+}
+
+.form-item:last-child {
+  margin-bottom: 0;
+}
+
+.form-item .label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.form-item .label.required::before {
+  content: '*';
+  color: #f44336;
+  margin-right: 8rpx;
+}
+
+.form-item .input {
+  width: 100%;
+  height: 80rpx;
+  padding: 0 24rpx;
+  background: #f8f8f8;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.form-item .picker {
+  height: 80rpx;
+  line-height: 80rpx;
+  padding: 0 24rpx;
+  background: #f8f8f8;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 上传 */
+.upload-item {
+  margin-bottom: 30rpx;
+}
+
+.upload-item:last-child {
+  margin-bottom: 0;
+}
+
+.upload-item .label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.upload-box {
+  width: 100%;
+  height: 300rpx;
+  border-radius: 8rpx;
+  overflow: hidden;
+  background: #f8f8f8;
+}
+
+.upload-image {
+  width: 100%;
+  height: 100%;
+}
+
+.upload-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.upload-icon {
+  font-size: 80rpx;
+  margin-bottom: 16rpx;
+}
+
+.upload-text {
+  font-size: 24rpx;
+}
+
+/* 提交 */
+.submit-section {
+  margin-top: 30rpx;
+}
+
+.submit-btn {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: #007aff;
+  color: white;
+  border-radius: 8rpx;
+  font-size: 32rpx;
+  text-align: center;
+}
+
+.submit-btn[disabled] {
+  background: #ccc;
+}
+
+.tips {
+  margin-top: 30rpx;
+  padding: 30rpx;
+  background: #fff9e6;
+  border-radius: 8rpx;
+}
+
+.tips-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #ff9800;
+  margin-bottom: 16rpx;
+}
+
+.tips-text {
+  display: block;
+  font-size: 24rpx;
+  color: #666;
+  line-height: 2;
+  padding-left: 20rpx;
+}

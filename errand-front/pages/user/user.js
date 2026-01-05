@@ -8,6 +8,7 @@ Page({
   data: {
     isLogin: false,
     userInfo: {},
+    isCertified: false,
     
     // 用户统计（从后端获取）
     userStats: {
@@ -168,7 +169,7 @@ Page({
     const type = e.currentTarget.dataset.type;
     
     // 需要登录的功能
-    const needLoginTypes = ['myOrders', 'myWallet', 'profile', 'history', 'notification'];
+    const needLoginTypes = ['myOrders', 'myWallet', 'profile', 'history', 'notification', 'certification'];
     
     if (needLoginTypes.includes(type) && !this.data.isLogin) {
       wx.showModal({
@@ -204,6 +205,11 @@ Page({
       case 'profile':
         wx.navigateTo({
           url: '/pages/profile/profile'
+        });
+        break;
+      case 'certification':
+        wx.navigateTo({
+          url: '/pages/certification/certification'
         });
         break;
       case 'history':

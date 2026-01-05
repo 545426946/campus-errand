@@ -164,6 +164,15 @@
   font-weight: 600;
 }
 
+.menu-badge {
+  font-size: var(--font-xs);
+  padding: 6rpx 12rpx;
+  border-radius: var(--radius-xs);
+  background: #ff9800;
+  color: white;
+  font-weight: 500;
+}
+
 .cert-status {
   font-size: var(--font-sm);
   padding: 6rpx 12rpx;

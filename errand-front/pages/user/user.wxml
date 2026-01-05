@@ -52,6 +52,17 @@
     </view>
 
     <view class="menu-group">
+      <view class="menu-item" bindtap="onMenuTap" data-type="certification">
+        <view class="menu-left">
+          <text class="menu-icon">🎓</text>
+          <text class="menu-title">身份认证</text>
+        </view>
+        <view class="menu-right">
+          <text class="menu-badge" wx:if="{{!isCertified}}">未认证</text>
+          <text class="menu-arrow">></text>
+        </view>
+      </view>
+      
       <view class="menu-item" bindtap="onMenuTap" data-type="history">
         <view class="menu-left">
           <text class="menu-icon">📝</text>

@@ -16,6 +16,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // 路由
+// 管理员路由（必须在其他路由之前，避免被认证中间件拦截）
+app.use('/api/admin', require('./routes/admin.routes'));
+
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/users', require('./routes/user.routes'));
 app.use('/api/user', require('./routes/user.routes')); // 兼容前端 /api/user 路径
@@ -28,6 +31,7 @@ app.use('/api/upload', require('./routes/upload.routes')); // 上传路由
 app.use('/api/ai', require('./routes/ai.routes'));
 app.use('/api/messages', require('./routes/message.routes')); // 消息路由
 app.use('/api', require('./routes/cancelRequest.routes')); // 取消请求路由
+app.use('/api/certification', require('./routes/certification.routes')); // 认证路由
 
 // 健康检查
 app.get('/health', (req, res) => {

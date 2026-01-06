@@ -310,36 +310,57 @@ Page({
     try {
       wx.showLoading({ title: '处理中...' });
       
-      const result = await userAPI.withdraw({
+      // 使用新的提现申请API
+      const result = await userAPI.createWithdrawRequest({
         amount,
-        account: '微信'
+        account: '微信',
+        accountType: 'wechat'
       });
 
       wx.hideLoading();
       
-      wx.showModal({
-        title: '提现申请已提交',
-        content: `提现金额：¥${amount.toFixed(2)}\n预计1-3个工作日到账`,
-        showCancel: false,
-        success: () => {
-          // 重新加载钱包信息
-          this.loadWalletInfo();
-          this.setData({
-            detailList: [],
-            page: 1,
-            hasMore: true
-          });
-          this.loadWalletDetails();
-        }
-      });
+      if (result && result.success) {
+        wx.showModal({
+          title: '提现申请已提交',
+          content: `提现金额：¥${amount.toFixed(2)}\n预计1-3个工作日到账`,
+          showCancel: false,
+          success: () => {
+            // 重新加载钱包信息
+            this.loadWalletInfo();
+            this.setData({
+              detailList: [],
+              page: 1,
+              hasMore: true
+            });
+            this.loadWalletDetails();
+          }
+        });
+      } else {
+        const errorMsg = (result && result.message) || '提现失败';
+        wx.showToast({
+          title: errorMsg,
+          icon: 'none',
+          duration: 2000
+        });
+      }
 
     } catch (error) {
       wx.hideLoading();
+      console.error('提现失败:', error);
+      
       wx.showToast({
-        title: '提现失败',
-        icon: 'none'
+        title: error.message || '提现失败',
+        icon: 'none',
+        duration: 2000
       });
     }
+  },
+
+  // 查看提现记录
+  onViewWithdrawList: function () {
+    wx.navigateTo({
+      url: '/pages/wallet/withdraw-list'
+    });
   },
 
   // 格式化时间

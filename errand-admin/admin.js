@@ -1,5 +1,5 @@
 // API基础URL
-const API_BASE_URL = 'http://192.168.1.170:3000/api';
+const API_BASE_URL = 'http://192.168.1.175:3000/api';
 let token = localStorage.getItem('adminToken');
 let currentPage = 1;
 const pageSize = 20;

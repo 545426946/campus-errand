@@ -1,0 +1,101 @@
+<view class="page-container">
+  <!-- 统计卡片 -->
+  <view class="stats-card">
+    <view class="stat-item">
+      <text class="stat-value">{{stats.totalCount}}</text>
+      <text class="stat-label">总申请</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-value">{{stats.pendingCount}}</text>
+      <text class="stat-label">待审核</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-value">¥{{stats.totalAmount}}</text>
+      <text class="stat-label">已提现</text>
+    </view>
+  </view>
+
+  <!-- 状态筛选 -->
+  <view class="filter-tabs">
+    <view 
+      class="filter-tab {{statusFilter === 'all' ? 'active' : ''}}"
+      data-status="all"
+      bindtap="onStatusChange">
+      全部
+    </view>
+    <view 
+      class="filter-tab {{statusFilter === 'pending' ? 'active' : ''}}"
+      data-status="pending"
+      bindtap="onStatusChange">
+      待审核
+    </view>
+    <view 
+      class="filter-tab {{statusFilter === 'completed' ? 'active' : ''}}"
+      data-status="completed"
+      bindtap="onStatusChange">
+      已完成
+    </view>
+    <view 
+      class="filter-tab {{statusFilter === 'rejected' ? 'active' : ''}}"
+      data-status="rejected"
+      bindtap="onStatusChange">
+      已拒绝
+    </view>
+  </view>
+
+  <!-- 提现列表 -->
+  <view class="withdraw-list" wx:if="{{withdrawList.length > 0}}">
+    <view 
+      class="withdraw-item" 
+      wx:for="{{withdrawList}}" 
+      wx:key="id"
+      bindtap="onViewDetail"
+      data-id="{{item.id}}">
+      
+      <view class="withdraw-header">
+        <view class="withdraw-info">
+          <text class="withdraw-amount">¥{{item.amount}}</text>
+          <text class="withdraw-account">提现到{{item.account}}</text>
+        </view>
+        <view class="withdraw-status {{item.statusClass}}">
+          {{item.statusText}}
+        </view>
+      </view>
+
+      <view class="withdraw-footer">
+        <text class="withdraw-time">{{item.created_at}}</text>
+        <view class="withdraw-actions" wx:if="{{item.status === 'pending'}}">
+          <text 
+            class="action-btn cancel"
+            catchtap="onCancelWithdraw"
+            data-id="{{item.id}}">
+            取消
+          </text>
+        </view>
+      </view>
+
+      <view class="withdraw-note" wx:if="{{item.admin_note}}">
+        <text class="note-label">备注：</text>
+        <text class="note-text">{{item.admin_note}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:elif="{{!loading}}">
+    <text class="empty-icon">💰</text>
+    <text class="empty-text">暂无提现记录</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 没有更多 -->
+  <view class="no-more" wx:if="{{!hasMore && withdrawList.length > 0}}">
+    <text class="no-more-text">没有更多记录了</text>
+  </view>
+</view>

@@ -143,6 +143,35 @@ const userAPI = {
     return request.post('/user/wallet/recharge', rechargeData)
   },
 
+  // 创建提现申请
+  createWithdrawRequest(withdrawData) {
+    return request.post('/withdraw', withdrawData)
+  },
+
+  // 获取我的提现申请列表
+  getMyWithdrawRequests(params = {}) {
+    return request.get('/withdraw/my', {
+      page: params.page || 1,
+      pageSize: params.pageSize || 20,
+      status: params.status
+    })
+  },
+
+  // 获取提现申请详情
+  getWithdrawRequestDetail(id) {
+    return request.get(`/withdraw/${id}`)
+  },
+
+  // 取消提现申请
+  cancelWithdrawRequest(id) {
+    return request.post(`/withdraw/${id}/cancel`)
+  },
+
+  // 获取提现统计
+  getWithdrawStats() {
+    return request.get('/withdraw/stats')
+  },
+
   // 获取用户统计数据
   getUserStats() {
     return request.get('/user/stats')

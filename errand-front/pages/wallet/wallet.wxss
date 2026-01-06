@@ -109,9 +109,21 @@ page {
   color: #333;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
 .record-count {
   font-size: 24rpx;
   color: #999;
+}
+
+.view-withdraw {
+  font-size: 24rpx;
+  color: #667eea;
+  font-weight: bold;
 }
 
 /* 交易记录列表 */

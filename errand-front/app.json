@@ -9,6 +9,7 @@
     "pages/notification/notification",
     "pages/profile/profile",
     "pages/wallet/wallet",
+    "pages/wallet/withdraw-list",
     "pages/history/history",
     "pages/message/center",
     "pages/chat/chat",

@@ -32,6 +32,7 @@ app.use('/api/ai', require('./routes/ai.routes'));
 app.use('/api/messages', require('./routes/message.routes')); // 消息路由
 app.use('/api', require('./routes/cancelRequest.routes')); // 取消请求路由
 app.use('/api/certification', require('./routes/certification.routes')); // 认证路由
+app.use('/api/withdraw', require('./routes/withdraw.routes')); // 提现路由
 
 // 健康检查
 app.get('/health', (req, res) => {

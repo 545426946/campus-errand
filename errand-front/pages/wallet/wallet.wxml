@@ -30,7 +30,10 @@
   <!-- 交易记录标题 -->
   <view class="section-header">
     <text class="section-title">交易记录</text>
-    <text class="record-count">共{{detailList.length}}条记录</text>
+    <view class="header-actions">
+      <text class="record-count">共{{detailList.length}}条</text>
+      <text class="view-withdraw" bindtap="onViewWithdrawList">提现记录 ></text>
+    </view>
   </view>
 
   <!-- 交易记录列表 -->

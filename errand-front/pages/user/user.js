@@ -107,7 +107,7 @@ Page({
           inProgressOrders: statsResult.data.in_progress_count || 0
         },
         userWallet: {
-          balance: (walletResult.data.balance || 0).toFixed(2)
+          balance: parseFloat(walletResult.data.balance || 0).toFixed(2)
         }
       });
       

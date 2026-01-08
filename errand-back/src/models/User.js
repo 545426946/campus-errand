@@ -228,6 +228,314 @@ class User {
 
     return await this.findById(id);
   }
+
+  // 添加钱包交易记录
+  static async addWalletTransaction(userId, transactionData) {
+    const { type, amount, title, description, relatedType, relatedId } = transactionData;
+    
+    // 开始事务
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    try {
+      // 获取用户当前余额
+      const [userRows] = await connection.execute(
+        'SELECT balance, frozen_balance, total_income, total_expense FROM users WHERE id = ? FOR UPDATE',
+        [userId]
+      );
+
+      if (userRows.length === 0) {
+        throw new Error('用户不存在');
+      }
+
+      const user = userRows[0];
+      let currentBalance = parseFloat(user.balance) || 0;
+      let newBalance = currentBalance;
+      let newTotalIncome = parseFloat(user.total_income) || 0;
+      let newTotalExpense = parseFloat(user.total_expense) || 0;
+      const amountNum = parseFloat(amount);
+
+      // 根据交易类型更新余额
+      if (type === 'income') {
+        newBalance += amountNum;
+        newTotalIncome += amountNum;
+      } else if (type === 'expense') {
+        if (newBalance < amountNum) {
+          throw new Error('余额不足');
+        }
+        newBalance -= amountNum;
+        newTotalExpense += amountNum;
+      }
+
+      // 更新用户余额
+      await connection.execute(
+        'UPDATE users SET balance = ?, total_income = ?, total_expense = ? WHERE id = ?',
+        [newBalance, newTotalIncome, newTotalExpense, userId]
+      );
+
+      // 插入交易记录 - 使用正确的字段名 order_id
+      const orderId = relatedType === 'order' ? relatedId : null;
+      await connection.execute(
+        `INSERT INTO wallet_transactions 
+        (user_id, type, amount, balance_before, balance_after, title, description, order_id, status, created_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'completed', NOW())`,
+        [userId, type, amountNum, currentBalance, newBalance, title, description || '', orderId]
+      );
+
+      await connection.commit();
+      return { success: true, newBalance };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  // 冻结余额（发布订单时使用）
+  static async freezeBalance(userId, amount, orderId, title, description) {
+    console.log('=== freezeBalance 开始 ===');
+    console.log('参数:', { userId, amount, orderId, title });
+    
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    try {
+      // 获取用户当前余额
+      const [userRows] = await connection.execute(
+        'SELECT balance, frozen_balance FROM users WHERE id = ? FOR UPDATE',
+        [userId]
+      );
+
+      console.log('用户查询结果:', userRows);
+
+      if (userRows.length === 0) {
+        throw new Error('用户不存在');
+      }
+
+      const user = userRows[0];
+      const currentBalance = parseFloat(user.balance) || 0;
+      const currentFrozen = parseFloat(user.frozen_balance) || 0;
+      const amountNum = parseFloat(amount);
+
+      console.log('当前余额:', currentBalance);
+      console.log('当前冻结:', currentFrozen);
+      console.log('冻结金额:', amountNum);
+
+      // 检查余额是否足够
+      if (currentBalance < amountNum) {
+        throw new Error('余额不足');
+      }
+
+      const newBalance = currentBalance - amountNum;
+      const newFrozen = currentFrozen + amountNum;
+
+      console.log('新余额:', newBalance);
+      console.log('新冻结:', newFrozen);
+
+      // 更新用户余额和冻结余额
+      const [updateResult] = await connection.execute(
+        'UPDATE users SET balance = ?, frozen_balance = ? WHERE id = ?',
+        [newBalance, newFrozen, userId]
+      );
+      console.log('更新用户结果:', updateResult);
+
+      // 插入冻结交易记录
+      const [insertResult] = await connection.execute(
+        `INSERT INTO wallet_transactions 
+        (user_id, type, amount, balance_before, balance_after, title, description, order_id, status, created_at) 
+        VALUES (?, 'freeze', ?, ?, ?, ?, ?, ?, 'completed', NOW())`,
+        [userId, amountNum, currentBalance, newBalance, title, description || '', orderId]
+      );
+      console.log('插入交易记录结果:', insertResult);
+
+      await connection.commit();
+      console.log('=== freezeBalance 成功 ===');
+      return { success: true, newBalance, newFrozen };
+    } catch (error) {
+      console.error('freezeBalance 错误:', error);
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  // 解冻余额并转账给骑手（确认完成订单时使用）
+  static async unfreezeAndTransfer(publisherId, riderId, amount, orderId, orderTitle) {
+    console.log('=== unfreezeAndTransfer 开始 ===');
+    console.log('参数:', { publisherId, riderId, amount, orderId, orderTitle });
+    
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    try {
+      const amountNum = parseFloat(amount);
+      console.log('转账金额:', amountNum);
+
+      // 获取发布者信息
+      const [publisherRows] = await connection.execute(
+        'SELECT balance, frozen_balance, total_expense FROM users WHERE id = ? FOR UPDATE',
+        [publisherId]
+      );
+
+      console.log('发布者查询结果:', publisherRows);
+
+      if (publisherRows.length === 0) {
+        throw new Error('发布者不存在');
+      }
+
+      const publisher = publisherRows[0];
+      const publisherFrozen = parseFloat(publisher.frozen_balance) || 0;
+      const publisherExpense = parseFloat(publisher.total_expense) || 0;
+
+      console.log('发布者冻结余额:', publisherFrozen);
+
+      if (publisherFrozen < amountNum) {
+        throw new Error(`冻结余额不足: 当前冻结=${publisherFrozen}, 需要=${amountNum}`);
+      }
+
+      // 获取骑手信息
+      const [riderRows] = await connection.execute(
+        'SELECT balance, total_income FROM users WHERE id = ? FOR UPDATE',
+        [riderId]
+      );
+
+      console.log('骑手查询结果:', riderRows);
+
+      if (riderRows.length === 0) {
+        throw new Error('骑手不存在');
+      }
+
+      const rider = riderRows[0];
+      const riderBalance = parseFloat(rider.balance) || 0;
+      const riderIncome = parseFloat(rider.total_income) || 0;
+
+      console.log('骑手当前余额:', riderBalance);
+
+      // 更新发布者：减少冻结余额，增加总支出
+      const newPublisherFrozen = publisherFrozen - amountNum;
+      const newPublisherExpense = publisherExpense + amountNum;
+      
+      console.log('更新发布者: frozen_balance', publisherFrozen, '->', newPublisherFrozen);
+      
+      await connection.execute(
+        'UPDATE users SET frozen_balance = ?, total_expense = ? WHERE id = ?',
+        [newPublisherFrozen, newPublisherExpense, publisherId]
+      );
+
+      // 更新骑手：增加余额和总收入
+      const newRiderBalance = riderBalance + amountNum;
+      const newRiderIncome = riderIncome + amountNum;
+      
+      console.log('更新骑手: balance', riderBalance, '->', newRiderBalance);
+      
+      await connection.execute(
+        'UPDATE users SET balance = ?, total_income = ? WHERE id = ?',
+        [newRiderBalance, newRiderIncome, riderId]
+      );
+
+      // 插入发布者的支出记录
+      await connection.execute(
+        `INSERT INTO wallet_transactions 
+        (user_id, type, amount, balance_before, balance_after, title, description, order_id, status, created_at) 
+        VALUES (?, 'expense', ?, ?, ?, ?, ?, ?, 'completed', NOW())`,
+        [publisherId, amountNum, publisherFrozen, newPublisherFrozen, '订单支付', `支付订单"${orderTitle}"的费用`, orderId]
+      );
+
+      // 插入骑手的收入记录
+      await connection.execute(
+        `INSERT INTO wallet_transactions 
+        (user_id, type, amount, balance_before, balance_after, title, description, order_id, status, created_at) 
+        VALUES (?, 'income', ?, ?, ?, ?, ?, ?, 'completed', NOW())`,
+        [riderId, amountNum, riderBalance, newRiderBalance, '订单收入', `完成订单"${orderTitle}"获得收入`, orderId]
+      );
+
+      await connection.commit();
+      console.log('=== unfreezeAndTransfer 成功 ===');
+      return { success: true, riderNewBalance: newRiderBalance };
+    } catch (error) {
+      console.error('unfreezeAndTransfer 错误:', error);
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  // 解冻余额退还（取消订单时使用）
+  static async unfreezeBalance(userId, amount, orderId, title, description) {
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    try {
+      // 获取用户当前余额
+      const [userRows] = await connection.execute(
+        'SELECT balance, frozen_balance FROM users WHERE id = ? FOR UPDATE',
+        [userId]
+      );
+
+      if (userRows.length === 0) {
+        throw new Error('用户不存在');
+      }
+
+      const user = userRows[0];
+      const currentBalance = parseFloat(user.balance) || 0;
+      const currentFrozen = parseFloat(user.frozen_balance) || 0;
+      const amountNum = parseFloat(amount);
+
+      if (currentFrozen < amountNum) {
+        throw new Error('冻结余额不足');
+      }
+
+      const newBalance = currentBalance + amountNum;
+      const newFrozen = currentFrozen - amountNum;
+
+      // 更新用户余额和冻结余额
+      await connection.execute(
+        'UPDATE users SET balance = ?, frozen_balance = ? WHERE id = ?',
+        [newBalance, newFrozen, userId]
+      );
+
+      // 插入解冻交易记录
+      await connection.execute(
+        `INSERT INTO wallet_transactions 
+        (user_id, type, amount, balance_before, balance_after, title, description, order_id, status, created_at) 
+        VALUES (?, 'unfreeze', ?, ?, ?, ?, ?, ?, 'completed', NOW())`,
+        [userId, amountNum, currentBalance, newBalance, title, description || '', orderId]
+      );
+
+      await connection.commit();
+      return { success: true, newBalance, newFrozen };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  // 检查用户余额是否足够
+  static async checkBalance(userId, amount) {
+    const [rows] = await db.execute(
+      'SELECT balance FROM users WHERE id = ?',
+      [userId]
+    );
+    
+    if (rows.length === 0) {
+      return { sufficient: false, balance: 0, message: '用户不存在' };
+    }
+    
+    const balance = parseFloat(rows[0].balance) || 0;
+    const amountNum = parseFloat(amount);
+    
+    return {
+      sufficient: balance >= amountNum,
+      balance,
+      required: amountNum,
+      shortage: amountNum > balance ? amountNum - balance : 0
+    };
+  }
 }
 
 module.exports = User;

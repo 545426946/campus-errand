@@ -647,6 +647,191 @@ class AdminController {
       });
     }
   }
+
+  // 获取提现申请列表
+  static async getWithdrawRequests(req, res) {
+    try {
+      const { page = 1, pageSize = 20, status } = req.query;
+      const pageNum = parseInt(page) || 1;
+      const pageSizeNum = parseInt(pageSize) || 20;
+      const offset = (pageNum - 1) * pageSizeNum;
+      const db = require('../config/database');
+
+      let whereClause = '1=1';
+      const params = [];
+
+      if (status && status.trim() !== '') {
+        whereClause += ' AND w.status = ?';
+        params.push(status);
+      }
+
+      const sql = `SELECT w.*, u.username, u.nickname, u.avatar, u.phone
+         FROM withdraw_requests w
+         LEFT JOIN users u ON w.user_id = u.id
+         WHERE ${whereClause}
+         ORDER BY w.created_at DESC
+         LIMIT ${pageSizeNum} OFFSET ${offset}`;
+
+      const [requests] = await db.execute(sql, params);
+
+      const [countResult] = await db.execute(
+        `SELECT COUNT(*) as total FROM withdraw_requests w WHERE ${whereClause}`,
+        params
+      );
+
+      res.json({
+        success: true,
+        data: {
+          list: requests,
+          total: countResult[0].total,
+          page: pageNum,
+          pageSize: pageSizeNum
+        }
+      });
+    } catch (error) {
+      console.error('获取提现申请列表错误:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取提现申请列表失败',
+        error: error.message
+      });
+    }
+  }
+
+  // 审核提现申请
+  static async reviewWithdrawRequest(req, res) {
+    try {
+      const { id } = req.params;
+      const { status, reject_reason } = req.body;
+      const db = require('../config/database');
+
+      if (!['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: '无效的审核状态'
+        });
+      }
+
+      if (status === 'rejected' && !reject_reason) {
+        return res.status(400).json({
+          success: false,
+          message: '拒绝时必须提供原因'
+        });
+      }
+
+      // 获取提现申请
+      const [requests] = await db.execute(
+        'SELECT * FROM withdraw_requests WHERE id = ?',
+        [id]
+      );
+
+      if (requests.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: '提现申请不存在'
+        });
+      }
+
+      const request = requests[0];
+
+      if (request.status !== 'pending') {
+        return res.status(400).json({
+          success: false,
+          message: '该申请已处理'
+        });
+      }
+
+      // 开始事务
+      const connection = await db.getConnection();
+      await connection.beginTransaction();
+
+      try {
+        // 更新提现申请状态
+        await connection.execute(
+          `UPDATE withdraw_requests 
+           SET status = ?, reject_reason = ?, reviewed_at = NOW(), reviewer_id = ?
+           WHERE id = ?`,
+          [status, reject_reason || null, req.admin.id, id]
+        );
+
+        // 获取用户当前余额
+        const [users] = await connection.execute(
+          'SELECT balance, frozen_balance FROM users WHERE id = ? FOR UPDATE',
+          [request.user_id]
+        );
+        
+        const currentBalance = parseFloat(users[0]?.balance) || 0;
+        const frozenBalance = parseFloat(users[0]?.frozen_balance) || 0;
+
+        if (status === 'approved') {
+          // 审核通过：从冻结余额扣除（钱已经打给用户了）
+          const newFrozenBalance = frozenBalance - parseFloat(request.amount);
+          
+          await connection.execute(
+            'UPDATE users SET frozen_balance = ? WHERE id = ?',
+            [newFrozenBalance, request.user_id]
+          );
+
+          // 记录交易（提现成功）
+          await connection.execute(
+            `INSERT INTO wallet_transactions 
+            (user_id, type, amount, balance_before, balance_after, title, description, status, created_at) 
+            VALUES (?, 'withdraw', ?, ?, ?, '提现成功', ?, 'completed', NOW())`,
+            [
+              request.user_id,
+              request.amount,
+              currentBalance,
+              currentBalance,
+              `提现 ¥${request.amount} 到${request.account_type === 'wechat' ? '微信' : request.account_type === 'alipay' ? '支付宝' : '银行卡'}，已到账`
+            ]
+          );
+        } else {
+          // 审核拒绝：解冻余额，返还到可用余额
+          const newBalance = currentBalance + parseFloat(request.amount);
+          const newFrozenBalance = frozenBalance - parseFloat(request.amount);
+          
+          await connection.execute(
+            'UPDATE users SET balance = ?, frozen_balance = ? WHERE id = ?',
+            [newBalance, newFrozenBalance, request.user_id]
+          );
+
+          // 记录交易（提现拒绝，解冻）
+          await connection.execute(
+            `INSERT INTO wallet_transactions 
+            (user_id, type, amount, balance_before, balance_after, title, description, status, created_at) 
+            VALUES (?, 'unfreeze', ?, ?, ?, '提现拒绝退回', ?, 'completed', NOW())`,
+            [
+              request.user_id,
+              request.amount,
+              currentBalance,
+              newBalance,
+              `提现申请被拒绝，¥${request.amount} 已退回余额。原因：${reject_reason}`
+            ]
+          );
+        }
+
+        await connection.commit();
+
+        res.json({
+          success: true,
+          message: status === 'approved' ? '提现申请已通过，请确保已将款项转账至用户账户' : '提现申请已拒绝，金额已退回用户余额'
+        });
+      } catch (error) {
+        await connection.rollback();
+        throw error;
+      } finally {
+        connection.release();
+      }
+    } catch (error) {
+      console.error('审核提现申请错误:', error);
+      res.status(500).json({
+        success: false,
+        message: '审核提现申请失败',
+        error: error.message
+      });
+    }
+  }
 }
+
 
 module.exports = AdminController;

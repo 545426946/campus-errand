@@ -109,6 +109,17 @@
       <view class="form-section">
         <view class="section-title">金额设置</view>
         
+        <!-- 余额显示 -->
+        <view class="balance-info" bindtap="goToWallet">
+          <view class="balance-left">
+            <text class="balance-label">当前余额：</text>
+            <text class="balance-amount">¥{{balance}}</text>
+          </view>
+          <view class="balance-right">
+            <text class="recharge-btn">去充值 ›</text>
+          </view>
+        </view>
+        
         <view class="form-item price-item">
           <view class="price-input-wrapper">
             <text class="currency">¥</text>
@@ -124,7 +135,7 @@
             />
           </view>
         </view>
-        <view class="price-tip">建议合理定价，提高接单率</view>
+        <view class="price-tip">发布订单时将冻结相应金额，订单完成后支付给骑手</view>
       </view>
 
       <!-- 上传图片 -->

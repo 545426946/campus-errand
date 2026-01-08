@@ -22,7 +22,19 @@ Page({
       totalIncome: '0.00',
       totalExpense: '0.00',
       todayIncome: '0.00'
-    }
+    },
+
+    // 充值相关
+    showRechargePanel: false,
+    selectedAmount: null,
+    customAmount: '',
+    currentOrderNo: null,
+
+    // 提现相关
+    showWithdrawPanel: false,
+    withdrawAmount: '',
+    withdrawMethod: 'wechat',
+    alipayAccount: ''
   },
 
   onLoad: function (options) {
@@ -176,103 +188,7 @@ Page({
     });
   },
 
-  // 充值
-  onRecharge: function () {
-    wx.showModal({
-      title: '充值',
-      content: '请输入充值金额',
-      editable: true,
-      placeholderText: '请输入金额',
-      success: async (res) => {
-        if (res.confirm && res.content) {
-          const amount = parseFloat(res.content);
-          if (amount > 0 && amount <= 10000) { // 限制充值金额
-            await this.doRecharge(amount);
-          } else {
-            wx.showToast({
-              title: '请输入正确金额（1-10000）',
-              icon: 'none'
-            });
-          }
-        }
-      }
-    });
-  },
-
-  // 执行充值
-  doRecharge: async function (amount) {
-    try {
-      console.log('=== 开始充值 ===');
-      console.log('充值金额:', amount);
-      
-      wx.showLoading({ title: '充值处理中...' });
-      
-      const result = await userAPI.recharge({
-        amount: amount,
-        paymentMethod: 'wechat'
-      });
-
-      wx.hideLoading();
-      
-      console.log('充值API响应:', JSON.stringify(result, null, 2));
-      
-      if (result && result.success) {
-        console.log('✅ 充值成功');
-        
-        const balanceBefore = result.data.balance_before || 0;
-        const balanceAfter = result.data.balance_after || amount;
-        
-        // 显示成功信息
-        wx.showModal({
-          title: '充值成功',
-          content: `充值金额：¥${amount.toFixed(2)}\n充值前余额：¥${balanceBefore.toFixed(2)}\n充值后余额：¥${balanceAfter.toFixed(2)}`,
-          showCancel: false,
-          success: () => {
-            console.log('=== 开始刷新数据 ===');
-            
-            // 重置并重新加载明细
-            this.setData({
-              detailList: [],
-              page: 1,
-              hasMore: true
-            });
-            
-            // 立即刷新钱包信息
-            this.loadWalletInfo().then(() => {
-              console.log('钱包信息已刷新，当前余额:', this.data.walletInfo.balance);
-              
-              // 延迟加载明细，确保充值记录已生成
-              setTimeout(() => {
-                this.loadWalletDetails();
-              }, 300);
-            });
-          }
-        });
-        
-      } else {
-        console.log('❌ 充值失败:', result);
-        const errorMsg = (result && result.message) || '充值失败';
-        
-        wx.showToast({
-          title: errorMsg,
-          icon: 'none',
-          duration: 3000
-        });
-      }
-
-    } catch (error) {
-      wx.hideLoading();
-      console.error('❌ 充值异常:', error);
-      
-      wx.showToast({
-        title: '充值失败，请重试',
-        icon: 'none',
-        duration: 2000
-      });
-    }
-  },
-
-  // 提现
+  // 提现 - 显示提现面板
   onWithdraw: function () {
     const balance = parseFloat(this.data.walletInfo.balance);
     
@@ -284,22 +200,108 @@ Page({
       return;
     }
 
+    if (balance < 1) {
+      wx.showToast({
+        title: '余额不足1元，无法提现',
+        icon: 'none'
+      });
+      return;
+    }
+
+    this.setData({
+      showWithdrawPanel: true,
+      showRechargePanel: false,
+      withdrawAmount: '',
+      withdrawMethod: 'wechat',
+      alipayAccount: ''
+    });
+  },
+
+  // 输入提现金额
+  onWithdrawAmountInput: function (e) {
+    this.setData({
+      withdrawAmount: e.detail.value
+    });
+  },
+
+  // 全部提现
+  withdrawAll: function () {
+    this.setData({
+      withdrawAmount: this.data.walletInfo.balance
+    });
+  },
+
+  // 选择提现方式
+  selectWithdrawMethod: function (e) {
+    this.setData({
+      withdrawMethod: e.currentTarget.dataset.method
+    });
+  },
+
+  // 输入支付宝账号
+  onAlipayAccountInput: function (e) {
+    this.setData({
+      alipayAccount: e.detail.value
+    });
+  },
+
+  // 取消提现
+  cancelWithdraw: function () {
+    this.setData({
+      showWithdrawPanel: false,
+      withdrawAmount: '',
+      withdrawMethod: 'wechat',
+      alipayAccount: ''
+    });
+  },
+
+  // 确认提现
+  confirmWithdraw: async function () {
+    const amount = parseFloat(this.data.withdrawAmount);
+    const balance = parseFloat(this.data.walletInfo.balance);
+    const method = this.data.withdrawMethod;
+
+    if (!amount || amount <= 0) {
+      wx.showToast({
+        title: '请输入提现金额',
+        icon: 'none'
+      });
+      return;
+    }
+
+    if (amount < 1) {
+      wx.showToast({
+        title: '最低提现金额为1元',
+        icon: 'none'
+      });
+      return;
+    }
+
+    if (amount > balance) {
+      wx.showToast({
+        title: '提现金额不能超过余额',
+        icon: 'none'
+      });
+      return;
+    }
+
+    if (method === 'alipay' && !this.data.alipayAccount) {
+      wx.showToast({
+        title: '请输入支付宝账号',
+        icon: 'none'
+      });
+      return;
+    }
+
+    // 确认提现
     wx.showModal({
-      title: '提现',
-      content: `当前余额：¥${balance.toFixed(2)}\n请输入提现金额`,
-      editable: true,
-      placeholderText: '请输入金额',
+      title: '确认提现',
+      content: `提现金额：¥${amount.toFixed(2)}\n提现方式：${method === 'wechat' ? '微信' : '支付宝'}\n\n提交后金额将被冻结，管理员审核通过后到账`,
+      confirmText: '确认',
+      cancelText: '取消',
       success: async (res) => {
-        if (res.confirm && res.content) {
-          const amount = parseFloat(res.content);
-          if (amount > 0 && amount <= balance) {
-            await this.doWithdraw(amount);
-          } else {
-            wx.showToast({
-              title: '请输入正确金额',
-              icon: 'none'
-            });
-          }
+        if (res.confirm) {
+          await this.doWithdraw(amount);
         }
       }
     });
@@ -308,21 +310,32 @@ Page({
   // 执行提现
   doWithdraw: async function (amount) {
     try {
-      wx.showLoading({ title: '处理中...' });
+      wx.showLoading({ title: '提交中...' });
       
-      // 使用新的提现申请API
+      const method = this.data.withdrawMethod;
+      const account = method === 'wechat' ? '微信' : this.data.alipayAccount;
+      
+      // 使用提现申请API
       const result = await userAPI.createWithdrawRequest({
         amount,
-        account: '微信',
-        accountType: 'wechat'
+        account: account,
+        accountType: method
       });
 
       wx.hideLoading();
       
       if (result && result.success) {
+        // 关闭提现面板
+        this.setData({
+          showWithdrawPanel: false,
+          withdrawAmount: '',
+          withdrawMethod: 'wechat',
+          alipayAccount: ''
+        });
+
         wx.showModal({
           title: '提现申请已提交',
-          content: `提现金额：¥${amount.toFixed(2)}\n预计1-3个工作日到账`,
+          content: `提现金额：¥${amount.toFixed(2)}\n\n金额已冻结，管理员审核通过后将转入您的${method === 'wechat' ? '微信' : '支付宝'}账户，预计1-3个工作日到账`,
           showCancel: false,
           success: () => {
             // 重新加载钱包信息
@@ -361,6 +374,253 @@ Page({
     wx.navigateTo({
       url: '/pages/wallet/withdraw-list'
     });
+  },
+
+  // ========== 充值功能 ==========
+
+  // 点击充值按钮
+  onRecharge: function () {
+    this.setData({
+      showRechargePanel: true,
+      selectedAmount: null,
+      customAmount: ''
+    });
+  },
+
+  // 选择充值金额
+  selectAmount: function (e) {
+    const amount = e.currentTarget.dataset.amount;
+    this.setData({
+      selectedAmount: amount,
+      customAmount: amount === 'custom' ? '' : ''
+    });
+  },
+
+  // 输入自定义金额
+  onCustomAmountInput: function (e) {
+    this.setData({
+      customAmount: e.detail.value
+    });
+  },
+
+  // 取消充值
+  cancelRecharge: function () {
+    this.setData({
+      showRechargePanel: false,
+      selectedAmount: null,
+      customAmount: ''
+    });
+  },
+
+  // 确认充值
+  confirmRecharge: async function () {
+    let amount = this.data.selectedAmount;
+    
+    if (amount === 'custom') {
+      amount = parseFloat(this.data.customAmount);
+    } else {
+      amount = parseFloat(amount);
+    }
+
+    if (!amount || amount <= 0) {
+      wx.showToast({
+        title: '请选择或输入充值金额',
+        icon: 'none'
+      });
+      return;
+    }
+
+    if (amount < 0.01) {
+      wx.showToast({
+        title: '最小充值金额为0.01元',
+        icon: 'none'
+      });
+      return;
+    }
+
+    if (amount > 10000) {
+      wx.showToast({
+        title: '单次充值不能超过10000元',
+        icon: 'none'
+      });
+      return;
+    }
+
+    try {
+      wx.showLoading({ title: '创建订单...' });
+
+      // 1. 创建充值订单
+      const result = await userAPI.createRechargeOrder(amount);
+      
+      if (!result || !result.success) {
+        throw new Error(result?.message || '创建订单失败');
+      }
+
+      const orderData = result.data;
+      this.setData({ currentOrderNo: orderData.orderNo });
+
+      wx.hideLoading();
+
+      // 2. 检查是否为模拟模式（开发环境）
+      if (orderData.mockMode) {
+        // 开发环境：显示模拟支付确认
+        wx.showModal({
+          title: '开发环境模拟支付',
+          content: `充值金额：¥${amount.toFixed(2)}\n订单号：${orderData.orderNo}\n\n点击确定模拟支付成功`,
+          confirmText: '确定支付',
+          cancelText: '取消',
+          success: async (res) => {
+            if (res.confirm) {
+              await this.mockPayment(orderData.orderNo);
+            }
+          }
+        });
+        return;
+      }
+
+      // 3. 调用微信支付
+      await this.callWechatPay(orderData);
+
+    } catch (error) {
+      wx.hideLoading();
+      console.error('充值失败:', error);
+      wx.showToast({
+        title: error.message || '充值失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 调用微信支付
+  callWechatPay: function (orderData) {
+    return new Promise((resolve, reject) => {
+      wx.requestPayment({
+        timeStamp: orderData.timeStamp,
+        nonceStr: orderData.nonceStr,
+        package: orderData.package,
+        signType: orderData.signType || 'MD5',
+        paySign: orderData.paySign,
+        success: async (res) => {
+          console.log('微信支付成功:', res);
+          
+          // 支付成功，查询订单状态确认
+          await this.checkPaymentResult(orderData.orderNo);
+          resolve(res);
+        },
+        fail: (err) => {
+          console.error('微信支付失败:', err);
+          
+          if (err.errMsg.includes('cancel')) {
+            wx.showToast({
+              title: '已取消支付',
+              icon: 'none'
+            });
+          } else {
+            wx.showToast({
+              title: '支付失败',
+              icon: 'none'
+            });
+          }
+          reject(err);
+        }
+      });
+    });
+  },
+
+  // 模拟支付（开发环境）
+  mockPayment: async function (orderNo) {
+    try {
+      wx.showLoading({ title: '处理中...' });
+
+      const result = await userAPI.mockPaySuccess(orderNo);
+
+      wx.hideLoading();
+
+      if (result && result.success) {
+        wx.showToast({
+          title: '充值成功',
+          icon: 'success'
+        });
+
+        // 关闭充值面板，刷新数据
+        this.setData({
+          showRechargePanel: false,
+          selectedAmount: null,
+          customAmount: '',
+          currentOrderNo: null
+        });
+
+        // 刷新钱包信息
+        this.loadWalletInfo();
+        this.setData({
+          detailList: [],
+          page: 1,
+          hasMore: true
+        });
+        this.loadWalletDetails();
+      } else {
+        throw new Error(result?.message || '支付处理失败');
+      }
+
+    } catch (error) {
+      wx.hideLoading();
+      console.error('模拟支付失败:', error);
+      wx.showToast({
+        title: error.message || '支付失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 检查支付结果
+  checkPaymentResult: async function (orderNo) {
+    try {
+      // 轮询查询订单状态
+      let retries = 0;
+      const maxRetries = 5;
+
+      while (retries < maxRetries) {
+        const result = await userAPI.queryRechargeOrder(orderNo);
+        
+        if (result && result.success && result.data.status === 'paid') {
+          wx.showToast({
+            title: '充值成功',
+            icon: 'success'
+          });
+
+          // 关闭充值面板，刷新数据
+          this.setData({
+            showRechargePanel: false,
+            selectedAmount: null,
+            customAmount: '',
+            currentOrderNo: null
+          });
+
+          // 刷新钱包信息
+          this.loadWalletInfo();
+          this.setData({
+            detailList: [],
+            page: 1,
+            hasMore: true
+          });
+          this.loadWalletDetails();
+          return;
+        }
+
+        retries++;
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      // 超时未确认，提示用户
+      wx.showModal({
+        title: '支付确认中',
+        content: '支付结果确认中，请稍后刷新查看余额',
+        showCancel: false
+      });
+
+    } catch (error) {
+      console.error('查询支付结果失败:', error);
+    }
   },
 
   // 格式化时间

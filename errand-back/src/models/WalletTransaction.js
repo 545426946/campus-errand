@@ -30,37 +30,86 @@ class WalletTransaction {
     const { page = 1, pageSize = 20, type } = options;
     const offset = (page - 1) * pageSize;
 
-    let whereClause = 'WHERE user_id = ?';
-    let params = [userId];
+    try {
+      let whereClause = 'WHERE user_id = ?';
+      let params = [userId];
 
-    if (type) {
-      whereClause += ' AND type = ?';
-      params.push(type);
+      if (type && type !== 'undefined') {
+        whereClause += ' AND type = ?';
+        params.push(type);
+      }
+
+      // 获取总数
+      const [countResult] = await db.execute(
+        `SELECT COUNT(*) as total FROM wallet_transactions ${whereClause}`,
+        params
+      );
+      const total = countResult[0].total;
+
+      // 获取记录 - 使用字符串拼接而不是参数绑定 LIMIT/OFFSET
+      const limitValue = parseInt(pageSize);
+      const offsetValue = parseInt(offset);
+
+      console.log('=== 钱包明细查询参数 ===');
+      console.log('userId:', userId);
+      console.log('type:', type);
+      console.log('limitValue:', limitValue);
+      console.log('offsetValue:', offsetValue);
+
+      // 获取记录
+      const [rows] = await db.execute(
+        `SELECT * FROM wallet_transactions 
+         ${whereClause} 
+         ORDER BY created_at DESC 
+         LIMIT ${limitValue} OFFSET ${offsetValue}`,
+        params
+      );
+
+      return {
+        list: rows,
+        total,
+        page,
+        pageSize,
+        hasMore: offset + rows.length < total
+      };
+    } catch (error) {
+      // 如果表不存在，自动创建
+      if (error.code === 'ER_NO_SUCH_TABLE' || error.message.includes("doesn't exist")) {
+        console.log('⚠️ wallet_transactions 表不存在，正在自动创建...');
+        await this.createTable();
+        console.log('✅ wallet_transactions 表创建成功');
+        
+        // 重新执行查询
+        return this.getUserTransactions(userId, options);
+      }
+      throw error;
     }
+  }
 
-    // 获取总数
-    const [countResult] = await db.execute(
-      `SELECT COUNT(*) as total FROM wallet_transactions ${whereClause}`,
-      params
-    );
-    const total = countResult[0].total;
-
-    // 获取记录
-    const [rows] = await db.execute(
-      `SELECT * FROM wallet_transactions 
-       ${whereClause} 
-       ORDER BY created_at DESC 
-       LIMIT ? OFFSET ?`,
-      [...params, pageSize, offset]
-    );
-
-    return {
-      list: rows,
-      total,
-      page,
-      pageSize,
-      hasMore: offset + rows.length < total
-    };
+  // 自动创建表
+  static async createTable() {
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS wallet_transactions (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        user_id INT NOT NULL,
+        type ENUM('income', 'expense', 'freeze', 'unfreeze', 'withdraw', 'recharge') NOT NULL COMMENT '交易类型',
+        amount DECIMAL(10, 2) NOT NULL COMMENT '交易金额',
+        balance_before DECIMAL(10, 2) DEFAULT 0 COMMENT '交易前余额',
+        balance_after DECIMAL(10, 2) DEFAULT 0 COMMENT '交易后余额',
+        title VARCHAR(100) NOT NULL COMMENT '交易标题',
+        description TEXT COMMENT '交易描述',
+        related_type VARCHAR(50) COMMENT '关联类型(order/withdraw)',
+        related_id INT COMMENT '关联ID',
+        order_id INT COMMENT '关联订单ID(兼容旧字段)',
+        status ENUM('pending', 'completed', 'failed') DEFAULT 'completed' COMMENT '交易状态',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_user_id (user_id),
+        INDEX idx_type (type),
+        INDEX idx_created_at (created_at),
+        INDEX idx_related (related_type, related_id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='钱包交易记录表';
+    `);
   }
 
   // 获取用户余额统计

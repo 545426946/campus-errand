@@ -73,20 +73,74 @@ exports.getOrderDetail = async (req, res, next) => {
 exports.createOrder = async (req, res, next) => {
   try {
     const userId = req.user.id;
+    const User = require('../models/User');
+    const orderPrice = parseFloat(req.body.price) || 0;
+
+    console.log('=== 创建订单调试 ===');
+    console.log('用户ID:', userId);
+    console.log('请求体:', JSON.stringify(req.body, null, 2));
+    console.log('订单金额:', orderPrice, '(原始值:', req.body.price, ')');
+
+    // 检查用户余额是否足够
+    if (orderPrice > 0) {
+      const balanceCheck = await User.checkBalance(userId, orderPrice);
+      console.log('余额检查结果:', balanceCheck);
+      
+      if (!balanceCheck.sufficient) {
+        return res.status(400).json({
+          success: false,
+          code: 400,
+          message: `余额不足，当前余额 ¥${balanceCheck.balance.toFixed(2)}，需要 ¥${balanceCheck.required.toFixed(2)}，还差 ¥${balanceCheck.shortage.toFixed(2)}`,
+          data: {
+            balance: balanceCheck.balance,
+            required: balanceCheck.required,
+            shortage: balanceCheck.shortage
+          }
+        });
+      }
+    }
+
     const orderData = {
       userId,
       ...req.body
     };
 
+    // 创建订单
     const orderId = await Order.create(orderData);
+    console.log('订单创建成功，ID:', orderId);
+
+    // 冻结订单金额
+    if (orderPrice > 0) {
+      console.log('开始冻结金额...');
+      try {
+        const freezeResult = await User.freezeBalance(
+          userId, 
+          orderPrice, 
+          orderId, 
+          '发布订单冻结', 
+          `发布订单"${req.body.title}"，冻结金额 ¥${orderPrice.toFixed(2)}`
+        );
+        console.log('冻结结果:', freezeResult);
+      } catch (freezeError) {
+        console.error('冻结失败:', freezeError);
+        // 如果冻结失败，删除已创建的订单
+        await Order.delete(orderId);
+        return res.status(400).json({
+          success: false,
+          code: 400,
+          message: '冻结金额失败: ' + freezeError.message
+        });
+      }
+    }
 
     res.status(201).json({
       success: true,
       code: 0,
       data: { orderId },
-      message: '订单创建成功'
+      message: '订单创建成功，金额已冻结'
     });
   } catch (error) {
+    console.error('创建订单错误:', error);
     next(error);
   }
 };
@@ -243,6 +297,25 @@ exports.cancelOrder = async (req, res, next) => {
       });
     }
 
+    // 退还冻结金额给发布者
+    const User = require('../models/User');
+    const refundAmount = parseFloat(order.price) || 0;
+    
+    if (refundAmount > 0) {
+      try {
+        await User.unfreezeBalance(
+          order.user_id,
+          refundAmount,
+          id,
+          '订单取消退款',
+          `订单"${order.title}"已取消，冻结金额 ¥${refundAmount.toFixed(2)} 已退还`
+        );
+      } catch (refundError) {
+        console.error('退款失败:', refundError);
+        // 退款失败不影响取消操作，但记录错误
+      }
+    }
+
     // 创建通知
     try {
       // 如果有接单者，通知接单者
@@ -262,7 +335,7 @@ exports.cancelOrder = async (req, res, next) => {
           order.user_id,
           'order_cancelled',
           '订单已取消',
-          `您的订单"${order.title}"已被取消，原因：${reason}`
+          `您的订单"${order.title}"已被取消，原因：${reason}，冻结金额已退还`
         );
       }
     } catch (error) {
@@ -272,7 +345,7 @@ exports.cancelOrder = async (req, res, next) => {
     res.json({
       success: true,
       code: 0,
-      message: '订单已取消'
+      message: '订单已取消，冻结金额已退还'
     });
   } catch (error) {
     next(error);
@@ -343,6 +416,10 @@ exports.confirmCompleteOrder = async (req, res, next) => {
     const { id } = req.params;
     const userId = req.user.id;
 
+    console.log('=== 确认完成订单调试 ===');
+    console.log('订单ID:', id);
+    console.log('用户ID:', userId);
+
     const order = await Order.findById(id);
 
     if (!order) {
@@ -352,6 +429,13 @@ exports.confirmCompleteOrder = async (req, res, next) => {
         message: '订单不存在'
       });
     }
+
+    console.log('订单信息:', {
+      user_id: order.user_id,
+      acceptor_id: order.acceptor_id,
+      price: order.price,
+      status: order.status
+    });
 
     // 只有发布者可以确认完成
     if (order.user_id !== userId) {
@@ -381,6 +465,37 @@ exports.confirmCompleteOrder = async (req, res, next) => {
       });
     }
 
+    // 将冻结金额转给骑手
+    const User = require('../models/User');
+    const paymentAmount = parseFloat(order.price) || 0;
+    
+    console.log('支付金额:', paymentAmount);
+    console.log('骑手ID:', order.acceptor_id);
+
+    if (paymentAmount > 0 && order.acceptor_id) {
+      console.log('开始转账...');
+      try {
+        const transferResult = await User.unfreezeAndTransfer(
+          userId,            // 发布者ID
+          order.acceptor_id, // 骑手ID
+          paymentAmount,
+          id,
+          order.title
+        );
+        console.log('转账结果:', transferResult);
+      } catch (transferError) {
+        console.error('转账失败:', transferError);
+        // 返回错误信息但不影响订单状态
+        return res.json({
+          success: true,
+          code: 0,
+          message: '订单已确认完成，但转账失败: ' + transferError.message
+        });
+      }
+    } else {
+      console.log('跳过转账: paymentAmount=', paymentAmount, 'acceptor_id=', order.acceptor_id);
+    }
+
     // 创建通知给接单者
     try {
       await Notification.createOrderNotification(
@@ -388,7 +503,7 @@ exports.confirmCompleteOrder = async (req, res, next) => {
         order.acceptor_id,
         'order_confirmed',
         '订单已确认完成',
-        `发布者已确认订单"${order.title}"完成`
+        `发布者已确认订单"${order.title}"完成，¥${paymentAmount.toFixed(2)}已到账`
       );
     } catch (error) {
       console.error('创建通知失败:', error);
@@ -397,9 +512,10 @@ exports.confirmCompleteOrder = async (req, res, next) => {
     res.json({
       success: true,
       code: 0,
-      message: '订单已确认完成'
+      message: '订单已确认完成，款项已支付给骑手'
     });
   } catch (error) {
+    console.error('确认完成订单错误:', error);
     next(error);
   }
 };

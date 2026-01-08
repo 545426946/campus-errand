@@ -31,6 +31,10 @@ router.delete('/orders/:id', requireSuperAdmin, AdminController.deleteOrder);
 router.get('/certifications', AdminController.getCertifications);
 router.post('/certifications/:id/review', requireAdmin, AdminController.reviewCertification);
 
+// 提现管理
+router.get('/withdraws', AdminController.getWithdrawRequests);
+router.post('/withdraws/:id/review', requireAdmin, AdminController.reviewWithdrawRequest);
+
 // 管理员管理（仅超级管理员）
 router.get('/admins', requireSuperAdmin, AdminController.getAdmins);
 router.post('/admins', requireSuperAdmin, AdminController.createAdmin);

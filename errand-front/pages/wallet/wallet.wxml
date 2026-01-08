@@ -4,7 +4,7 @@
     <view class="wallet-header">
       <text class="wallet-title">我的钱包</text>
       <view class="wallet-actions">
-        <text class="action-btn" bindtap="onRecharge">充值</text>
+        <text class="action-btn recharge" bindtap="onRecharge">充值</text>
         <text class="action-btn withdraw" bindtap="onWithdraw">提现</text>
       </view>
     </view>
@@ -27,6 +27,73 @@
     </view>
   </view>
 
+  <!-- 快捷充值金额 -->
+  <view class="quick-recharge" wx:if="{{showRechargePanel}}">
+    <view class="section-title">选择充值金额</view>
+    <view class="amount-grid">
+      <view class="amount-item {{selectedAmount === 10 ? 'selected' : ''}}" bindtap="selectAmount" data-amount="10">¥10</view>
+      <view class="amount-item {{selectedAmount === 20 ? 'selected' : ''}}" bindtap="selectAmount" data-amount="20">¥20</view>
+      <view class="amount-item {{selectedAmount === 50 ? 'selected' : ''}}" bindtap="selectAmount" data-amount="50">¥50</view>
+      <view class="amount-item {{selectedAmount === 100 ? 'selected' : ''}}" bindtap="selectAmount" data-amount="100">¥100</view>
+      <view class="amount-item {{selectedAmount === 200 ? 'selected' : ''}}" bindtap="selectAmount" data-amount="200">¥200</view>
+      <view class="amount-item {{selectedAmount === 'custom' ? 'selected' : ''}}" bindtap="selectAmount" data-amount="custom">自定义</view>
+    </view>
+    <view class="custom-amount" wx:if="{{selectedAmount === 'custom'}}">
+      <input class="amount-input" type="digit" placeholder="请输入充值金额" value="{{customAmount}}" bindinput="onCustomAmountInput" />
+    </view>
+    <view class="recharge-actions">
+      <button class="cancel-btn" bindtap="cancelRecharge">取消</button>
+      <button class="confirm-btn" bindtap="confirmRecharge">确认充值</button>
+    </view>
+  </view>
+
+  <!-- 提现面板 -->
+  <view class="quick-recharge withdraw-panel" wx:if="{{showWithdrawPanel}}">
+    <view class="section-title">申请提现</view>
+    <view class="withdraw-info">
+      <text class="info-label">可提现余额</text>
+      <text class="info-value">¥{{walletInfo.balance}}</text>
+    </view>
+    
+    <view class="form-group">
+      <text class="form-label">提现金额</text>
+      <input class="amount-input" type="digit" placeholder="请输入提现金额（最低1元）" value="{{withdrawAmount}}" bindinput="onWithdrawAmountInput" />
+      <text class="withdraw-all" bindtap="withdrawAll">全部提现</text>
+    </view>
+
+    <view class="form-group">
+      <text class="form-label">提现方式</text>
+      <view class="withdraw-methods">
+        <view class="method-item {{withdrawMethod === 'wechat' ? 'selected' : ''}}" bindtap="selectWithdrawMethod" data-method="wechat">
+          <text class="method-icon">💚</text>
+          <text class="method-name">微信</text>
+        </view>
+        <view class="method-item {{withdrawMethod === 'alipay' ? 'selected' : ''}}" bindtap="selectWithdrawMethod" data-method="alipay">
+          <text class="method-icon">💙</text>
+          <text class="method-name">支付宝</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-group" wx:if="{{withdrawMethod === 'alipay'}}">
+      <text class="form-label">支付宝账号</text>
+      <input class="amount-input" type="text" placeholder="请输入支付宝账号" value="{{alipayAccount}}" bindinput="onAlipayAccountInput" />
+    </view>
+
+    <view class="withdraw-tips">
+      <text class="tips-title">提现说明：</text>
+      <text class="tips-item">• 最低提现金额为1元</text>
+      <text class="tips-item">• 提现申请提交后，金额将被冻结</text>
+      <text class="tips-item">• 管理员审核通过后，款项将转入您的账户</text>
+      <text class="tips-item">• 预计1-3个工作日到账</text>
+    </view>
+
+    <view class="recharge-actions">
+      <button class="cancel-btn" bindtap="cancelWithdraw">取消</button>
+      <button class="confirm-btn" bindtap="confirmWithdraw">确认提现</button>
+    </view>
+  </view>
+
   <!-- 交易记录标题 -->
   <view class="section-header">
     <text class="section-title">交易记录</text>
@@ -40,9 +107,10 @@
   <view class="detail-list" wx:if="{{detailList.length > 0}}">
     <view class="detail-item" wx:for="{{detailList}}" wx:key="id">
       <view class="detail-icon {{item.type}}">
-        <text wx:if="{{item.type === 'income'}}">+</text>
-        <text wx:if="{{item.type === 'expense'}}">-</text>
-        <text wx:if="{{item.type === 'freeze'}}">🔒</text>
+        <text wx:if="{{item.type === 'income' || item.type === 'recharge' || item.type === 'unfreeze'}}">+</text>
+        <text wx:elif="{{item.type === 'expense' || item.type === 'withdraw'}}">-</text>
+        <text wx:elif="{{item.type === 'freeze'}}">🔒</text>
+        <text wx:else>•</text>
       </view>
       
       <view class="detail-info">
@@ -52,9 +120,10 @@
       </view>
       
       <view class="detail-amount {{item.type}}">
-        <text wx:if="{{item.type === 'income'}}">+¥{{item.amount}}</text>
-        <text wx:if="{{item.type === 'expense'}}">-¥{{item.amount}}</text>
-        <text wx:if="{{item.type === 'freeze'}}">¥{{item.amount}}</text>
+        <text wx:if="{{item.type === 'income' || item.type === 'recharge' || item.type === 'unfreeze'}}">+¥{{item.amount}}</text>
+        <text wx:elif="{{item.type === 'expense' || item.type === 'withdraw'}}">-¥{{item.amount}}</text>
+        <text wx:elif="{{item.type === 'freeze'}}">-¥{{item.amount}}</text>
+        <text wx:else>¥{{item.amount}}</text>
       </view>
     </view>
   </view>

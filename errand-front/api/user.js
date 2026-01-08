@@ -126,11 +126,17 @@ const userAPI = {
 
   // 获取钱包明细
   getWalletDetails(params = {}) {
-    return request.get('/user/wallet/details', {
+    const queryParams = {
       page: params.page || 1,
-      pageSize: params.pageSize || 20,
-      type: params.type
-    })
+      pageSize: params.pageSize || 20
+    };
+    
+    // 只在 type 有值时才添加到查询参数
+    if (params.type) {
+      queryParams.type = params.type;
+    }
+    
+    return request.get('/user/wallet/details', queryParams);
   },
 
   // 提现
@@ -138,9 +144,33 @@ const userAPI = {
     return request.post('/user/wallet/withdraw', withdrawData)
   },
 
-  // 充值
+  // 充值（旧接口，保留兼容）
   recharge(rechargeData) {
     return request.post('/user/wallet/recharge', rechargeData)
+  },
+
+  // 创建充值订单（微信支付）
+  createRechargeOrder(amount) {
+    return request.post('/recharge/create', { amount })
+  },
+
+  // 查询充值订单状态
+  queryRechargeOrder(orderNo) {
+    return request.get(`/recharge/query/${orderNo}`)
+  },
+
+  // 获取充值记录
+  getRechargeList(params = {}) {
+    return request.get('/recharge/list', {
+      page: params.page || 1,
+      pageSize: params.pageSize || 20,
+      status: params.status
+    })
+  },
+
+  // 模拟支付成功（仅开发环境）
+  mockPaySuccess(orderNo) {
+    return request.post('/recharge/mock-pay', { orderNo })
   },
 
   // 创建提现申请

@@ -336,6 +336,7 @@
     .menu-item:nth-child(2)::before { content: '👥'; }
     .menu-item:nth-child(3)::before { content: '📋'; }
     .menu-item:nth-child(4)::before { content: '✅'; }
+    .menu-item:nth-child(5)::before { content: '💰'; }
 
     .menu-item:hover {
       background: linear-gradient(135deg, #667eea15, #764ba215);
@@ -869,6 +870,7 @@
         <div class="menu-item" data-page="users" onclick="switchMenu('users')">用户管理</div>
         <div class="menu-item" data-page="orders" onclick="switchMenu('orders')">订单管理</div>
         <div class="menu-item" data-page="certifications" onclick="switchMenu('certifications')">认证审核</div>
+        <div class="menu-item" data-page="withdraws" onclick="switchMenu('withdraws')">提现管理</div>
       </div>
       <div class="admin-content">
         <!-- 数据统计 -->
@@ -932,6 +934,11 @@
             <button class="btn btn-warning" onclick="resetCertFilters()">🔄 重置</button>
           </div>
           <div id="certificationsTable"></div>
+        </div>
+
+        <!-- 提现管理 -->
+        <div class="content-section" id="withdraws">
+          <div id="withdrawsContent"></div>
         </div>
       </div>
     </div>

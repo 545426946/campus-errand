@@ -216,7 +216,27 @@ Page({
       wx.showLoading({ title: '登录中...', mask: true });
 
       // 1. 获取微信登录 code
-      const loginRes = await wx.login();
+      let loginRes;
+      try {
+        loginRes = await wx.login();
+      } catch (loginError) {
+        console.error('wx.login 失败:', loginError);
+        // 如果是开发环境网络问题，使用测试模式
+        if (loginError.errMsg && loginError.errMsg.includes('Failed to fetch')) {
+          wx.hideLoading();
+          wx.showModal({
+            title: '网络错误',
+            content: '无法连接微信服务器，是否使用测试账号登录？',
+            success: (res) => {
+              if (res.confirm) {
+                this.onTestLogin();
+              }
+            }
+          });
+          return;
+        }
+        throw loginError;
+      }
       
       if (!loginRes.code) {
         throw new Error('获取登录凭证失败');
@@ -233,7 +253,11 @@ Page({
         userInfo = profileRes.userInfo;
         console.log('获取到用户信息:', userInfo);
       } catch (error) {
-        console.log('用户取消授权或获取信息失败，使用默认信息');
+        console.log('用户取消授权或获取信息失败，使用默认信息:', error);
+        // 如果是网络错误，不影响登录流程
+        if (error.errMsg && !error.errMsg.includes('cancel')) {
+          console.warn('获取用户信息网络错误，继续登录流程');
+        }
       }
 
       // 3. 调用后端登录接口

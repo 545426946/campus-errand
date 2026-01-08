@@ -221,11 +221,36 @@ exports.getWalletDetails = async (req, res, next) => {
     const userId = req.user.id;
     const { page = 1, pageSize = 20, type } = req.query;
 
-    const result = await WalletTransaction.getUserTransactions(userId, {
-      page: parseInt(page),
-      pageSize: parseInt(pageSize),
-      type
-    });
+    // 过滤掉 undefined 字符串和实际的 undefined
+    const filterType = (type && type !== 'undefined') ? type : undefined;
+
+    // 尝试获取交易记录，如果表不存在则返回空列表
+    let result;
+    try {
+      result = await WalletTransaction.getUserTransactions(userId, {
+        page: parseInt(page),
+        pageSize: parseInt(pageSize),
+        type: filterType
+      });
+    } catch (error) {
+      // 如果是表不存在的错误，返回空列表
+      if (error.code === 'ER_NO_SUCH_TABLE' || error.message.includes("doesn't exist")) {
+        console.log('⚠️ wallet_transactions 表不存在，返回空列表');
+        return res.json({
+          success: true,
+          code: 0,
+          data: {
+            list: [],
+            total: 0,
+            page: parseInt(page),
+            pageSize: parseInt(pageSize),
+            hasMore: false
+          },
+          message: '获取钱包明细成功（暂无记录）'
+        });
+      }
+      throw error;
+    }
 
     // 格式化数据
     const formattedList = result.list.map(item => ({
@@ -236,8 +261,8 @@ exports.getWalletDetails = async (req, res, next) => {
       description: item.description,
       createTime: item.created_at,
       status: item.status,
-      balanceBefore: parseFloat(item.balance_before).toFixed(2),
-      balanceAfter: parseFloat(item.balance_after).toFixed(2),
+      balanceBefore: parseFloat(item.balance_before || 0).toFixed(2),
+      balanceAfter: parseFloat(item.balance_after || 0).toFixed(2),
       orderId: item.order_id
     }));
 

@@ -101,6 +101,9 @@ function switchMenu(menu) {
     case 'certifications':
       loadCertifications();
       break;
+    case 'withdraws':
+      loadWithdraws();
+      break;
   }
 }
 
@@ -857,3 +860,169 @@ window.addEventListener('DOMContentLoaded', () => {
     showAdminPanel();
   }
 });
+
+
+// ==================== 提现管理 ====================
+
+// 加载提现列表
+async function loadWithdraws(page = 1) {
+  currentPage = page;
+  const status = document.getElementById('withdrawStatusFilter')?.value || '';
+
+  try {
+    const params = new URLSearchParams({
+      page,
+      pageSize,
+      ...(status && { status })
+    });
+
+    const response = await apiRequest(`${API_BASE_URL}/admin/withdraws?${params}`);
+    const data = await response.json();
+
+    if (data.success) {
+      displayWithdraws(data.data);
+    } else {
+      alert(data.message || '加载失败');
+    }
+  } catch (error) {
+    console.error('加载提现列表错误:', error);
+    alert('加载失败');
+  }
+}
+
+// 显示提现列表
+function displayWithdraws(data) {
+  const { list, total, page } = data;
+  const totalPages = Math.ceil(total / pageSize);
+
+  const statusMap = {
+    pending: { text: '待审核', color: '#f59e0b', icon: '⏳' },
+    approved: { text: '已通过', color: '#10b981', icon: '✅' },
+    rejected: { text: '已拒绝', color: '#ef4444', icon: '❌' }
+  };
+
+  document.getElementById('withdraws').innerHTML = `
+    <div class="section-header">
+      <h2>💰 提现管理</h2>
+      <div class="filters">
+        <select id="withdrawStatusFilter" onchange="loadWithdraws(1)">
+          <option value="">全部状态</option>
+          <option value="pending">待审核</option>
+          <option value="approved">已通过</option>
+          <option value="rejected">已拒绝</option>
+        </select>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>用户</th>
+          <th>提现金额</th>
+          <th>账户信息</th>
+          <th>状态</th>
+          <th>申请时间</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(w => {
+          const status = statusMap[w.status] || { text: w.status, color: '#6b7280', icon: '❓' };
+          return `
+            <tr>
+              <td>${w.id}</td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <img src="${w.avatar || '/images/default-avatar.png'}" style="width: 32px; height: 32px; border-radius: 50%;">
+                  <div>
+                    <div>${w.nickname || w.username}</div>
+                    <div style="font-size: 12px; color: #6b7280;">${w.phone || '-'}</div>
+                  </div>
+                </div>
+              </td>
+              <td style="color: #ef4444; font-weight: bold;">¥${parseFloat(w.amount).toFixed(2)}</td>
+              <td>
+                <div>${w.account_type === 'wechat' ? '微信' : w.account_type === 'alipay' ? '支付宝' : '银行卡'}</div>
+                <div style="font-size: 12px; color: #6b7280;">${w.account}</div>
+              </td>
+              <td>
+                <span style="background: ${status.color}20; color: ${status.color}; padding: 4px 12px; border-radius: 12px; font-size: 12px;">
+                  ${status.icon} ${status.text}
+                </span>
+              </td>
+              <td>${new Date(w.created_at).toLocaleString()}</td>
+              <td>
+                ${w.status === 'pending' ? `
+                  <button class="btn btn-success" onclick="approveWithdraw(${w.id})">✅ 通过</button>
+                  <button class="btn btn-danger" onclick="rejectWithdraw(${w.id})">❌ 拒绝</button>
+                ` : `
+                  <button class="btn btn-primary" onclick="viewWithdrawDetail(${w.id})">👁️ 查看</button>
+                `}
+              </td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+    <div class="pagination">
+      <button onclick="loadWithdraws(${page - 1})" ${page <= 1 ? 'disabled' : ''}>⬅ 上一页</button>
+      <span>📄 第 ${page} / ${totalPages} 页，共 ${total} 条</span>
+      <button onclick="loadWithdraws(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>下一页 ➡</button>
+    </div>
+  `;
+}
+
+// 通过提现申请
+async function approveWithdraw(id) {
+  if (!confirm('确认通过此提现申请？\n\n请确保已将款项转账至用户账户。')) return;
+
+  try {
+    const response = await apiRequest(`${API_BASE_URL}/admin/withdraws/${id}/review`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'approved' })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      alert('✅ 审核通过');
+      loadWithdraws(currentPage);
+    } else {
+      alert(data.message || '操作失败');
+    }
+  } catch (error) {
+    console.error('审核错误:', error);
+    alert('操作失败');
+  }
+}
+
+// 拒绝提现申请
+async function rejectWithdraw(id) {
+  const reason = prompt('请输入拒绝原因：');
+  if (!reason) return;
+
+  try {
+    const response = await apiRequest(`${API_BASE_URL}/admin/withdraws/${id}/review`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'rejected', reject_reason: reason })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      alert('❌ 已拒绝');
+      loadWithdraws(currentPage);
+    } else {
+      alert(data.message || '操作失败');
+    }
+  } catch (error) {
+    console.error('审核错误:', error);
+    alert('操作失败');
+  }
+}
+
+// 查看提现详情
+async function viewWithdrawDetail(id) {
+  alert('提现详情功能待实现');
+}

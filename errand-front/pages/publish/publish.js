@@ -1,5 +1,6 @@
 // 发布订单页面
 const orderAPI = require('../../api/order.js');
+const userAPI = require('../../api/user.js');
 const config = require('../../utils/config.js');
 
 Page({
@@ -12,6 +13,9 @@ Page({
     ],
     typeIndex: 0,
     submitting: false,
+    
+    // 用户余额信息
+    balance: '0.00',
     
     formData: {
       title: '',
@@ -62,6 +66,9 @@ Page({
       return;
     }
     
+    // 加载用户余额
+    this.loadBalance();
+    
     console.log('发布订单页面加载完成，用户已登录');
   },
 
@@ -81,7 +88,32 @@ Page({
           });
         }
       });
+    } else {
+      // 刷新余额
+      this.loadBalance();
     }
+  },
+
+  // 加载用户余额
+  async loadBalance() {
+    try {
+      const result = await userAPI.getWalletInfo();
+      if (result && result.success && result.data) {
+        const balance = parseFloat(result.data.balance) || 0;
+        this.setData({
+          balance: balance.toFixed(2)
+        });
+      }
+    } catch (error) {
+      console.error('加载余额失败:', error);
+    }
+  },
+
+  // 跳转到钱包充值
+  goToWallet() {
+    wx.navigateTo({
+      url: '/pages/wallet/wallet'
+    });
   },
 
   // 选择服务类型
@@ -213,6 +245,24 @@ Page({
     } catch (error) {
       this.setData({ submitting: false });
       console.error('发布订单失败:', error);
+
+      // 处理余额不足的情况
+      if (error.message && error.message.includes('余额不足')) {
+        wx.showModal({
+          title: '余额不足',
+          content: error.message,
+          confirmText: '去充值',
+          cancelText: '取消',
+          success: (res) => {
+            if (res.confirm) {
+              wx.navigateTo({
+                url: '/pages/wallet/wallet'
+              });
+            }
+          }
+        });
+        return;
+      }
 
       // 401错误已在请求拦截器中统一处理，这里只处理其他错误
       if (error.message !== 'Token无效或已过期' && error.message !== '认证失败') {

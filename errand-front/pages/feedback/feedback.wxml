@@ -3,13 +3,13 @@
   <view class="type-section">
     <text class="section-title">反馈类型</text>
     <view class="type-grid">
-      <view class="type-item {{selectedType.id === type.id ? 'selected' : ''}}"
+      <view class="type-item {{selectedType.id === item.id ? 'selected' : ''}}"
             wx:for="{{feedbackTypes}}" 
             wx:key="id"
             bindtap="selectType"
-            data-type="{{type}}">
-        <text class="type-icon">{{type.icon}}</text>
-        <text class="type-name">{{type.name}}</text>
+            data-type="{{item}}">
+        <text class="type-icon">{{item.icon}}</text>
+        <text class="type-name">{{item.name}}</text>
       </view>
     </view>
   </view>
@@ -17,31 +17,41 @@
   <!-- 反馈表单 -->
   <view class="form-section">
     <view class="form-item">
+      <view class="form-label required">反馈标题</view>
       <input class="form-input {{errors.title ? 'error' : ''}}"
-             placeholder="* 反馈标题：请简要描述您的问题或建议"
+             placeholder="请简要描述问题或建议"
+             placeholder-class="placeholder-text"
              value="{{formData.title}}"
              bindinput="onInputChange"
              data-field="title"
              maxlength="50" />
-      <text class="error-text" wx:if="{{errors.title}}">{{errors.title}}</text>
-      <text class="char-count">{{formData.title.length}}/50</text>
+      <view class="input-footer">
+        <text class="error-text" wx:if="{{errors.title}}">{{errors.title}}</text>
+        <text class="char-count">{{formData.title.length}}/50</text>
+      </view>
     </view>
 
     <view class="form-item">
+      <view class="form-label required">详细描述</view>
       <textarea class="form-textarea {{errors.content ? 'error' : ''}}"
-                placeholder="* 详细描述：请详细描述您遇到的问题或建议，以便我们更好地为您服务"
+                placeholder="请详细描述问题，以便我们更好地帮助您"
+                placeholder-class="placeholder-text"
                 value="{{formData.content}}"
                 bindinput="onInputChange"
                 data-field="content"
                 maxlength="500"
                 auto-height></textarea>
-      <text class="error-text" wx:if="{{errors.content}}">{{errors.content}}</text>
-      <text class="char-count">{{formData.content.length}}/500</text>
+      <view class="input-footer">
+        <text class="error-text" wx:if="{{errors.content}}">{{errors.content}}</text>
+        <text class="char-count">{{formData.content.length}}/500</text>
+      </view>
     </view>
 
     <view class="form-item">
+      <view class="form-label">联系方式（选填）</view>
       <input class="form-input {{errors.contact ? 'error' : ''}}"
-             placeholder="联系方式：手机号或邮箱，方便我们联系您（选填）"
+             placeholder="手机号或邮箱"
+             placeholder-class="placeholder-text"
              value="{{formData.contact}}"
              bindinput="onInputChange"
              data-field="contact" />
@@ -50,7 +60,7 @@
 
     <!-- 图片上传 -->
     <view class="form-item">
-      <text class="form-label">相关图片（选填）</text>
+      <view class="form-label">相关截图（选填）</view>
       <view class="image-upload">
         <view class="image-list">
           <view class="image-item" 
@@ -62,20 +72,20 @@
                    bindtap="onPreviewImage"
                    data-url="{{item}}"></image>
             <view class="delete-btn" 
-                  bindtap="onDeleteImage"
+                  catchtap="onDeleteImage"
                   data-index="{{index}}">
               <text class="delete-icon">✕</text>
             </view>
           </view>
           
-          <view class="upload-btn {{formData.images.length >= 4 ? 'disabled' : ''}}"
+          <view class="upload-btn"
                 bindtap="onUploadImage"
                 wx:if="{{formData.images.length < 4}}">
             <text class="upload-icon">📷</text>
             <text class="upload-text">添加图片</text>
           </view>
         </view>
-        <text class="upload-desc">最多上传4张图片，每张不超过5MB</text>
+        <text class="upload-desc">最多上传4张图片</text>
       </view>
     </view>
   </view>
@@ -89,7 +99,7 @@
     </button>
     
     <view class="action-links">
-      <text class="link-text" bindtap="onViewHistory">查看反馈记录</text>
+      <text class="link-text" bindtap="onViewHistory">查看我的反馈记录</text>
     </view>
   </view>
 
@@ -102,8 +112,7 @@
     <view class="tips-list">
       <text class="tips-item">• 请尽可能详细地描述您遇到的问题</text>
       <text class="tips-item">• 上传相关截图能帮助我们更快定位问题</text>
-      <text class="tips-item">• 我们会在收到反馈后24小时内回复您</text>
-      <text class="tips-item">• 如有紧急问题，请直接联系客服</text>
+      <text class="tips-item">• 我们会尽快处理您的反馈</text>
     </view>
   </view>
 </view>

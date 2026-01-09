@@ -1,0 +1,156 @@
+<view class="page-container">
+  <!-- 统计卡片 -->
+  <view class="stats-section">
+    <view class="stats-title">订单历史统计</view>
+    <view class="stats-grid">
+      <view class="stat-item">
+        <text class="stat-value">{{stats.publishTotal}}</text>
+        <text class="stat-label">发布总数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{stats.publishToday}}</text>
+        <text class="stat-label">今日发布</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{stats.acceptedTotal}}</text>
+        <text class="stat-label">接单总数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-value">{{stats.acceptedToday}}</text>
+        <text class="stat-label">今日接单</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 标签切换 -->
+  <view class="tabs-section">
+    <view class="tabs">
+      <view class="tab {{currentTab === 'publish' ? 'active' : ''}}"
+            bindtap="switchTab"
+            data-tab="publish">
+        <text class="tab-text">我发布的</text>
+        <text class="tab-count">({{publishTotal}})</text>
+      </view>
+      <view class="tab {{currentTab === 'accepted' ? 'active' : ''}}"
+            bindtap="switchTab"
+            data-tab="accepted">
+        <text class="tab-text">我接的</text>
+        <text class="tab-count">({{acceptedTotal}})</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 发布的订单列表 -->
+  <view class="order-list" wx:if="{{currentTab === 'publish'}}">
+    <view class="order-item"
+          wx:for="{{publishOrders}}"
+          wx:key="id"
+          bindtap="viewOrderDetail"
+          data-id="{{item.id}}">
+      
+      <!-- 订单头部 -->
+      <view class="order-header">
+        <view class="order-title">{{item.title}}</view>
+        <view class="status-badge" style="background: {{statusMap[item.status].color}}20; color: {{statusMap[item.status].color}}">
+          <text class="status-icon">{{statusMap[item.status].icon}}</text>
+          <text class="status-name">{{statusMap[item.status].name}}</text>
+        </view>
+      </view>
+
+      <!-- 订单内容 -->
+      <view class="order-content">
+        <view class="content-row">
+          <text class="label">📍 取货地点：</text>
+          <text class="value">{{item.pickup_location}}</text>
+        </view>
+        <view class="content-row">
+          <text class="label">📦 送达地点：</text>
+          <text class="value">{{item.delivery_location}}</text>
+        </view>
+        <view class="content-row" wx:if="{{item.acceptor_name}}">
+          <text class="label">👤 接单人：</text>
+          <text class="value">{{item.acceptor_name}}</text>
+        </view>
+      </view>
+
+      <!-- 订单底部 -->
+      <view class="order-footer">
+        <view class="price">¥{{item.price}}</view>
+        <view class="time">{{formatTime(item.created_at)}}</view>
+      </view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view class="loading-more" wx:if="{{loading && !refreshing}}">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <view class="no-more" wx:if="{{!publishHasMore && publishOrders.length > 0}}">
+      <text class="no-more-text">没有更多了</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!loading && publishOrders.length === 0}}">
+      <text class="empty-icon">📋</text>
+      <text class="empty-text">暂无发布记录</text>
+      <text class="empty-desc">快去发布你的第一个订单吧</text>
+    </view>
+  </view>
+
+  <!-- 接的订单列表 -->
+  <view class="order-list" wx:if="{{currentTab === 'accepted'}}">
+    <view class="order-item"
+          wx:for="{{acceptedOrders}}"
+          wx:key="id"
+          bindtap="viewOrderDetail"
+          data-id="{{item.id}}">
+      
+      <!-- 订单头部 -->
+      <view class="order-header">
+        <view class="order-title">{{item.title}}</view>
+        <view class="status-badge" style="background: {{statusMap[item.status].color}}20; color: {{statusMap[item.status].color}}">
+          <text class="status-icon">{{statusMap[item.status].icon}}</text>
+          <text class="status-name">{{statusMap[item.status].name}}</text>
+        </view>
+      </view>
+
+      <!-- 订单内容 -->
+      <view class="order-content">
+        <view class="content-row">
+          <text class="label">📍 取货地点：</text>
+          <text class="value">{{item.pickup_location}}</text>
+        </view>
+        <view class="content-row">
+          <text class="label">📦 送达地点：</text>
+          <text class="value">{{item.delivery_location}}</text>
+        </view>
+        <view class="content-row" wx:if="{{item.publisher_name}}">
+          <text class="label">👤 发布人：</text>
+          <text class="value">{{item.publisher_name}}</text>
+        </view>
+      </view>
+
+      <!-- 订单底部 -->
+      <view class="order-footer">
+        <view class="price">¥{{item.price}}</view>
+        <view class="time">{{formatTime(item.accepted_at || item.created_at)}}</view>
+      </view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view class="loading-more" wx:if="{{loading && !refreshing}}">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <view class="no-more" wx:if="{{!acceptedHasMore && acceptedOrders.length > 0}}">
+      <text class="no-more-text">没有更多了</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!loading && acceptedOrders.length === 0}}">
+      <text class="empty-icon">📋</text>
+      <text class="empty-text">暂无接单记录</text>
+      <text class="empty-desc">快去接单赚取佣金吧</text>
+    </view>
+  </view>
+</view>

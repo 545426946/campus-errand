@@ -54,6 +54,14 @@ const commonAPI = {
     return request.post('/system/feedback', feedbackData)
   },
 
+  // 获取反馈历史
+  getFeedbackHistory(params = {}) {
+    return request.get('/system/feedback/history', {
+      page: params.page || 1,
+      pageSize: params.pageSize || 20
+    })
+  },
+
   // 获取帮助信息
   getHelpList(params = {}) {
     return request.get('/system/help', {

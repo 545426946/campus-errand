@@ -35,6 +35,11 @@ router.post('/certifications/:id/review', requireAdmin, AdminController.reviewCe
 router.get('/withdraws', AdminController.getWithdrawRequests);
 router.post('/withdraws/:id/review', requireAdmin, AdminController.reviewWithdrawRequest);
 
+// 反馈管理
+router.get('/feedbacks', AdminController.getFeedbacks);
+router.post('/feedbacks/:id/reply', requireAdmin, AdminController.replyFeedback);
+router.put('/feedbacks/:id/status', requireAdmin, AdminController.updateFeedbackStatus);
+
 // 管理员管理（仅超级管理员）
 router.get('/admins', requireSuperAdmin, AdminController.getAdmins);
 router.post('/admins', requireSuperAdmin, AdminController.createAdmin);

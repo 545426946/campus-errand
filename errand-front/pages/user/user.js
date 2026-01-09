@@ -220,19 +220,9 @@ Page({
           url: '/pages/history/history'
         });
         break;
-      case 'help':
-        wx.navigateTo({
-          url: '/pages/help/help'
-        });
-        break;
       case 'feedback':
         wx.navigateTo({
           url: '/pages/feedback/feedback'
-        });
-        break;
-      case 'about':
-        wx.navigateTo({
-          url: '/pages/about/about'
         });
         break;
     }

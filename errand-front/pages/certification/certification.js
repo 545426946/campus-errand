@@ -9,26 +9,16 @@ Page({
 
     // 表单数据
     form: {
-      type: 'student', // student, teacher, staff
+      type: 'rider', // 骑手认证
       realName: '',
       idCard: '',
-      studentId: '',
-      school: '',
-      college: '',
-      major: '',
-      grade: '',
-      department: '',
+      phone: '',
+      emergencyContact: '',
+      emergencyPhone: '',
       idCardFront: '',
       idCardBack: '',
-      studentCard: ''
+      healthCert: '' // 健康证（可选）
     },
-
-    // 认证类型选项
-    typeOptions: [
-      { value: 'student', label: '学生' },
-      { value: 'teacher', label: '教师' },
-      { value: 'staff', label: '职工' }
-    ],
 
     loading: false,
     submitting: false
@@ -84,31 +74,21 @@ Page({
       if (res.code === 0) {
         this.setData({
           form: {
-            type: res.data.type,
+            type: 'rider',
             realName: res.data.real_name,
             idCard: res.data.id_card,
-            studentId: res.data.student_id || '',
-            school: res.data.school,
-            college: res.data.college || '',
-            major: res.data.major || '',
-            grade: res.data.grade || '',
-            department: res.data.department || '',
+            phone: res.data.phone || '',
+            emergencyContact: res.data.emergency_contact || '',
+            emergencyPhone: res.data.emergency_phone || '',
             idCardFront: res.data.id_card_front || '',
             idCardBack: res.data.id_card_back || '',
-            studentCard: res.data.student_card || ''
+            healthCert: res.data.health_cert || ''
           }
         });
       }
     } catch (error) {
       console.error('加载认证详情失败:', error);
     }
-  },
-
-  // 选择认证类型
-  onTypeChange(e) {
-    this.setData({
-      'form.type': e.detail.value
-    });
   },
 
   // 输入框变化
@@ -211,8 +191,8 @@ Page({
       return;
     }
 
-    if (!form.school) {
-      wx.showToast({ title: '请输入学校名称', icon: 'none' });
+    if (!form.phone) {
+      wx.showToast({ title: '请输入联系电话', icon: 'none' });
       return;
     }
 
@@ -223,9 +203,10 @@ Page({
       return;
     }
 
-    // 学生必须填写学号
-    if (form.type === 'student' && !form.studentId) {
-      wx.showToast({ title: '请输入学号', icon: 'none' });
+    // 验证手机号格式
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!phoneRegex.test(form.phone)) {
+      wx.showToast({ title: '手机号格式不正确', icon: 'none' });
       return;
     }
 
@@ -278,10 +259,15 @@ Page({
     this.setData({
       certStatus: 'none',
       form: {
-        ...this.data.form,
+        type: 'rider',
+        realName: '',
+        idCard: '',
+        phone: '',
+        emergencyContact: '',
+        emergencyPhone: '',
         idCardFront: '',
         idCardBack: '',
-        studentCard: ''
+        healthCert: ''
       }
     });
   },

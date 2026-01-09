@@ -4,21 +4,43 @@ const fs = require('fs');
 
 // 确保上传目录存在
 const uploadDir = path.join(__dirname, '../../uploads');
-const avatarDir = path.join(uploadDir, 'avatars');
-const orderDir = path.join(uploadDir, 'orders');
+const directories = ['avatars', 'orders', 'feedbacks', 'certifications', 'general'];
 
-[uploadDir, avatarDir, orderDir].forEach(dir => {
+// 创建所有需要的目录
+[uploadDir, ...directories.map(d => path.join(uploadDir, d))].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
 });
 
+// 获取上传目录
+const getUploadDir = (type) => {
+  const typeMap = {
+    'avatar': 'avatars',
+    'avatars': 'avatars',
+    'order': 'orders',
+    'orders': 'orders',
+    'feedback': 'feedbacks',
+    'feedbacks': 'feedbacks',
+    'certification': 'certifications',
+    'certifications': 'certifications'
+  };
+  return typeMap[type] || 'general';
+};
+
 // 配置存储
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // 根据上传类型选择目录
-    const uploadType = req.body.type || req.query.type || 'orders';
-    const dir = uploadType === 'avatar' ? avatarDir : orderDir;
+    const uploadType = req.body.type || req.query.type || req.body.category || 'general';
+    const dirName = getUploadDir(uploadType);
+    const dir = path.join(uploadDir, dirName);
+    
+    // 确保目录存在
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    
     cb(null, dir);
   },
   filename: (req, file, cb) => {

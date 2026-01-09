@@ -131,29 +131,17 @@ Page({
     const item = e.currentTarget.dataset.item;
     
     // 构建详情信息
-    let content = `认证类型：${item.type === 'student' ? '学生' : item.type === 'teacher' ? '教师' : '职工'}\n`;
+    let content = `认证类型：骑手认证\n`;
     content += `真实姓名：${item.real_name}\n`;
     content += `身份证号：${item.id_card}\n`;
-    content += `学校：${item.school}\n`;
+    content += `联系电话：${item.phone || '-'}\n`;
     
-    if (item.student_id) {
-      content += `${item.type === 'student' ? '学号' : '工号'}：${item.student_id}\n`;
+    if (item.emergency_contact) {
+      content += `紧急联系人：${item.emergency_contact}\n`;
     }
     
-    if (item.college) {
-      content += `学院：${item.college}\n`;
-    }
-    
-    if (item.major) {
-      content += `专业：${item.major}\n`;
-    }
-    
-    if (item.grade) {
-      content += `年级：${item.grade}\n`;
-    }
-    
-    if (item.department) {
-      content += `部门：${item.department}\n`;
+    if (item.emergency_phone) {
+      content += `紧急联系电话：${item.emergency_phone}\n`;
     }
     
     content += `\n提交时间：${item.submitted_at}`;

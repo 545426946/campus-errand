@@ -9,6 +9,7 @@ router.use(authenticate);
 
 // 上传单张图片（头像或订单图片）
 router.post('/single', uploadSingle, UploadController.uploadSingle);
+router.post('/image', uploadSingle, UploadController.uploadSingle); // 兼容前端 /upload/image 路径
 
 // 上传多张图片（订单图片）
 router.post('/multiple', uploadMultiple, UploadController.uploadMultiple);

@@ -1,30 +1,28 @@
 const db = require('../config/database');
 
 class Certification {
-  // 创建认证申请
+  // 创建认证申请（骑手认证）
   static async create(certificationData) {
     const {
       user_id,
-      type,
+      type = 'rider',
       real_name,
       id_card,
-      student_id,
-      school,
-      college,
-      major,
-      grade,
-      department,
+      phone,
+      emergency_contact,
+      emergency_phone,
       id_card_front,
       id_card_back,
-      student_card
+      health_cert
     } = certificationData;
 
     const query = `
       INSERT INTO certifications (
-        user_id, type, real_name, id_card, student_id, school, 
-        college, major, grade, department, id_card_front, 
-        id_card_back, student_card, status, submitted_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
+        user_id, type, real_name, id_card, phone,
+        emergency_contact, emergency_phone,
+        id_card_front, id_card_back, health_cert,
+        status, submitted_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
     `;
 
     const [result] = await db.execute(query, [
@@ -32,15 +30,12 @@ class Certification {
       type,
       real_name,
       id_card,
-      student_id || null,
-      school,
-      college || null,
-      major || null,
-      grade || null,
-      department || null,
+      phone || null,
+      emergency_contact || null,
+      emergency_phone || null,
       id_card_front || null,
       id_card_back || null,
-      student_card || null
+      health_cert || null
     ]);
 
     return result.insertId;
@@ -105,12 +100,11 @@ class Certification {
       await db.execute(
         `UPDATE users 
          SET is_certified = TRUE, 
-             certification_type = ?, 
+             certification_type = 'rider', 
              certification_id = ?,
-             real_name = ?,
-             student_id = ?
+             real_name = ?
          WHERE id = ?`,
-        [cert.type, id, cert.real_name, cert.student_id, cert.user_id]
+        [id, cert.real_name, cert.user_id]
       );
     }
 

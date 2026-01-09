@@ -2,6 +2,21 @@ const path = require('path');
 const fs = require('fs');
 
 class UploadController {
+  // 获取上传目录
+  static getUploadDir(type) {
+    const typeMap = {
+      'avatar': 'avatars',
+      'avatars': 'avatars',
+      'order': 'orders',
+      'orders': 'orders',
+      'feedback': 'feedbacks',
+      'feedbacks': 'feedbacks',
+      'certification': 'certifications',
+      'certifications': 'certifications'
+    };
+    return typeMap[type] || 'general';
+  }
+
   // 上传单张图片
   static async uploadSingle(req, res) {
     try {
@@ -12,8 +27,9 @@ class UploadController {
         });
       }
 
-      const uploadType = req.body.type || req.query.type || 'orders';
-      const imageUrl = `/uploads/${uploadType === 'avatar' ? 'avatars' : 'orders'}/${req.file.filename}`;
+      const uploadType = req.body.type || req.query.type || req.body.category || 'general';
+      const uploadDir = UploadController.getUploadDir(uploadType);
+      const imageUrl = `/uploads/${uploadDir}/${req.file.filename}`;
 
       res.json({
         success: true,
@@ -45,9 +61,10 @@ class UploadController {
         });
       }
 
-      const uploadType = req.body.type || req.query.type || 'orders';
+      const uploadType = req.body.type || req.query.type || req.body.category || 'general';
+      const uploadDir = UploadController.getUploadDir(uploadType);
       const images = req.files.map(file => ({
-        url: `/uploads/${uploadType === 'avatar' ? 'avatars' : 'orders'}/${file.filename}`,
+        url: `/uploads/${uploadDir}/${file.filename}`,
         filename: file.filename,
         size: file.size,
         mimetype: file.mimetype

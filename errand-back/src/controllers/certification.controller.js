@@ -1,40 +1,28 @@
 const Certification = require('../models/Certification');
 const User = require('../models/User');
 
-// 提交认证申请
+// 提交认证申请（骑手认证）
 exports.submitCertification = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const {
-      type,
+      type = 'rider',
       realName,
       idCard,
-      studentId,
-      school,
-      college,
-      major,
-      grade,
-      department,
+      phone,
+      emergencyContact,
+      emergencyPhone,
       idCardFront,
       idCardBack,
-      studentCard
+      healthCert
     } = req.body;
 
     // 验证必填字段
-    if (!type || !realName || !idCard || !school) {
+    if (!realName || !idCard || !phone) {
       return res.status(400).json({
         success: false,
         code: 400,
-        message: '请填写完整的认证信息'
-      });
-    }
-
-    // 验证认证类型
-    if (!['student', 'teacher', 'staff'].includes(type)) {
-      return res.status(400).json({
-        success: false,
-        code: 400,
-        message: '无效的认证类型'
+        message: '请填写完整的认证信息（姓名、身份证号、联系电话）'
       });
     }
 
@@ -45,6 +33,16 @@ exports.submitCertification = async (req, res, next) => {
         success: false,
         code: 400,
         message: '身份证号格式不正确'
+      });
+    }
+
+    // 验证手机号格式
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '手机号格式不正确'
       });
     }
 
@@ -64,32 +62,29 @@ exports.submitCertification = async (req, res, next) => {
       return res.status(400).json({
         success: false,
         code: 400,
-        message: '您已完成身份认证'
+        message: '您已完成骑手认证'
       });
     }
 
     // 创建认证申请
     const certId = await Certification.create({
       user_id: userId,
-      type,
+      type: 'rider',
       real_name: realName,
       id_card: idCard,
-      student_id: studentId,
-      school,
-      college,
-      major,
-      grade,
-      department,
+      phone: phone,
+      emergency_contact: emergencyContact,
+      emergency_phone: emergencyPhone,
       id_card_front: idCardFront,
       id_card_back: idCardBack,
-      student_card: studentCard
+      health_cert: healthCert
     });
 
     res.json({
       success: true,
       code: 0,
       data: { certificationId: certId },
-      message: '认证申请已提交，请等待审核'
+      message: '骑手认证申请已提交，请等待审核'
     });
   } catch (error) {
     next(error);
@@ -122,10 +117,9 @@ exports.getCertificationStatus = async (req, res, next) => {
       data: {
         status: certification.status,
         isCertified: userCertStatus?.is_certified || false,
-        certificationType: userCertStatus?.certification_type || null,
+        certificationType: 'rider',
         realName: certification.real_name,
-        type: certification.type,
-        school: certification.school,
+        type: 'rider',
         submittedAt: certification.submitted_at,
         reviewedAt: certification.reviewed_at,
         rejectReason: certification.reject_reason,
@@ -178,15 +172,12 @@ exports.getCertificationHistory = async (req, res, next) => {
     // 隐藏敏感信息并格式化数据
     const safeHistory = history.map(cert => ({
       id: cert.id,
-      type: cert.type,
+      type: 'rider',
       real_name: cert.real_name,
       id_card: cert.id_card.replace(/(\d{6})\d{8}(\d{4})/, '$1********$2'),
-      student_id: cert.student_id,
-      school: cert.school,
-      college: cert.college,
-      major: cert.major,
-      grade: cert.grade,
-      department: cert.department,
+      phone: cert.phone,
+      emergency_contact: cert.emergency_contact,
+      emergency_phone: cert.emergency_phone,
       status: cert.status,
       reject_reason: cert.reject_reason,
       submitted_at: cert.submitted_at,

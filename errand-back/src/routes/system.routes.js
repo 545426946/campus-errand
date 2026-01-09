@@ -12,6 +12,7 @@ const {
   getRecommendedKeywords,
   checkSensitive,
   submitFeedback,
+  getFeedbackHistory,
   getHelp,
   getAbout,
   getPrivacy,
@@ -56,6 +57,7 @@ router.post('/check-sensitive', protect, checkSensitive);
 
 // 用户反馈（需要认证）
 router.post('/feedback', protect, submitFeedback);
+router.get('/feedback/history', protect, getFeedbackHistory);
 
 // 帮助和关于（公开）
 router.get('/help', getHelp);

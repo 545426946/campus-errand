@@ -51,10 +51,21 @@ Page({
       });
 
       const newList = result.data.list || [];
+      
+      // 处理每条记录，添加格式化的数据
+      const processedList = newList.map(item => {
+        return {
+          ...item,
+          formattedTime: this.formatTime(item.createTime),
+          actionText: this.getActionText(item.type, item.action),
+          actionIcon: this.getActionIcon(item.type, item.action)
+        };
+      });
+      
       const existingList = isLoadMore ? this.data.historyList : [];
 
       this.setData({
-        historyList: existingList.concat(newList),
+        historyList: existingList.concat(processedList),
         hasMore: newList.length === 10,
         page: this.data.page + 1,
         stats: {

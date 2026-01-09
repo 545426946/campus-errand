@@ -16,17 +16,13 @@
   <view class="cert-status approved" wx:if="{{isCertified && certStatus === 'approved'}}">
     <view class="status-icon">✓</view>
     <view class="status-text">
-      <text class="status-title">认证已通过</text>
-      <text class="status-desc">您已完成{{certDetail.certificationType === 'student' ? '学生' : certDetail.certificationType === 'teacher' ? '教师' : '职工'}}身份认证</text>
+      <text class="status-title">骑手认证已通过</text>
+      <text class="status-desc">您已完成骑手身份认证，可以接单了</text>
     </view>
     <view class="cert-info">
       <view class="info-item">
         <text class="label">真实姓名：</text>
         <text class="value">{{certDetail.realName}}</text>
-      </view>
-      <view class="info-item">
-        <text class="label">学校：</text>
-        <text class="value">{{certDetail.school}}</text>
       </view>
       <view class="info-item">
         <text class="label">认证时间：</text>
@@ -40,7 +36,7 @@
     <view class="status-icon">⏳</view>
     <view class="status-text">
       <text class="status-title">审核中</text>
-      <text class="status-desc">您的认证申请正在审核中，请耐心等待</text>
+      <text class="status-desc">您的骑手认证申请正在审核中，请耐心等待</text>
     </view>
     <view class="cert-info">
       <view class="info-item">
@@ -63,17 +59,7 @@
   <!-- 认证表单 -->
   <view class="cert-form" wx:if="{{certStatus === 'none' || certStatus === 'rejected'}}">
     <view class="form-section">
-      <view class="section-title">基本信息</view>
-
-      <!-- 认证类型 -->
-      <view class="form-item">
-        <text class="label required">认证类型</text>
-        <picker mode="selector" range="{{typeOptions}}" range-key="label" value="{{form.type}}" bindchange="onTypeChange">
-          <view class="picker">
-            {{typeOptions[form.type === 'student' ? 0 : form.type === 'teacher' ? 1 : 2].label}}
-          </view>
-        </picker>
-      </view>
+      <view class="section-title">骑手基本信息</view>
 
       <!-- 真实姓名 -->
       <view class="form-item">
@@ -87,46 +73,25 @@
         <input class="input" placeholder="请输入身份证号" value="{{form.idCard}}" data-field="idCard" bindinput="onInputChange" maxlength="18" />
       </view>
 
-      <!-- 学号/工号 -->
-      <view class="form-item" wx:if="{{form.type === 'student' || form.type === 'teacher' || form.type === 'staff'}}">
-        <text class="label {{form.type === 'student' ? 'required' : ''}}">{{form.type === 'student' ? '学号' : '工号'}}</text>
-        <input class="input" placeholder="请输入{{form.type === 'student' ? '学号' : '工号'}}" value="{{form.studentId}}" data-field="studentId" bindinput="onInputChange" />
-      </view>
-
-      <!-- 学校 -->
+      <!-- 联系电话 -->
       <view class="form-item">
-        <text class="label required">学校名称</text>
-        <input class="input" placeholder="请输入学校名称" value="{{form.school}}" data-field="school" bindinput="onInputChange" />
+        <text class="label required">联系电话</text>
+        <input class="input" type="number" placeholder="请输入手机号" value="{{form.phone}}" data-field="phone" bindinput="onInputChange" maxlength="11" />
       </view>
     </view>
 
-    <!-- 学生信息 -->
-    <view class="form-section" wx:if="{{form.type === 'student'}}">
-      <view class="section-title">学生信息</view>
+    <!-- 紧急联系人 -->
+    <view class="form-section">
+      <view class="section-title">紧急联系人（选填）</view>
 
       <view class="form-item">
-        <text class="label">学院</text>
-        <input class="input" placeholder="请输入学院" value="{{form.college}}" data-field="college" bindinput="onInputChange" />
+        <text class="label">紧急联系人</text>
+        <input class="input" placeholder="请输入紧急联系人姓名" value="{{form.emergencyContact}}" data-field="emergencyContact" bindinput="onInputChange" />
       </view>
 
       <view class="form-item">
-        <text class="label">专业</text>
-        <input class="input" placeholder="请输入专业" value="{{form.major}}" data-field="major" bindinput="onInputChange" />
-      </view>
-
-      <view class="form-item">
-        <text class="label">年级</text>
-        <input class="input" placeholder="如：2023级" value="{{form.grade}}" data-field="grade" bindinput="onInputChange" />
-      </view>
-    </view>
-
-    <!-- 教职工信息 -->
-    <view class="form-section" wx:if="{{form.type === 'teacher' || form.type === 'staff'}}">
-      <view class="section-title">{{form.type === 'teacher' ? '教师' : '职工'}}信息</view>
-
-      <view class="form-item">
-        <text class="label">部门</text>
-        <input class="input" placeholder="请输入所在部门" value="{{form.department}}" data-field="department" bindinput="onInputChange" />
+        <text class="label">紧急联系电话</text>
+        <input class="input" type="number" placeholder="请输入紧急联系人电话" value="{{form.emergencyPhone}}" data-field="emergencyPhone" bindinput="onInputChange" maxlength="11" />
       </view>
     </view>
 
@@ -137,9 +102,9 @@
 
       <!-- 身份证正面 -->
       <view class="upload-item">
-        <text class="label">身份证正面</text>
+        <text class="label required">身份证正面（人像面）</text>
         <view class="upload-box" bindtap="onUploadImage" data-type="idCardFront">
-          <image wx:if="{{form.idCardFront}}" class="upload-image" src="{{form.idCardFront}}" mode="aspectFill" bindtap="onPreviewImage" data-url="{{form.idCardFront}}" />
+          <image wx:if="{{form.idCardFront}}" class="upload-image" src="{{form.idCardFront}}" mode="aspectFill" catchtap="onPreviewImage" data-url="{{form.idCardFront}}" />
           <view wx:else class="upload-placeholder">
             <text class="upload-icon">+</text>
             <text class="upload-text">上传身份证正面</text>
@@ -149,9 +114,9 @@
 
       <!-- 身份证背面 -->
       <view class="upload-item">
-        <text class="label">身份证背面</text>
+        <text class="label required">身份证背面（国徽面）</text>
         <view class="upload-box" bindtap="onUploadImage" data-type="idCardBack">
-          <image wx:if="{{form.idCardBack}}" class="upload-image" src="{{form.idCardBack}}" mode="aspectFill" bindtap="onPreviewImage" data-url="{{form.idCardBack}}" />
+          <image wx:if="{{form.idCardBack}}" class="upload-image" src="{{form.idCardBack}}" mode="aspectFill" catchtap="onPreviewImage" data-url="{{form.idCardBack}}" />
           <view wx:else class="upload-placeholder">
             <text class="upload-icon">+</text>
             <text class="upload-text">上传身份证背面</text>
@@ -159,14 +124,14 @@
         </view>
       </view>
 
-      <!-- 学生证/工作证 -->
+      <!-- 健康证（可选） -->
       <view class="upload-item">
-        <text class="label">{{form.type === 'student' ? '学生证' : '工作证'}}</text>
-        <view class="upload-box" bindtap="onUploadImage" data-type="studentCard">
-          <image wx:if="{{form.studentCard}}" class="upload-image" src="{{form.studentCard}}" mode="aspectFill" bindtap="onPreviewImage" data-url="{{form.studentCard}}" />
+        <text class="label">健康证（选填）</text>
+        <view class="upload-box" bindtap="onUploadImage" data-type="healthCert">
+          <image wx:if="{{form.healthCert}}" class="upload-image" src="{{form.healthCert}}" mode="aspectFill" catchtap="onPreviewImage" data-url="{{form.healthCert}}" />
           <view wx:else class="upload-placeholder">
             <text class="upload-icon">+</text>
-            <text class="upload-text">上传{{form.type === 'student' ? '学生证' : '工作证'}}</text>
+            <text class="upload-text">上传健康证</text>
           </view>
         </view>
       </view>
@@ -175,13 +140,14 @@
     <!-- 提交按钮 -->
     <view class="submit-section">
       <button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}">
-        {{submitting ? '提交中...' : '提交认证'}}
+        {{submitting ? '提交中...' : '提交骑手认证'}}
       </button>
       <view class="tips">
         <text class="tips-title">温馨提示：</text>
         <text class="tips-text">1. 请确保填写的信息真实准确</text>
         <text class="tips-text">2. 上传的证件照片需清晰可见</text>
-        <text class="tips-text">3. 认证通过后方可发布和接单</text>
+        <text class="tips-text">3. 认证通过后方可接单配送</text>
+        <text class="tips-text">4. 健康证为选填项，有助于提高审核通过率</text>
       </view>
     </view>
   </view>

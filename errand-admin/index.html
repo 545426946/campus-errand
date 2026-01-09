@@ -337,6 +337,7 @@
     .menu-item:nth-child(3)::before { content: '📋'; }
     .menu-item:nth-child(4)::before { content: '✅'; }
     .menu-item:nth-child(5)::before { content: '💰'; }
+    .menu-item:nth-child(6)::before { content: '💬'; }
 
     .menu-item:hover {
       background: linear-gradient(135deg, #667eea15, #764ba215);
@@ -871,6 +872,7 @@
         <div class="menu-item" data-page="orders" onclick="switchMenu('orders')">订单管理</div>
         <div class="menu-item" data-page="certifications" onclick="switchMenu('certifications')">认证审核</div>
         <div class="menu-item" data-page="withdraws" onclick="switchMenu('withdraws')">提现管理</div>
+        <div class="menu-item" data-page="feedbacks" onclick="switchMenu('feedbacks')">意见反馈</div>
       </div>
       <div class="admin-content">
         <!-- 数据统计 -->
@@ -915,15 +917,9 @@
 
         <!-- 认证审核 -->
         <div class="content-section" id="certifications">
-          <h2 class="section-title">✅ 认证审核</h2>
+          <h2 class="section-title">✅ 骑手认证审核</h2>
           <div class="search-bar">
-            <input type="text" id="certSearch" placeholder="搜索姓名、学号、学校...">
-            <select id="certTypeFilter">
-              <option value="">全部类型</option>
-              <option value="student">学生认证</option>
-              <option value="teacher">教师认证</option>
-              <option value="staff">职工认证</option>
-            </select>
+            <input type="text" id="certSearch" placeholder="搜索姓名、身份证号、手机号...">
             <select id="certStatusFilter">
               <option value="">全部状态</option>
               <option value="pending">待审核</option>
@@ -939,6 +935,30 @@
         <!-- 提现管理 -->
         <div class="content-section" id="withdraws">
           <div id="withdrawsContent"></div>
+        </div>
+
+        <!-- 意见反馈 -->
+        <div class="content-section" id="feedbacks">
+          <h2 class="section-title">💬 意见反馈</h2>
+          <div class="search-bar">
+            <input type="text" id="feedbackSearch" placeholder="搜索反馈标题、内容...">
+            <select id="feedbackStatusFilter">
+              <option value="">全部状态</option>
+              <option value="pending">待处理</option>
+              <option value="processing">处理中</option>
+              <option value="resolved">已解决</option>
+              <option value="closed">已关闭</option>
+            </select>
+            <select id="feedbackTypeFilter">
+              <option value="">全部类型</option>
+              <option value="bug">Bug反馈</option>
+              <option value="feature">功能建议</option>
+              <option value="complaint">投诉建议</option>
+              <option value="other">其他问题</option>
+            </select>
+            <button class="btn btn-primary" onclick="searchFeedbacks()">🔍 搜索</button>
+          </div>
+          <div id="feedbacksTable"></div>
         </div>
       </div>
     </div>
@@ -966,6 +986,15 @@
       <span class="modal-close" onclick="closeOrderModal()">&times;</span>
       <h3 class="modal-title">订单详情</h3>
       <div id="orderDetail"></div>
+    </div>
+  </div>
+
+  <!-- 反馈详情/回复模态框 -->
+  <div class="modal" id="feedbackModal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeFeedbackModal()">&times;</span>
+      <h3 class="modal-title">反馈详情</h3>
+      <div id="feedbackDetail"></div>
     </div>
   </div>
 

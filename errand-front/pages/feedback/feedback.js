@@ -144,12 +144,35 @@ Page({
     try {
       wx.showLoading({ title: '提交中...' });
 
+      // 先上传图片到服务器
+      let uploadedImages = [];
+      if (this.data.formData.images.length > 0) {
+        wx.showLoading({ title: '上传图片中...' });
+        try {
+          const uploadResults = await commonAPI.uploadImages(this.data.formData.images, {
+            category: 'feedback'
+          });
+          uploadedImages = uploadResults.map(result => result.data.url);
+        } catch (uploadError) {
+          console.error('图片上传失败:', uploadError);
+          wx.hideLoading();
+          wx.showToast({
+            title: '图片上传失败',
+            icon: 'none'
+          });
+          this.setData({ submitting: false });
+          return;
+        }
+      }
+
+      wx.showLoading({ title: '提交中...' });
+
       const result = await commonAPI.submitFeedback({
         type: this.data.formData.type,
         title: this.data.formData.title,
         content: this.data.formData.content,
         contact: this.data.formData.contact,
-        images: this.data.formData.images
+        images: uploadedImages
       });
 
       wx.hideLoading();
@@ -187,7 +210,7 @@ Page({
   // 查看反馈记录
   onViewHistory: function () {
     wx.navigateTo({
-      url: '/pages/feedback/history'
+      url: '/pages/feedback/feedback-history'
     });
   }
 });

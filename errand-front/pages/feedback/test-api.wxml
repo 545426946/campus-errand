@@ -1,0 +1,27 @@
+<view class="container">
+  <view class="section">
+    <text class="title">反馈 API 测试</text>
+  </view>
+
+  <view class="section">
+    <text class="label">登录状态:</text>
+    <text class="value">{{token}}</text>
+  </view>
+
+  <view class="section" wx:if="{{userInfo}}">
+    <text class="label">用户信息:</text>
+    <text class="value">ID: {{userInfo.id}}, 用户名: {{userInfo.username}}</text>
+  </view>
+
+  <view class="section">
+    <button class="test-btn" bindtap="testSubmitFeedback">测试提交反馈</button>
+    <button class="test-btn" bindtap="testGetHistory">测试获取历史</button>
+  </view>
+
+  <view class="section">
+    <text class="label">测试结果:</text>
+    <view class="result-box">
+      <text class="result">{{result || '暂无结果'}}</text>
+    </view>
+  </view>
+</view>

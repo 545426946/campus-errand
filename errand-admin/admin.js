@@ -1,5 +1,6 @@
 // API基础URL
-const API_BASE_URL = 'http://192.168.1.175:3000/api';
+// 如果在本机访问，使用 localhost；如果在其他设备访问，改为服务器IP
+const API_BASE_URL = 'http://localhost:3000/api';
 let token = localStorage.getItem('adminToken');
 let currentPage = 1;
 const pageSize = 20;
@@ -103,6 +104,9 @@ function switchMenu(menu) {
       break;
     case 'withdraws':
       loadWithdraws();
+      break;
+    case 'feedbacks':
+      loadFeedbacks();
       break;
   }
 }
@@ -587,11 +591,10 @@ function closeUserModal() {
 async function loadCertifications(page = 1) {
   currentPage = page;
   const keyword = document.getElementById('certSearch')?.value || '';
-  const type = document.getElementById('certTypeFilter')?.value || '';
   const status = document.getElementById('certStatusFilter')?.value || '';
   
   try {
-    const params = new URLSearchParams({ page, pageSize, keyword, type, status });
+    const params = new URLSearchParams({ page, pageSize, keyword, status });
     const response = await apiRequest(`${API_BASE_URL}/admin/certifications?${params}`);
     const data = await response.json();
     
@@ -612,9 +615,9 @@ function renderCertificationsTable(data) {
   if (!list || list.length === 0) {
     document.getElementById('certificationsTable').innerHTML = `
       <div style="text-align: center; padding: 60px; color: #999;">
-        <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
-        <div style="font-size: 18px; margin-bottom: 10px;">暂无认证申请</div>
-        <div style="font-size: 14px; color: #bbb;">还没有认证申请哦~</div>
+        <div style="font-size: 64px; margin-bottom: 20px;">🏍️</div>
+        <div style="font-size: 18px; margin-bottom: 10px;">暂无骑手认证申请</div>
+        <div style="font-size: 14px; color: #bbb;">还没有骑手认证申请哦~</div>
       </div>
     `;
     return;
@@ -626,22 +629,15 @@ function renderCertificationsTable(data) {
     'rejected': '✗ 已拒绝'
   };
 
-  const typeMap = {
-    'student': '🎓 学生认证',
-    'teacher': '👨‍🏫 教师认证',
-    'staff': '💼 职工认证'
-  };
-
   let html = `
     <table class="data-table">
       <thead>
         <tr>
           <th>ID</th>
           <th>用户</th>
-          <th>认证类型</th>
           <th>真实姓名</th>
-          <th>学号/工号</th>
-          <th>学校</th>
+          <th>联系电话</th>
+          <th>身份证号</th>
           <th>状态</th>
           <th>提交时间</th>
           <th>操作</th>
@@ -655,10 +651,9 @@ function renderCertificationsTable(data) {
       <tr>
         <td><strong>#${cert.id}</strong></td>
         <td><strong>${cert.nickname || cert.username}</strong></td>
-        <td>${typeMap[cert.type] || cert.type}</td>
         <td>${cert.real_name}</td>
-        <td>${cert.student_id || '-'}</td>
-        <td>${cert.school}</td>
+        <td>${cert.phone || '-'}</td>
+        <td>${cert.id_card ? cert.id_card.replace(/(\d{6})\d{8}(\d{4})/, '$1****$2') : '-'}</td>
         <td><span class="status-badge status-${cert.status}">${statusMap[cert.status] || cert.status}</span></td>
         <td style="font-size: 13px; color: #999;">${new Date(cert.submitted_at).toLocaleString()}</td>
         <td>
@@ -691,7 +686,6 @@ function searchCertifications() {
 
 function resetCertFilters() {
   document.getElementById('certSearch').value = '';
-  document.getElementById('certTypeFilter').value = '';
   document.getElementById('certStatusFilter').value = '';
   loadCertifications(1);
 }
@@ -715,32 +709,23 @@ async function viewCertification(id) {
 }
 
 function showCertificationDetail(cert) {
-  const typeMap = {
-    'student': '学生认证',
-    'teacher': '教师认证',
-    'staff': '职工认证'
-  };
-  
   let html = `
     <div style="line-height: 2.2; color: #555;">
       <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
         <h4 style="margin-bottom: 15px; color: #667eea; display: flex; align-items: center; gap: 8px;">
-          <span>👤</span> 基本信息
+          <span>🏍️</span> 骑手基本信息
         </h4>
-        <p><strong>认证类型：</strong>${typeMap[cert.type] || cert.type}</p>
         <p><strong>真实姓名：</strong><span style="color: #667eea; font-weight: 600;">${cert.real_name}</span></p>
         <p><strong>身份证号：</strong>${cert.id_card}</p>
+        <p><strong>联系电话：</strong>${cert.phone || '-'}</p>
       </div>
 
       <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
         <h4 style="margin-bottom: 15px; color: #667eea; display: flex; align-items: center; gap: 8px;">
-          <span>🎓</span> 学籍信息
+          <span>📞</span> 紧急联系人
         </h4>
-        <p><strong>学号/工号：</strong><span style="color: #667eea; font-weight: 600;">${cert.student_id || '-'}</span></p>
-        <p><strong>学校：</strong>${cert.school}</p>
-        <p><strong>学院：</strong>${cert.college || '-'}</p>
-        <p><strong>专业：</strong>${cert.major || '-'}</p>
-        <p><strong>年级：</strong>${cert.grade || '-'}</p>
+        <p><strong>联系人姓名：</strong>${cert.emergency_contact || '-'}</p>
+        <p><strong>联系人电话：</strong>${cert.emergency_phone || '-'}</p>
       </div>
 
       <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
@@ -755,7 +740,7 @@ function showCertificationDetail(cert) {
     html += `
       <div style="margin: 20px 0;">
         <h4 style="margin-bottom: 10px; color: #667eea; display: flex; align-items: center; gap: 8px;">
-          <span>🆔</span> 身份证正面
+          <span>🆔</span> 身份证正面（人像面）
         </h4>
         <img src="${API_BASE_URL.replace('/api', '')}${cert.id_card_front}" class="cert-image" style="cursor: zoom-in;">
       </div>`;
@@ -764,18 +749,18 @@ function showCertificationDetail(cert) {
     html += `
       <div style="margin: 20px 0;">
         <h4 style="margin-bottom: 10px; color: #667eea; display: flex; align-items: center; gap: 8px;">
-          <span>🆔</span> 身份证反面
+          <span>🆔</span> 身份证背面（国徽面）
         </h4>
         <img src="${API_BASE_URL.replace('/api', '')}${cert.id_card_back}" class="cert-image" style="cursor: zoom-in;">
       </div>`;
   }
-  if (cert.student_card) {
+  if (cert.health_cert) {
     html += `
       <div style="margin: 20px 0;">
         <h4 style="margin-bottom: 10px; color: #667eea; display: flex; align-items: center; gap: 8px;">
-          <span>📚</span> 学生证/工作证
+          <span>🏥</span> 健康证
         </h4>
-        <img src="${API_BASE_URL.replace('/api', '')}${cert.student_card}" class="cert-image" style="cursor: zoom-in;">
+        <img src="${API_BASE_URL.replace('/api', '')}${cert.health_cert}" class="cert-image" style="cursor: zoom-in;">
       </div>`;
   }
 
@@ -1025,4 +1010,249 @@ async function rejectWithdraw(id) {
 // 查看提现详情
 async function viewWithdrawDetail(id) {
   alert('提现详情功能待实现');
+}
+
+// ==================== 意见反馈管理 ====================
+
+// 加载反馈列表
+async function loadFeedbacks(page = 1) {
+  currentPage = page;
+  const keyword = document.getElementById('feedbackSearch')?.value || '';
+  const status = document.getElementById('feedbackStatusFilter')?.value || '';
+  const type = document.getElementById('feedbackTypeFilter')?.value || '';
+
+  try {
+    const params = new URLSearchParams({ page, pageSize, keyword, status, type });
+    const response = await apiRequest(`${API_BASE_URL}/admin/feedbacks?${params}`);
+    const data = await response.json();
+
+    if (data.success) {
+      renderFeedbacksTable(data.data);
+    }
+  } catch (error) {
+    if (error.message !== 'Unauthorized') {
+      console.error('加载反馈列表错误:', error);
+    }
+  }
+}
+
+// 渲染反馈列表
+function renderFeedbacksTable(data) {
+  const { list, total, page } = data;
+  const totalPages = Math.ceil(total / pageSize);
+
+  if (!list || list.length === 0) {
+    document.getElementById('feedbacksTable').innerHTML = `
+      <div style="text-align: center; padding: 60px; color: #999;">
+        <div style="font-size: 64px; margin-bottom: 20px;">💬</div>
+        <div style="font-size: 18px; margin-bottom: 10px;">暂无反馈数据</div>
+        <div style="font-size: 14px; color: #bbb;">还没有用户提交反馈哦~</div>
+      </div>
+    `;
+    return;
+  }
+
+  const statusMap = {
+    'pending': { text: '待处理', class: 'status-pending', icon: '⏳' },
+    'processing': { text: '处理中', class: 'status-pending', icon: '🔄' },
+    'resolved': { text: '已解决', class: 'status-approved', icon: '✅' },
+    'closed': { text: '已关闭', class: 'status-rejected', icon: '🔒' }
+  };
+
+  const typeMap = {
+    'bug': { text: 'Bug反馈', icon: '🐛' },
+    'feature': { text: '功能建议', icon: '💡' },
+    'complaint': { text: '投诉建议', icon: '⚠️' },
+    'other': { text: '其他问题', icon: '❓' }
+  };
+
+  let html = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>用户</th>
+          <th>类型</th>
+          <th>标题</th>
+          <th>状态</th>
+          <th>提交时间</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  list.forEach(feedback => {
+    const statusInfo = statusMap[feedback.status] || statusMap['pending'];
+    const typeInfo = typeMap[feedback.type] || typeMap['other'];
+
+    html += `
+      <tr>
+        <td><strong>#${feedback.id}</strong></td>
+        <td>${feedback.nickname || feedback.username || '用户' + feedback.user_id}</td>
+        <td>${typeInfo.icon} ${typeInfo.text}</td>
+        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${feedback.title}</td>
+        <td><span class="status-badge ${statusInfo.class}">${statusInfo.icon} ${statusInfo.text}</span></td>
+        <td style="font-size: 13px; color: #999;">${new Date(feedback.created_at).toLocaleString()}</td>
+        <td>
+          <button class="btn btn-primary" onclick="viewFeedback(${feedback.id})">👁 查看</button>
+          ${feedback.status === 'pending' || feedback.status === 'processing' ? `
+            <button class="btn btn-success" onclick="replyFeedback(${feedback.id})">💬 回复</button>
+          ` : ''}
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `
+      </tbody>
+    </table>
+    <div class="pagination">
+      <button onclick="loadFeedbacks(${page - 1})" ${page <= 1 ? 'disabled' : ''}>⬅ 上一页</button>
+      <span>📄 第 ${page} / ${totalPages} 页，共 ${total} 条</span>
+      <button onclick="loadFeedbacks(${page + 1})" ${page >= totalPages ? 'disabled' : ''}>下一页 ➡</button>
+    </div>
+  `;
+
+  document.getElementById('feedbacksTable').innerHTML = html;
+}
+
+// 搜索反馈
+function searchFeedbacks() {
+  loadFeedbacks(1);
+}
+
+// 查看反馈详情
+async function viewFeedback(id) {
+  try {
+    const response = await apiRequest(`${API_BASE_URL}/admin/feedbacks?page=1&pageSize=100`);
+    const data = await response.json();
+
+    if (data.success) {
+      const feedback = data.data.list.find(f => f.id === id);
+      if (feedback) {
+        showFeedbackDetail(feedback);
+      }
+    }
+  } catch (error) {
+    console.error('查看反馈详情错误:', error);
+    alert('加载反馈详情失败');
+  }
+}
+
+// 显示反馈详情
+function showFeedbackDetail(feedback) {
+  const statusMap = {
+    'pending': '⏳ 待处理',
+    'processing': '🔄 处理中',
+    'resolved': '✅ 已解决',
+    'closed': '🔒 已关闭'
+  };
+
+  const typeMap = {
+    'bug': '🐛 Bug反馈',
+    'feature': '💡 功能建议',
+    'complaint': '⚠️ 投诉建议',
+    'other': '❓ 其他问题'
+  };
+
+  let html = `
+    <div style="line-height: 2.2; color: #555;">
+      <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+        <h4 style="margin-bottom: 15px; color: #667eea; display: flex; align-items: center; gap: 8px;">
+          <span>📋</span> 反馈信息
+        </h4>
+        <p><strong>反馈ID：</strong>#${feedback.id}</p>
+        <p><strong>反馈类型：</strong>${typeMap[feedback.type] || feedback.type}</p>
+        <p><strong>反馈标题：</strong><span style="color: #667eea; font-weight: 600;">${feedback.title}</span></p>
+        <p><strong>状态：</strong>${statusMap[feedback.status] || feedback.status}</p>
+      </div>
+
+      <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+        <h4 style="margin-bottom: 15px; color: #667eea; display: flex; align-items: center; gap: 8px;">
+          <span>👤</span> 用户信息
+        </h4>
+        <p><strong>用户ID：</strong>#${feedback.user_id}</p>
+        <p><strong>用户名：</strong>${feedback.nickname || feedback.username || '-'}</p>
+        <p><strong>联系方式：</strong>${feedback.contact || '未提供'}</p>
+      </div>
+
+      <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+        <h4 style="margin-bottom: 15px; color: #667eea; display: flex; align-items: center; gap: 8px;">
+          <span>📝</span> 反馈内容
+        </h4>
+        <p style="color: #666; line-height: 1.8; white-space: pre-wrap;">${feedback.content}</p>
+      </div>
+  `;
+
+  // 显示图片
+  if (feedback.images && feedback.images.length > 0) {
+    html += `
+      <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+        <h4 style="margin-bottom: 15px; color: #667eea; display: flex; align-items: center; gap: 8px;">
+          <span>🖼️</span> 相关图片
+        </h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+    `;
+    feedback.images.forEach(img => {
+      html += `<img src="${API_BASE_URL.replace('/api', '')}${img}" class="cert-image" style="max-width: 150px; cursor: zoom-in;">`;
+    });
+    html += `</div></div>`;
+  }
+
+  // 显示回复
+  if (feedback.reply) {
+    html += `
+      <div style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+        <h4 style="margin-bottom: 15px; color: #065f46; display: flex; align-items: center; gap: 8px;">
+          <span>💬</span> 管理员回复
+        </h4>
+        <p style="color: #065f46; line-height: 1.8; white-space: pre-wrap;">${feedback.reply}</p>
+        <p style="font-size: 12px; color: #059669; margin-top: 10px;">回复时间：${feedback.replied_at ? new Date(feedback.replied_at).toLocaleString() : '-'}</p>
+      </div>
+    `;
+  }
+
+  html += `
+      <div style="background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 12px;">
+        <h4 style="margin-bottom: 15px; color: #667eea; display: flex; align-items: center; gap: 8px;">
+          <span>📅</span> 时间信息
+        </h4>
+        <p><strong>提交时间：</strong>${new Date(feedback.created_at).toLocaleString()}</p>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('feedbackDetail').innerHTML = html;
+  document.getElementById('feedbackModal').classList.add('active');
+}
+
+// 关闭反馈模态框
+function closeFeedbackModal() {
+  document.getElementById('feedbackModal').classList.remove('active');
+}
+
+// 回复反馈
+async function replyFeedback(id) {
+  const reply = prompt('请输入回复内容：');
+  if (!reply || !reply.trim()) return;
+
+  try {
+    const response = await apiRequest(`${API_BASE_URL}/admin/feedbacks/${id}/reply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reply: reply.trim(), status: 'resolved' })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      alert('✅ 回复成功');
+      loadFeedbacks(currentPage);
+    } else {
+      alert(data.message || '回复失败');
+    }
+  } catch (error) {
+    console.error('回复反馈错误:', error);
+    alert('回复失败');
+  }
 }

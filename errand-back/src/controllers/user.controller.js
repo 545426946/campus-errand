@@ -402,21 +402,103 @@ exports.recharge = async (req, res, next) => {
 // 获取历史记录
 exports.getHistory = async (req, res, next) => {
   try {
-    const { page = 1, pageSize = 20 } = req.query;
+    const userId = req.user.id;
+    const { page = 1, pageSize = 20, type = 'all' } = req.query;
     
-    // 简化版：返回空列表
+    const Order = require('../models/Order');
+    
+    // 获取用户的所有订单（发布的和接受的）
+    const [publishedOrders, acceptedOrders] = await Promise.all([
+      Order.findByPublisher(userId, { page: 1, pageSize: 1000 }),
+      Order.findByAcceptor(userId, { page: 1, pageSize: 1000 })
+    ]);
+    
+    // 合并订单并转换为历史记录格式
+    const historyList = [];
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    // 处理发布的订单
+    publishedOrders.forEach(order => {
+      const createTime = new Date(order.created_at);
+      const item = {
+        id: `order-pub-${order.id}`,
+        type: 'order',
+        action: 'create',
+        orderId: order.id,
+        title: order.title,
+        description: `发布订单：${order.title}`,
+        amount: order.price ? `¥${order.price}` : null,
+        createTime: createTime.getTime(),
+        status: order.status
+      };
+      
+      // 根据筛选条件添加
+      if (type === 'all' || 
+          (type === 'today' && createTime >= todayStart) ||
+          (type === 'week' && createTime >= weekStart) ||
+          (type === 'month' && createTime >= monthStart)) {
+        historyList.push(item);
+      }
+    });
+    
+    // 处理接受的订单
+    acceptedOrders.forEach(order => {
+      const acceptTime = new Date(order.accepted_at || order.created_at);
+      const item = {
+        id: `order-acc-${order.id}`,
+        type: 'order',
+        action: 'accept',
+        orderId: order.id,
+        title: order.title,
+        description: `接单：${order.title}`,
+        amount: order.price ? `¥${order.price}` : null,
+        createTime: acceptTime.getTime(),
+        status: order.status
+      };
+      
+      // 根据筛选条件添加
+      if (type === 'all' || 
+          (type === 'today' && acceptTime >= todayStart) ||
+          (type === 'week' && acceptTime >= weekStart) ||
+          (type === 'month' && acceptTime >= monthStart)) {
+        historyList.push(item);
+      }
+    });
+    
+    // 按时间倒序排序
+    historyList.sort((a, b) => b.createTime - a.createTime);
+    
+    // 计算统计数据
+    const totalCount = historyList.length;
+    const todayCount = historyList.filter(item => new Date(item.createTime) >= todayStart).length;
+    const weekCount = historyList.filter(item => new Date(item.createTime) >= weekStart).length;
+    const monthCount = historyList.filter(item => new Date(item.createTime) >= monthStart).length;
+    
+    // 分页
+    const start = (page - 1) * pageSize;
+    const end = start + parseInt(pageSize);
+    const paginatedList = historyList.slice(start, end);
+    
     res.json({
       success: true,
       code: 0,
       data: {
-        list: [],
-        total: 0,
+        list: paginatedList,
+        total: totalCount,
+        totalCount,
+        todayCount,
+        weekCount,
+        monthCount,
         page: parseInt(page),
         pageSize: parseInt(pageSize)
       },
       message: '获取历史记录成功'
     });
   } catch (error) {
+    console.error('获取历史记录失败:', error);
     next(error);
   }
 };

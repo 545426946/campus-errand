@@ -831,6 +831,131 @@ class AdminController {
       });
     }
   }
+
+  // 获取反馈列表
+  static async getFeedbacks(req, res) {
+    try {
+      const { page = 1, pageSize = 20, status, type, keyword } = req.query;
+      const Feedback = require('../models/Feedback');
+
+      const result = await Feedback.getAll(
+        parseInt(page),
+        parseInt(pageSize),
+        { status, type, keyword }
+      );
+
+      res.json({
+        success: true,
+        data: {
+          list: result.list,
+          total: result.total,
+          page: parseInt(page),
+          pageSize: parseInt(pageSize)
+        }
+      });
+    } catch (error) {
+      console.error('获取反馈列表错误:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取反馈列表失败',
+        error: error.message
+      });
+    }
+  }
+
+  // 回复反馈
+  static async replyFeedback(req, res) {
+    try {
+      const { id } = req.params;
+      const { reply, status } = req.body;
+      const Feedback = require('../models/Feedback');
+
+      if (!reply || !reply.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: '请输入回复内容'
+        });
+      }
+
+      const feedback = await Feedback.findById(id);
+      if (!feedback) {
+        return res.status(404).json({
+          success: false,
+          message: '反馈不存在'
+        });
+      }
+
+      const updatedFeedback = await Feedback.reply(id, {
+        reply: reply.trim(),
+        status: status || 'resolved',
+        replied_by: req.admin.id
+      });
+
+      res.json({
+        success: true,
+        message: '回复成功',
+        data: updatedFeedback
+      });
+    } catch (error) {
+      console.error('回复反馈错误:', error);
+      res.status(500).json({
+        success: false,
+        message: '回复失败',
+        error: error.message
+      });
+    }
+  }
+
+  // 更新反馈状态
+  static async updateFeedbackStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const Feedback = require('../models/Feedback');
+
+      if (!['pending', 'processing', 'resolved', 'closed'].includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: '无效的状态'
+        });
+      }
+
+      const feedback = await Feedback.updateStatus(id, status);
+
+      res.json({
+        success: true,
+        message: '状态更新成功',
+        data: feedback
+      });
+    } catch (error) {
+      console.error('更新反馈状态错误:', error);
+      res.status(500).json({
+        success: false,
+        message: '更新状态失败',
+        error: error.message
+      });
+    }
+  }
+
+  // 获取反馈统计
+  static async getFeedbackStats(req, res) {
+    try {
+      const Feedback = require('../models/Feedback');
+      const stats = await Feedback.getStats();
+
+      res.json({
+        success: true,
+        data: stats
+      });
+    } catch (error) {
+      console.error('获取反馈统计错误:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取统计失败',
+        error: error.message
+      });
+    }
+  }
 }
 
 

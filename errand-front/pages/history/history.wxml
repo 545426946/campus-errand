@@ -61,12 +61,12 @@
       
       <view class="item-left">
         <view class="item-icon">
-          <text class="icon-text">{{getActionIcon(item.type, item.action)}}</text>
+          <text class="icon-text">{{item.actionIcon}}</text>
         </view>
         <view class="item-info">
-          <text class="item-title">{{getActionText(item.type, item.action)}}</text>
+          <text class="item-title">{{item.actionText}}</text>
           <text class="item-desc" wx:if="{{item.description}}">{{item.description}}</text>
-          <text class="item-time">{{formatTime(item.createTime)}}</text>
+          <text class="item-time">{{item.formattedTime}}</text>
         </view>
       </view>
       

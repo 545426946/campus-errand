@@ -20,6 +20,9 @@
     "pages/help/help",
     "pages/about/about",
     "pages/feedback/feedback",
+    "pages/feedback/feedback-history",
+    "pages/feedback/history",
+    "pages/feedback/test-api",
     "pages/test-order/test-order"
   ],
   "window": {

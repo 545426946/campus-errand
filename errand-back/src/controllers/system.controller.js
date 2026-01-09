@@ -270,9 +270,18 @@ exports.checkSensitive = async (req, res, next) => {
 // 提交意见反馈
 exports.submitFeedback = async (req, res, next) => {
   try {
-    const { type, content, contact, images } = req.body;
+    const userId = req.user.id;
+    const { type, title, content, contact, images } = req.body;
 
-    if (!content) {
+    if (!title || !title.trim()) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: '请提供反馈标题'
+      });
+    }
+
+    if (!content || !content.trim()) {
       return res.status(400).json({
         success: false,
         code: 400,
@@ -280,13 +289,43 @@ exports.submitFeedback = async (req, res, next) => {
       });
     }
 
-    // 简化版：直接返回成功
-    console.log(`用户反馈 - 类型: ${type}, 内容: ${content}`);
+    const Feedback = require('../models/Feedback');
+    
+    const feedbackId = await Feedback.create({
+      user_id: userId,
+      type: type || 'other',
+      title: title.trim(),
+      content: content.trim(),
+      contact: contact || null,
+      images: images || []
+    });
+
+    console.log(`用户反馈已保存 - ID: ${feedbackId}, 用户: ${userId}, 类型: ${type}`);
 
     res.json({
       success: true,
       code: 0,
+      data: { feedbackId },
       message: '反馈提交成功，感谢您的建议'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 获取用户反馈历史
+exports.getFeedbackHistory = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { page = 1, pageSize = 20 } = req.query;
+
+    const Feedback = require('../models/Feedback');
+    const result = await Feedback.getByUserId(userId, parseInt(page), parseInt(pageSize));
+
+    res.json({
+      success: true,
+      code: 0,
+      data: result
     });
   } catch (error) {
     next(error);
